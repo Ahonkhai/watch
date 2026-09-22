@@ -87,7 +87,7 @@ onPageReady(() => {
       anything is charged. Nothing is taken from you on this page.
     </p>
     <button class="btn btn-primary btn-block" type="submit" style="margin-top:1.2rem">
-      Place order &mdash; ${money(Cart.total())}
+      Place order &middot; ${money(Cart.total())}
     </button>
     <p style="text-align:center;margin-top:1.8rem">
       <a class="btn-quiet" href="cart.html">Return to bag</a>
@@ -112,7 +112,7 @@ onPageReady(() => {
      what they keep — so it has to be complete on its own. */
   function orderText(reference, form) {
     const lines = Cart.detailed().map(
-      (l) => `  ${l.qty} x ${l.product.name} (${l.strap.name}) — ${money(l.lineTotal)}`);
+      (l) => `  ${l.qty} x ${l.product.name} (${l.strap.name})   ${money(l.lineTotal)}`);
     const f = (n) => form.elements[n].value.trim();
     return [
       `Order ${reference}`,
@@ -167,7 +167,7 @@ onPageReady(() => {
         const sel = getSelection();
         sel.removeAllRanges();
         sel.addRange(range);
-        copy.textContent = 'Selected — press copy';
+        copy.textContent = 'Selected, press copy';
       }
     });
   }
