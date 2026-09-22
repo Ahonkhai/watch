@@ -1,0 +1,11 @@
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Tooling
+.vercel/
+node_modules/
+__pycache__/
+*.py[cod]
