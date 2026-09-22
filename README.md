@@ -3,9 +3,9 @@
 A static e-commerce front end for a watch brand. No build step, no dependencies,
 no framework: open `index.html` and it works.
 
-This is a **demo storefront**. The catalog is invented and the checkout takes no
-payment — it validates, confirms, and clears the bag. See
-[Going live](#going-live) for what has to be real before it can sell anything.
+The catalog is currently placeholder data and there is no payment processor
+wired up yet — checkout composes the order and hands it to the customer's mail
+client. See [Going live](#going-live) for what is still outstanding.
 
 ## Run it
 
@@ -244,18 +244,29 @@ paths, which is what you want for sharing and search engines.
 
 ## Going live
 
-Four things stand between this and a real store:
+Four things stand between this and taking money:
 
-1. **Checkout has no backend.** `checkout.js` validates and then renders a
-   confirmation. Post the cart to Stripe Checkout, Shopify, or your own
-   endpoint instead — the cart shape (`[{id, strap, qty}]`) is already what a
-   line-item payload wants. Never take card details in this form as it stands;
-   the fields are there to show the flow.
-2. **Prices and stock are client-side**, so they are editable by anyone with dev
-   tools. Price the order on the server at checkout time.
-3. **Tax and real shipping rates** are not calculated. `SHIPPING_FLAT` and
-   `FREE_SHIPPING_OVER` in `data.js` are a flat placeholder.
-4. **No order storage, email, or fulfilment.**
+1. **No payment processor.** `checkout.js` collects the order and opens the
+   customer's mail client addressed to `ORDER_EMAIL`, which is a placeholder
+   address — set it to a real inbox. The order is only placed when they send
+   that message, and the page says so plainly. It deliberately asks for no card
+   details, because there is nowhere to send them.
 
-The catalog, the brand, the addresses and the movement suppliers named in the
-copy are all invented. Replace them before this faces anyone.
+   When wiring Stripe: replace the submit handler with a call to a serverless
+   function that creates a Checkout session and redirects to it. **Price the
+   line items in that function, from the server's own catalog** — never from
+   the values in this page, which anyone can edit with dev tools.
+
+2. **The catalog is placeholder.** Names, prices, movements, case materials,
+   water-resistance ratings and the manufacturing story in `about.html` were
+   written as filler. Replace `assets/js/data.js` with the real references
+   before selling against any of it.
+
+3. **Product art is drawn, not photographed.** `watch.js` renders each watch as
+   SVG. Swap it for real photography by replacing the `renderWatch()` calls in
+   `ui.js`, `home.js`, `product.js` and `cart.js` with `<img>` tags; nothing
+   else depends on it.
+
+4. **No order storage, tax calculation or fulfilment.** `SHIPPING_FLAT` and
+   `FREE_SHIPPING_OVER` in `data.js` are a flat placeholder, and no tax is
+   calculated anywhere.
