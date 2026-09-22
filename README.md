@@ -24,13 +24,20 @@ over the network.
 
 The repository *is* the site, so there is nothing to configure:
 
-1. **vercel.com → Add New → Project**, import this repo.
+1. **vercel.com → Add New → Project**, import this repo as a *new* project.
+   Reusing a project that was pointed at another repo carries its saved
+   Framework Preset across, which is the usual cause of a wrong preset being
+   applied here.
 2. Leave every setting alone. There is no `package.json` and no
-   `requirements.txt`, so nothing is detected and nothing is built — Vercel
-   serves the files as they are.
+   `requirements.txt`, so there is nothing to detect and nothing to build. If
+   the Framework Preset shows something odd anyway, set it to **Other** — but
+   it cannot change the outcome, because `vercel.json` pins `framework` to
+   `null`, the build command to empty and the output directory to the repo
+   root, and `vercel.json` overrides dashboard settings.
 3. **Deploy.**
 
-`vercel.json` only declares response headers:
+`vercel.json` pins those three build settings and otherwise declares only
+response headers:
 
 | | |
 |---|---|
