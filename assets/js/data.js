@@ -9,7 +9,7 @@ const COLLECTIONS = [
     tagline: 'Dive instruments, 300 m rated',
     blurb:
       'Built around a unidirectional bezel and a case that stays legible at depth. ' +
-      'Every Tidewater is pressure-tested twice — once at the movement stage and ' +
+      'Every Tidewater is pressure-tested twice: once at the movement stage and ' +
       'once fully cased.',
   },
   {
@@ -79,7 +79,7 @@ const PRODUCTS = [
     price: 1890,
     tagline: 'Depth rating, second time zone.',
     description:
-      'We kept the 300 m case and added a true traveller GMT — the local hour hand ' +
+      'We kept the 300 m case and added a true traveller GMT. The local hour hand ' +
       'jumps forward or back without stopping the seconds. The bezel is 24-hour, ' +
       'so you can track a third zone if you are really committed.',
     art: {
@@ -270,7 +270,7 @@ const PRODUCTS = [
     description:
       'Two-tone sector dial, printed rather than applied, with a small seconds ' +
       'register at six. We redrew the numerals rather than copying a vintage ' +
-      'reference — they are ours, and they are better spaced.',
+      'reference. They are ours, and they are better spaced.',
     art: {
       case: 'steel', dial: '#EFE9DC', accent: '#232323', bezel: 'thin',
       bezelColor: '#AEB5BC', hands: 'leaf', lume: null, subdial: true,
@@ -301,7 +301,7 @@ const PRODUCTS = [
     description:
       'An aventurine moonphase disc at twelve, cut from a single slab so the ' +
       'flecking is different on every watch. The correction is set through the ' +
-      'crown — no pushers, no tools, no tiny hole in the case.',
+      'crown, with no pushers, no tools and no tiny hole in the case.',
     badge: 'New',
     art: {
       case: 'steel', dial: '#151B2E', finish: 'sunburst', accent: '#D6C08A', bezel: 'thin',

@@ -16,7 +16,7 @@ onPageReady(() => {
     return;
   }
 
-  document.title = `${product.name} — Swizz Clones`;
+  document.title = `${product.name} | Swizz Clones`;
   let strap = product.straps[0];
   let qty = 1;
 
@@ -56,8 +56,8 @@ onPageReady(() => {
 
     <p class="pdp-price">${money(product.price)}</p>
     <p class="pdp-stock${lowStock ? ' low' : ''}">
-      <strong>${lowStock ? `${product.stock} remaining` : 'In stock'}</strong>
-      &nbsp;&mdash;&nbsp; dispatched within two working days
+      <strong>${lowStock ? `${product.stock} remaining` : 'In stock'}.</strong>
+      Dispatched within two working days.
     </p>
 
     <div class="buy-row">

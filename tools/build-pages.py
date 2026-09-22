@@ -117,18 +117,18 @@ def page(filename, title, desc, body, scripts=()):
 
 # ---------------------------------------------------------------- index
 page("index.html",
-     "Swizz Clones — Mechanical watches built to be worn",
+     "Swizz Clones | Mechanical watches built to be worn",
      "Dive, field, dress and expedition watches from Swizz Clones Swiss and "
      "Japanese movements, sapphire crystals, five-year warranty.",
      '''
 <section class="hero" data-surface="dark">
   <div class="wrap hero-inner">
     <div>
-      <p class="label" data-reveal>Est. 2014 &mdash; Portland &amp; Biel</p>
+      <p class="label" data-reveal>Est. 2014, Portland &amp; Biel</p>
       <h1 data-reveal style="--delay:.06s">Instruments for<br>the <em>long run</em>.</h1>
       <p class="lede" data-reveal style="--delay:.24s">
         Four families of mechanical watches and nothing else. No seasonal colourways,
-        no drops you have to set an alarm for &mdash; only watches we expect you to be
+        no drops you have to set an alarm for. Only watches we expect you to be
         wearing in twenty years, and to service when you are.
       </p>
       <div class="hero-actions" data-reveal style="--delay:.32s">
@@ -188,7 +188,7 @@ page("index.html",
         <div class="num">03</div>
         <h3>Regulated in five positions</h3>
         <p>
-          We will not ship an automatic running outside &minus;5/+8 seconds a day &mdash;
+          We will not ship an automatic running outside &minus;5/+8 seconds a day,
           tighter than the movement suppliers\' own specification.
         </p>
       </div>
@@ -221,7 +221,7 @@ page("index.html",
 
 # ---------------------------------------------------------------- shop
 page("shop.html",
-     "The collection — Swizz Clones",
+     "The collection | Swizz Clones",
      "Browse every Swizz Clones reference: dive, field, dress and expedition watches "
      "from $420 to $3,150.",
      '''
@@ -290,7 +290,7 @@ page("shop.html",
 
 # ---------------------------------------------------------------- product
 page("product.html",
-     "Watch — Swizz Clones",
+     "Watch | Swizz Clones",
      "Reference detail, full specification and strap options.",
      '''
 <section class="section-tight" style="padding-bottom:var(--section)">
@@ -314,7 +314,7 @@ page("product.html",
 
 # ---------------------------------------------------------------- cart
 page("cart.html",
-     "Your bag — Swizz Clones",
+     "Your bag | Swizz Clones",
      "Review the watches in your bag before checkout.",
      '''
 <section class="section-tight" style="padding-bottom:var(--section)">
@@ -328,7 +328,7 @@ page("cart.html",
 
 # ---------------------------------------------------------------- checkout
 page("checkout.html",
-     "Checkout — Swizz Clones",
+     "Checkout | Swizz Clones",
      "Complete your order.",
      '''
 <section class="section-tight" style="padding-bottom:var(--section)">
@@ -342,7 +342,7 @@ page("checkout.html",
 
 # ---------------------------------------------------------------- 404
 page("404.html",
-     "Not found — Swizz Clones",
+     "Not found | Swizz Clones",
      "That page does not exist.",
      '''
 <section class="section" data-surface="dark" style="min-height:70vh;display:grid;place-items:center">
@@ -359,7 +359,7 @@ page("404.html",
 
 # ---------------------------------------------------------------- about
 page("about.html",
-     "The maison — Swizz Clones",
+     "The maison | Swizz Clones",
      "How Swizz Clones builds, tests and services its watches.",
      '''
 <section class="section-tight">
@@ -402,7 +402,7 @@ page("about.html",
     <p class="lede" data-reveal style="margin:1.5rem 0 clamp(3rem,6vw,4.5rem)">
       Cases are machined in Switzerland and Japan to our drawings. Assembly, regulation
       and testing happen in Biel. We regulate every automatic in five positions and will
-      not ship one running outside &minus;5/+8 seconds a day &mdash; tighter than the
+      not ship one running outside &minus;5/+8 seconds a day, tighter than the
       movement suppliers' own specification.
     </p>
 
@@ -426,7 +426,7 @@ page("about.html",
     <p class="lede" data-reveal style="margin:1.5rem 0 clamp(3rem,6vw,4.5rem)">
       Five years against defects in materials and workmanship, transferable with the
       watch. It does not cover scratches, a crystal cracked in a fall, or water damage
-      where the crown was left unscrewed &mdash; but tell us what happened and we will
+      where the crown was left unscrewed. But tell us what happened and we will
       usually find a way to help.
     </p>
 

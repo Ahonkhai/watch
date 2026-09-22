@@ -157,6 +157,15 @@ h2 { font-size: clamp(2.1rem, 5.4vw, 4.2rem); }
 h3 { font-size: clamp(1.35rem, 2.2vw, 1.85rem); letter-spacing: -0.005em; }
 h1 em, h2 em { font-style: italic; color: var(--gold-lit); }
 
+/* Cormorant defaults to old-style figures, which ride above and below the
+   baseline. Fine in running prose, but in a model number like "Tidewater 300"
+   they read as a mistake. */
+h1, h2, h3, h4,
+.card-name, .chapter-name, .chapter-tagline, .display-quote,
+.pdp-tagline, .hero-meta dd, .empty-state strong {
+  font-variant-numeric: lining-nums;
+}
+
 p { margin: 0 0 1.15rem; }
 p:last-child { margin-bottom: 0; }
 
@@ -483,10 +492,11 @@ p:last-child { margin-bottom: 0; }
 .card-tagline { color: var(--muted); font-size: 0.9rem; line-height: 1.6; margin: 0; }
 .card-foot { display: flex; align-items: baseline; gap: 1rem; margin-top: 1.1rem; }
 .price {
-  font-family: var(--serif);
-  font-size: 1.28rem;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
+  font-family: var(--sans);
+  font-size: 1.12rem;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0.02em;
 }
 
 .badge {
@@ -555,6 +565,7 @@ p:last-child { margin-bottom: 0; }
 }
 .craft .num {
   font-family: var(--serif);
+  font-variant-numeric: lining-nums;
   font-size: clamp(2.4rem, 4vw, 3.4rem);
   color: var(--gold);
   line-height: 1;
@@ -729,10 +740,12 @@ select option { background: var(--panel); color: var(--text); }
 }
 .pdp-desc { color: var(--muted); max-width: 46ch; }
 .pdp-price {
-  font-family: var(--serif);
-  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-family: var(--sans);
+  font-size: clamp(1.7rem, 2.4vw, 2.1rem);
+  font-weight: 500;
   margin: 2.4rem 0 0.6rem;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0.01em;
 }
 .pdp-stock {
   font-size: 0.78rem;
@@ -820,11 +833,12 @@ select option { background: var(--panel); color: var(--text); }
 }
 .cart-line-controls { display: flex; align-items: center; gap: 1.6rem; margin-top: 1.2rem; }
 .cart-line-price {
-  font-family: var(--serif);
-  font-size: 1.35rem;
+  font-family: var(--sans);
+  font-size: 1.1rem;
+  font-weight: 500;
   text-align: right;
   white-space: nowrap;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
   align-self: start;
 }
 
@@ -849,8 +863,10 @@ select option { background: var(--panel); color: var(--text); }
 }
 .summary-row.total {
   color: var(--text);
-  font-family: var(--serif);
-  font-size: 1.6rem;
+  font-family: var(--sans);
+  font-size: 1.25rem;
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
   border-top: 1px solid var(--hair);
   margin-top: 1rem;
   padding-top: 1.3rem;
@@ -1240,11 +1256,11 @@ select option { background: var(--panel); color: var(--text); }
 <section class="hero" data-surface="dark">
   <div class="wrap hero-inner">
     <div>
-      <p class="label" data-reveal>Est. 2014 &mdash; Portland &amp; Biel</p>
+      <p class="label" data-reveal>Est. 2014, Portland &amp; Biel</p>
       <h1 data-reveal style="--delay:.06s">Instruments for<br>the <em>long run</em>.</h1>
       <p class="lede" data-reveal style="--delay:.24s">
         Four families of mechanical watches and nothing else. No seasonal colourways,
-        no drops you have to set an alarm for &mdash; only watches we expect you to be
+        no drops you have to set an alarm for. Only watches we expect you to be
         wearing in twenty years, and to service when you are.
       </p>
       <div class="hero-actions" data-reveal style="--delay:.32s">
@@ -1304,7 +1320,7 @@ select option { background: var(--panel); color: var(--text); }
         <div class="num">03</div>
         <h3>Regulated in five positions</h3>
         <p>
-          We will not ship an automatic running outside &minus;5/+8 seconds a day &mdash;
+          We will not ship an automatic running outside &minus;5/+8 seconds a day,
           tighter than the movement suppliers' own specification.
         </p>
       </div>
@@ -1480,7 +1496,7 @@ select option { background: var(--panel); color: var(--text); }
     <p class="lede" data-reveal style="margin:1.5rem 0 clamp(3rem,6vw,4.5rem)">
       Cases are machined in Switzerland and Japan to our drawings. Assembly, regulation
       and testing happen in Biel. We regulate every automatic in five positions and will
-      not ship one running outside &minus;5/+8 seconds a day &mdash; tighter than the
+      not ship one running outside &minus;5/+8 seconds a day, tighter than the
       movement suppliers' own specification.
     </p>
 
@@ -1504,7 +1520,7 @@ select option { background: var(--panel); color: var(--text); }
     <p class="lede" data-reveal style="margin:1.5rem 0 clamp(3rem,6vw,4.5rem)">
       Five years against defects in materials and workmanship, transferable with the
       watch. It does not cover scratches, a crystal cracked in a fall, or water damage
-      where the crown was left unscrewed &mdash; but tell us what happened and we will
+      where the crown was left unscrewed. But tell us what happened and we will
       usually find a way to help.
     </p>
 
@@ -1580,7 +1596,7 @@ const COLLECTIONS = [
     tagline: 'Dive instruments, 300 m rated',
     blurb:
       'Built around a unidirectional bezel and a case that stays legible at depth. ' +
-      'Every Tidewater is pressure-tested twice — once at the movement stage and ' +
+      'Every Tidewater is pressure-tested twice: once at the movement stage and ' +
       'once fully cased.',
   },
   {
@@ -1650,7 +1666,7 @@ const PRODUCTS = [
     price: 1890,
     tagline: 'Depth rating, second time zone.',
     description:
-      'We kept the 300 m case and added a true traveller GMT — the local hour hand ' +
+      'We kept the 300 m case and added a true traveller GMT. The local hour hand ' +
       'jumps forward or back without stopping the seconds. The bezel is 24-hour, ' +
       'so you can track a third zone if you are really committed.',
     art: {
@@ -1841,7 +1857,7 @@ const PRODUCTS = [
     description:
       'Two-tone sector dial, printed rather than applied, with a small seconds ' +
       'register at six. We redrew the numerals rather than copying a vintage ' +
-      'reference — they are ours, and they are better spaced.',
+      'reference. They are ours, and they are better spaced.',
     art: {
       case: 'steel', dial: '#EFE9DC', accent: '#232323', bezel: 'thin',
       bezelColor: '#AEB5BC', hands: 'leaf', lume: null, subdial: true,
@@ -1872,7 +1888,7 @@ const PRODUCTS = [
     description:
       'An aventurine moonphase disc at twelve, cut from a single slab so the ' +
       'flecking is different on every watch. The correction is set through the ' +
-      'crown — no pushers, no tools, no tiny hole in the case.',
+      'crown, with no pushers, no tools and no tiny hole in the case.',
     badge: 'New',
     art: {
       case: 'steel', dial: '#151B2E', finish: 'sunburst', accent: '#D6C08A', bezel: 'thin',
@@ -3264,7 +3280,7 @@ onPageReady(() => {
     return;
   }
 
-  document.title = `${product.name} — Swizz Clones`;
+  document.title = `${product.name} | Swizz Clones`;
   let strap = product.straps[0];
   let qty = 1;
 
@@ -3304,8 +3320,8 @@ onPageReady(() => {
 
     <p class="pdp-price">${money(product.price)}</p>
     <p class="pdp-stock${lowStock ? ' low' : ''}">
-      <strong>${lowStock ? `${product.stock} remaining` : 'In stock'}</strong>
-      &nbsp;&mdash;&nbsp; dispatched within two working days
+      <strong>${lowStock ? `${product.stock} remaining` : 'In stock'}.</strong>
+      Dispatched within two working days.
     </p>
 
     <div class="buy-row">
@@ -3587,7 +3603,7 @@ onPageReady(() => {
       anything is charged. Nothing is taken from you on this page.
     </p>
     <button class="btn btn-primary btn-block" type="submit" style="margin-top:1.2rem">
-      Place order &mdash; ${money(Cart.total())}
+      Place order &middot; ${money(Cart.total())}
     </button>
     <p style="text-align:center;margin-top:1.8rem">
       <a class="btn-quiet" href="#/cart">Return to bag</a>
@@ -3612,7 +3628,7 @@ onPageReady(() => {
      what they keep — so it has to be complete on its own. */
   function orderText(reference, form) {
     const lines = Cart.detailed().map(
-      (l) => `  ${l.qty} x ${l.product.name} (${l.strap.name}) — ${money(l.lineTotal)}`);
+      (l) => `  ${l.qty} x ${l.product.name} (${l.strap.name})   ${money(l.lineTotal)}`);
     const f = (n) => form.elements[n].value.trim();
     return [
       `Order ${reference}`,
@@ -3667,7 +3683,7 @@ onPageReady(() => {
         const sel = getSelection();
         sel.removeAllRanges();
         sel.addRange(range);
-        copy.textContent = 'Selected — press copy';
+        copy.textContent = 'Selected, press copy';
       }
     });
   }
