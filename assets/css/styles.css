@@ -14,11 +14,11 @@
   --panel:     #FBFAF8;
   --raised:    #FFFFFF;
   --text:      #15161A;
-  --muted:     #64635F;
-  --faint:     #6E6C67;
-  --line:      rgba(21, 22, 26, 0.16);
-  --hair:      rgba(21, 22, 26, 0.09);
-  --gold:      #7A5E2B;
+  --muted:     #454440;
+  --faint:     #5A5954;
+  --line:      rgba(21, 22, 26, 0.26);
+  --hair:      rgba(21, 22, 26, 0.15);
+  --gold:      #6B5223;
   --gold-lit:  #6F5626;
   --danger:    #A9482C;
   --ok:        #3F7A57;
@@ -43,11 +43,11 @@ main section.statement[data-surface] { background: var(--bg-deep); }
   --panel:     #0E0E10;
   --raised:    #131316;
   --text:      #F4F1EA;
-  --muted:     #8E8A82;
-  --faint:     #8A867E;
-  --line:      rgba(244, 241, 234, 0.13);
-  --hair:      rgba(244, 241, 234, 0.07);
-  --gold:      #B99C6B;
+  --muted:     #ADA89E;
+  --faint:     #9C978D;
+  --line:      rgba(244, 241, 234, 0.24);
+  --hair:      rgba(244, 241, 234, 0.14);
+  --gold:      #CBAE7C;
   --gold-lit:  #D9C199;
   --danger:    #C87F63;
   --ok:        #7FB894;
@@ -82,10 +82,10 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
-  font-size: 1rem;
-  font-weight: 300;
-  line-height: 1.75;
-  letter-spacing: 0.01em;
+  font-size: 1.04rem;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -111,7 +111,7 @@ button { font: inherit; color: inherit; background: none; border: 0; }
 
 h1, h2, h3, h4 {
   font-family: var(--serif);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1;
   letter-spacing: -0.012em;
   margin: 0;
@@ -125,9 +125,9 @@ p { margin: 0 0 1.15rem; }
 p:last-child { margin-bottom: 0; }
 
 .label {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 400;
-  letter-spacing: 0.34em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--gold);
   margin: 0 0 1.6rem;
@@ -146,7 +146,7 @@ p:last-child { margin-bottom: 0; }
   font-family: var(--serif);
   font-size: clamp(1.9rem, 4.4vw, 3.4rem);
   line-height: 1.16;
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: -0.01em;
   max-width: 22ch;
 }
@@ -195,9 +195,9 @@ p:last-child { margin-bottom: 0; }
   padding: 1.1rem 2.5rem;
   border: 1px solid transparent;
   border-radius: 0;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 400;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
@@ -216,8 +216,8 @@ p:last-child { margin-bottom: 0; }
   position: relative;
   display: inline-block;
   padding: 0.2rem 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.22em;
+  font-size: 0.78rem;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--muted);
   cursor: pointer;
@@ -262,7 +262,7 @@ p:last-child { margin-bottom: 0; }
   font-family: var(--sans);
   font-size: 0.82rem;
   font-weight: 400;
-  letter-spacing: 0.34em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   white-space: nowrap;
   transition: color 0.45s var(--ease);
@@ -273,9 +273,9 @@ p:last-child { margin-bottom: 0; }
 .nav { display: flex; gap: 2.4rem; margin-left: auto; }
 .nav a {
   position: relative;
-  font-size: 0.72rem;
-  font-weight: 300;
-  letter-spacing: 0.2em;
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
   padding: 0.3rem 0;
@@ -301,8 +301,8 @@ p:last-child { margin-bottom: 0; }
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.2em;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
   transition: color 0.45s var(--ease);
@@ -373,8 +373,8 @@ p:last-child { margin-bottom: 0; }
   flex-wrap: wrap;
 }
 .hero-meta dt {
-  font-size: 0.72rem;
-  letter-spacing: 0.3em;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--faint);
 }
@@ -431,8 +431,8 @@ p:last-child { margin-bottom: 0; }
 .card:hover .card-body::before { transform: scaleX(1); }
 
 .card-collection {
-  font-size: 0.72rem;
-  letter-spacing: 0.28em;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--faint);
   margin: 0;
@@ -440,11 +440,11 @@ p:last-child { margin-bottom: 0; }
 .card-name {
   font-family: var(--serif);
   font-size: clamp(1.5rem, 2vw, 1.85rem);
-  font-weight: 300;
+  font-weight: 400;
   margin: 0.55rem 0 0.4rem;
   line-height: 1.1;
 }
-.card-tagline { color: var(--muted); font-size: 0.86rem; line-height: 1.6; margin: 0; }
+.card-tagline { color: var(--muted); font-size: 0.9rem; line-height: 1.6; margin: 0; }
 .card-foot { display: flex; align-items: baseline; gap: 1rem; margin-top: 1.1rem; }
 .price {
   font-family: var(--serif);
@@ -457,8 +457,8 @@ p:last-child { margin-bottom: 0; }
   position: absolute;
   top: 0.4rem; left: 0;
   z-index: 2;
-  font-size: 0.72rem;
-  letter-spacing: 0.26em;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--gold);
 }
@@ -487,7 +487,7 @@ p:last-child { margin-bottom: 0; }
 }
 .collection-card:hover h3 { color: var(--gold-lit); }
 .collection-card p { color: var(--muted); font-size: 0.87rem; line-height: 1.7; }
-.collection-card .link-arrow { margin-top: 1.6rem; font-size: 0.7rem; }
+.collection-card .link-arrow { margin-top: 1.6rem; font-size: 0.78rem; }
 
 /* ---------- editorial ---------- */
 
@@ -523,7 +523,7 @@ p:last-child { margin-bottom: 0; }
   color: var(--gold);
   line-height: 1;
   margin-bottom: 1.2rem;
-  font-weight: 300;
+  font-weight: 400;
 }
 .craft h3 { font-size: 1.3rem; margin-bottom: 0.7rem; }
 .craft p { color: var(--muted); font-size: 0.86rem; line-height: 1.7; }
@@ -537,9 +537,9 @@ p:last-child { margin-bottom: 0; }
 .filter-group:first-child { padding-top: 0; }
 .filter-group h4 {
   font-family: var(--sans);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 400;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--faint);
   margin: 0 0 1.2rem;
@@ -565,9 +565,9 @@ p:last-child { margin-bottom: 0; }
 }
 .check input:checked { background: var(--gold); border-color: var(--gold); }
 .check input:disabled { opacity: 0.35; cursor: not-allowed; }
-.check .count { margin-left: auto; font-size: 0.72rem; color: var(--faint); font-variant-numeric: tabular-nums; }
+.check .count { margin-left: auto; font-size: 0.78rem; color: var(--faint); font-variant-numeric: tabular-nums; }
 
-.range-row { display: flex; font-size: 0.72rem; color: var(--faint); margin-top: 0.7rem; letter-spacing: 0.08em; }
+.range-row { display: flex; font-size: 0.78rem; color: var(--faint); margin-top: 0.7rem; letter-spacing: 0.08em; }
 input[type='range'] { appearance: none; width: 100%; height: 1px; background: var(--line); cursor: pointer; }
 input[type='range']::-webkit-slider-thumb {
   appearance: none; width: 11px; height: 11px; background: var(--gold); cursor: pointer;
@@ -586,8 +586,8 @@ input[type='range']::-moz-range-thumb {
   flex-wrap: wrap;
 }
 .result-count {
-  font-size: 0.72rem;
-  letter-spacing: 0.24em;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--faint);
 }
@@ -600,7 +600,7 @@ select {
   border-bottom: 1px solid var(--line);
   padding: 0.35rem 1.4rem 0.35rem 0;
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;
@@ -612,8 +612,8 @@ select {
 }
 select option { background: var(--panel); color: var(--text); }
 
-.sort-field { margin-left: auto; display: flex; align-items: center; gap: 0.9rem; font-size: 0.7rem;
-              letter-spacing: 0.24em; text-transform: uppercase; color: var(--faint); }
+.sort-field { margin-left: auto; display: flex; align-items: center; gap: 0.9rem; font-size: 0.78rem;
+              letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
 
 .filter-toggle { display: none; }
 @media (max-width: 940px) {
@@ -660,8 +660,8 @@ select option { background: var(--panel); color: var(--text); }
   align-items: center;
   gap: 0.6rem;
   padding: 0.3rem 0;
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--faint);
   cursor: pointer;
@@ -673,8 +673,8 @@ select option { background: var(--panel); color: var(--text); }
 .swatch i { width: 11px; height: 11px; display: block; border: 1px solid var(--line); }
 
 .breadcrumb {
-  font-size: 0.7rem;
-  letter-spacing: 0.22em;
+  font-size: 0.78rem;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--faint);
   margin-bottom: 2rem;
@@ -699,8 +699,8 @@ select option { background: var(--panel); color: var(--text); }
   font-variant-numeric: tabular-nums;
 }
 .pdp-stock {
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--faint);
   margin-bottom: 2.4rem;
@@ -722,14 +722,14 @@ select option { background: var(--panel); color: var(--text); }
 .buy-row { display: flex; gap: 1rem; margin-bottom: 3.5rem; flex-wrap: wrap; }
 .buy-row .btn-primary { flex: 1; min-width: 210px; }
 
-.specs { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+.specs { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 .specs th, .specs td { text-align: left; padding: 1rem 0; border-bottom: 1px solid var(--hair); vertical-align: top; }
 .specs th {
-  font-weight: 300;
+  font-weight: 400;
   color: var(--faint);
   width: 46%;
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   padding-top: 1.15rem;
 }
@@ -742,8 +742,8 @@ select option { background: var(--panel); color: var(--text); }
   display: block;
   color: var(--text);
   font-weight: 400;
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   margin-bottom: 0.3rem;
 }
@@ -776,8 +776,8 @@ select option { background: var(--panel); color: var(--text); }
 .cart-line h3 { font-size: 1.5rem; }
 .cart-line h3 a:hover { color: var(--gold-lit); }
 .cart-line-meta {
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--faint);
   margin-top: 0.5rem;
@@ -795,9 +795,9 @@ select option { background: var(--panel); color: var(--text); }
 .summary { position: sticky; top: 110px; padding: 2.2rem; border: 1px solid var(--hair); background: var(--panel); }
 .summary h3 {
   font-family: var(--sans);
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: 400;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--faint);
   margin-bottom: 1.8rem;
@@ -820,7 +820,7 @@ select option { background: var(--panel); color: var(--text); }
   padding-top: 1.3rem;
   align-items: baseline;
 }
-.summary-note { font-size: 0.72rem; line-height: 1.65; color: var(--faint); margin-top: 1.4rem; }
+.summary-note { font-size: 0.78rem; line-height: 1.65; color: var(--faint); margin-top: 1.4rem; }
 
 @media (max-width: 900px) {
   .cart-layout { grid-template-columns: 1fr; }
@@ -835,8 +835,8 @@ select option { background: var(--panel); color: var(--text); }
 .field { display: block; margin-bottom: 1.6rem; }
 .field > span {
   display: block;
-  font-size: 0.72rem;
-  letter-spacing: 0.26em;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--faint);
   margin-bottom: 0.7rem;
@@ -859,7 +859,7 @@ select option { background: var(--panel); color: var(--text); }
 .field .error {
   display: block;
   color: var(--danger);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   letter-spacing: 0.08em;
   font-style: normal;
   margin-top: 0.5rem;
@@ -870,9 +870,9 @@ select option { background: var(--panel); color: var(--text); }
 
 .form-section-head {
   font-family: var(--sans);
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: 400;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--gold);
   margin: 3rem 0 1.8rem;
@@ -899,9 +899,9 @@ select option { background: var(--panel); color: var(--text); }
 .footer-grid { display: grid; grid-template-columns: 1.6fr repeat(3, 1fr); gap: clamp(2rem, 4vw, 3.5rem); }
 .footer-grid h4 {
   font-family: var(--sans);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 400;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--faint);
   margin: 0 0 1.4rem;
@@ -919,7 +919,7 @@ select option { background: var(--panel); color: var(--text); }
   justify-content: space-between;
   gap: 1.5rem;
   flex-wrap: wrap;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   letter-spacing: 0.14em;
   color: var(--faint);
 }
@@ -939,7 +939,7 @@ select option { background: var(--panel); color: var(--text); }
   padding: 1rem 1.6rem;
   background: var(--raised);
   border: 1px solid var(--line);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
@@ -959,7 +959,7 @@ select option { background: var(--panel); color: var(--text); }
 .skip-link {
   position: absolute; left: 50%; translate: -50% -200%;
   z-index: 100; background: var(--text); color: var(--bg);
-  padding: 0.8rem 1.6rem; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+  padding: 0.8rem 1.6rem; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase;
   transition: translate 0.4s var(--ease);
 }
 .skip-link:focus { translate: -50% 0; }
@@ -1075,7 +1075,7 @@ select option { background: var(--panel); color: var(--text); }
   font-family: var(--serif);
   font-size: clamp(2.6rem, 7vw, 6rem);
   line-height: 0.98;
-  font-weight: 300;
+  font-weight: 400;
 }
 .chapter-art {
   display: grid;
@@ -1105,8 +1105,8 @@ select option { background: var(--panel); color: var(--text); }
   top: clamp(4.5rem, 12vh, 7rem);
   left: var(--gutter);
   z-index: 1;
-  font-size: 0.7rem;
-  letter-spacing: 0.3em;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
@@ -1137,8 +1137,8 @@ select option { background: var(--panel); color: var(--text); }
   gap: 0.8rem;
   padding: 0 var(--gutter);
   margin-top: 1rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.28em;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--faint);
 }
