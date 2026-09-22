@@ -140,73 +140,6 @@ function initHeaderSurface() {
   apply();
 }
 
-/* Fades the page out before following an internal link, so navigation between
-   pages reads as one continuous surface. Everything that isn't a plain
-   left-click on a same-origin document is left to the browser. */
-function initPageTransitions() {
-  if (prefersReducedMotion()) return;
-
-  document.addEventListener('click', (e) => {
-    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey ||
-        e.shiftKey || e.altKey) return;
-
-    const link = e.target.closest('a[href]');
-    if (!link || link.hasAttribute('download')) return;
-    if (link.target && link.target !== '_self') return;
-
-    const href = link.getAttribute('href');
-    if (!href || href.startsWith('#')) return;
-
-    let url;
-    try { url = new URL(link.href, location.href); } catch { return; }
-    if (url.origin !== location.origin) return;              // external
-    if (!/^https?:$/.test(url.protocol)) return;             // mailto:, tel:
-    if (url.pathname === location.pathname &&
-        url.search === location.search && url.hash) return;  // same-page anchor
-
-    e.preventDefault();
-    if (window.kestrelCurtain) {
-      window.kestrelCurtain.close(() => { location.href = link.href; });
-    } else {
-      document.body.classList.add('is-leaving');
-      setTimeout(() => { location.href = link.href; }, 260);
-    }
-  });
-
-  // Coming back via the back button can restore a faded-out page from bfcache.
-  window.addEventListener('pageshow', () => {
-    document.body.classList.remove('is-leaving');
-  });
-}
-
-/* The hero watch drifts and tilts a little with the pointer. Fine pointers
-   only — on touch there is nothing to follow. */
-function initHeroParallax() {
-  const hero = document.querySelector('.hero');
-  const art = document.querySelector('.hero-art');
-  if (!hero || !art || prefersReducedMotion()) return;
-  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-
-  let frame = 0;
-  hero.addEventListener('pointermove', (e) => {
-    if (frame) return;                       // coalesce to one write per frame
-    frame = requestAnimationFrame(() => {
-      frame = 0;
-      const r = hero.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      art.style.setProperty('--px', `${(x * 16).toFixed(2)}px`);
-      art.style.setProperty('--py', `${(y * 16).toFixed(2)}px`);
-      art.style.setProperty('--rx', `${(-y * 4).toFixed(2)}deg`);
-      art.style.setProperty('--ry', `${(x * 4).toFixed(2)}deg`);
-    });
-  });
-
-  hero.addEventListener('pointerleave', () => {
-    for (const prop of ['--px', '--py', '--rx', '--ry']) art.style.removeProperty(prop);
-  });
-}
-
 let chromeReady = false;
 
 function initChrome() {
@@ -240,8 +173,6 @@ function initChrome() {
   Cart.onChange(syncCartBadge);
   observeReveals();
   initHeaderSurface();
-  initPageTransitions();
-  initHeroParallax();
 }
 
 /* Marks the current page in the nav without hardcoding it per file. Handles

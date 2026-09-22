@@ -110,32 +110,10 @@ ROUTER = """
   // A non-home entry route has to be in place before the page scripts init.
   if (route().name !== '') paint(false);
 
-  window.addEventListener('hashchange', function () {
-    paint(true);
-    if (window.kestrelCurtain) window.kestrelCurtain.open();
-    requestAnimationFrame(function () {
-      document.body.classList.remove('is-leaving');
-    });
-  });
+  window.addEventListener('hashchange', function () { paint(true); });
 
-  // Fade between routes. ui.js ignores '#' links, so there is no double handling.
-  document.addEventListener('click', function (e) {
-    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey ||
-        e.shiftKey || e.altKey) return;
-    var a = e.target.closest('a[href^="#/"]');
-    if (!a) return;
-    var href = a.getAttribute('href');
-    if (href === location.hash) { e.preventDefault(); return; }
-    if (prefersReducedMotion()) return;
-    e.preventDefault();
-    if (window.kestrelCurtain) {
-      window.kestrelCurtain.close(function () { location.hash = href.slice(1); });
-      return;
-    }
-    document.body.classList.add('is-leaving');
-    setTimeout(function () { location.hash = href.slice(1); }, 260);
-  });
-})();
+}
+)();
 """.replace("%TITLES%", repr(TITLES).replace("'", '"'))
 
 templates = "\n".join(

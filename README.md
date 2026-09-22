@@ -142,42 +142,52 @@ Supporting details: a fixed film-grain layer over the whole page
 
 ### Motion
 
-All of it lives under the `Motion` heading at the foot of `styles.css`, with the
-behaviour in `ui.js`.
+Deliberately little, and all of it specific to watches. The rule applied here:
+keep motion that only a watch site would have, cut motion any site could have.
 
 | | |
 |---|---|
 | **Running seconds** | The seconds hand sweeps for real. Quartz and solar references step once a second; mechanical ones beat eight times a second, matching a 4 Hz escapement. Driven by `movement` in the catalog. |
 | **Live where it counts** | The hero and product-detail watches run always (`renderWatch(p, { live: true })`); grid cards start on hover, so twelve watches aren't all ticking at once. |
-| **Section reveals** | `IntersectionObserver` fades elements in as they arrive — opt in with `data-reveal`, stagger with a `--delay` custom property. |
-| **Headline** | Each line rises out of its own mask. Mark up the lines as `.line > span` inside a `.reveal-lines` element. |
-| **Page transitions** | Internal links fade the page out before navigating, and every page fades in. Modified clicks, new tabs, downloads, external, `mailto:`/`tel:` and same-page anchors are left alone; with JS off, links simply work. |
-| **Hero parallax** | The hero watch drifts and tilts with the pointer. Fine pointers only, one write per animation frame. |
+| **Turn it over** | Dragging the product on its detail page tilts it in 3D and springs back. |
+| **Rail** | The twelve-reference row is drag-scrollable, and a drag that ends on a card does not open it. |
 | **Strap change** | Crossfades instead of cutting. |
 | **Bag** | The count pulses when something is added — not on load, not on removal. |
-| **Chapters** | The home page is full-viewport panels, one reference each, alternating ground. The watch drifts and settles on a scroll-linked transform (`data-parallax`, depth as the value). |
-| **Wipe reveal** | Artwork unmasks upward. The clip goes on a *child* of the observed element: a clipped element has zero visual area, so an observer watching it would never see it intersect and it could never reveal itself. |
-| **Split headlines** | `data-split` wraps each word in its own mask and staggers them. |
-| **Curtain** | A full-screen panel is the entry sequence and the page transition. `window.KESTREL_INTRO = false` skips the entry, which the preview build sets so the first painted frame is the page. |
-| **Pointer** | A dot and a lagging ring replace the cursor on fine pointers; `.magnetic` controls lean toward it. |
-| **Rail** | The twelve-reference row is drag-scrollable, and a drag that ends on a card does not open it. |
-| **Tilt** | Dragging the product on its detail page tilts it in 3D and springs back. |
-| **Progress** | A hairline at the top tracks how far down the page you are. |
+| **Section reveals** | A short fade as sections arrive. Opt in with `data-reveal`, stagger with a `--delay` custom property. |
 
-`assets/js/motion.js` drives all of the above from a single `requestAnimationFrame`
-loop, so there is one place that reads layout and one that writes transforms.
-It is decoration: if it fails to load, the site still works. Page scripts that
-inject markup call `window.kestrelMotion?.refresh()` afterwards, since the
-engine's own setup runs before their content exists.
+There are exactly two `@keyframes` in the stylesheet: the seconds sweep and the
+bag count. Everything else was removed as decoration — an entry curtain, page
+transitions, scroll-linked parallax, a custom pointer, magnetic buttons,
+word-by-word headline reveals, a reading-progress bar, a hero float and a
+button sheen. They were well-built and they made the site look like every
+other site.
 
-`prefers-reduced-motion: reduce` disables all of it: the seconds hand stops,
-reveals show immediately, parallax stops writing offsets, and navigation is
-immediate. The reduced-motion block is last in the stylesheet so it wins.
+`assets/js/motion.js` holds only the two drag behaviours and is optional: if it
+fails to load, the site still works. Page scripts that inject markup call
+`observeReveals()` and `window.kestrelMotion?.refresh()` afterwards, since both
+run their own setup before that content exists.
 
-Both font families are **self-hosted variable subsets** — no request leaves the
-origin on page load. They were generated from Google Fonts' latin subset; to
-change families, replace the files in `assets/fonts/` and the `@font-face`
-blocks in `assets/css/fonts.css`.
+`prefers-reduced-motion: reduce` disables what remains, and `motion.js` returns
+early rather than attaching listeners.
+
+### Avoiding the generated look
+
+Choices made against the house style of AI-generated sites, worth keeping if
+you restyle:
+
+- **No blur, no glass.** The header is opaque. There is no `backdrop-filter`
+  anywhere.
+- **No decorative gradients.** The only gradients left draw metal, straps and
+  dials inside the product illustrations, where they depict something.
+- **Square.** One `border-radius` in the whole stylesheet, on the bag count.
+- **Four shadows total**, three of them cast by product art.
+- **Uneven on purpose.** The four home chapters use three layouts, and the
+  craft block is a deliberately uneven 12-column grid, not four equal tiles.
+- **Contrast is checked.** Every text token meets WCAG AA against its own
+  ground, on both surfaces, and nothing is set below 11.5px.
+- **Specific words.** Buttons say what they do — "See all twelve", not
+  "Get started". There are no testimonials, no logo wall and no statistics.
+
 
 ### Product art
 
