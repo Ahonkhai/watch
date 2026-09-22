@@ -11,7 +11,7 @@ onPageReady(() => {
 <div class="empty-state">
   <strong>We cannot find that reference.</strong>
   <p>It may have been discontinued, or the link may be wrong.</p>
-  <p style="margin-top:1.8rem"><a class="btn btn-ghost" href="shop.html">Browse all watches</a></p>
+  <p style="margin-top:1.8rem"><a class="btn btn-ghost" href="shop.html">See all twelve</a></p>
 </div>`;
     return;
   }

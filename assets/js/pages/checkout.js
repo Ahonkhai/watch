@@ -108,7 +108,7 @@ onPageReady(() => {
   <strong>There is nothing to check out.</strong>
   <p>Add a watch to your bag first.</p>
   <p style="margin-top:1.8rem">
-    <a class="btn btn-primary" href="shop.html">Discover the collection</a>
+    <a class="btn btn-primary" href="shop.html">See all twelve</a>
   </p>
 </div>`;
   }
@@ -137,7 +137,7 @@ onPageReady(() => {
     This is a demo storefront. No payment was taken and no order was placed.
   </p>
   <p style="margin-top:2.2rem">
-    <a class="btn btn-ghost" href="shop.html">Back to the collection</a>
+    <a class="btn btn-ghost" href="shop.html">Back to the watches</a>
   </p>
 </div>`;
   }

@@ -35,7 +35,7 @@ onPageReady(() => {
   <strong>Your bag is empty.</strong>
   <p>Twelve references are waiting, from ${money(Math.min(...PRODUCTS.map((p) => p.price)))}.</p>
   <p style="margin-top:1.8rem">
-    <a class="btn btn-primary" href="shop.html">Discover the collection</a>
+    <a class="btn btn-primary" href="shop.html">See all twelve</a>
   </p>
 </div>`;
       return;

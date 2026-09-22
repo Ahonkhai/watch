@@ -125,17 +125,14 @@ page("index.html",
   <div class="wrap hero-inner">
     <div>
       <p class="label" data-reveal>Est. 2014 &mdash; Portland &amp; Biel</p>
-      <h1 class="reveal-lines" data-reveal>
-        <span class="line"><span style="--d:.05s">Instruments for</span></span>
-        <span class="line"><span style="--d:.17s">the <em>long run</em>.</span></span>
-      </h1>
+      <h1 data-reveal style="--delay:.06s">Instruments for<br>the <em>long run</em>.</h1>
       <p class="lede" data-reveal style="--delay:.24s">
         Four families of mechanical watches and nothing else. No seasonal colourways,
         no drops you have to set an alarm for &mdash; only watches we expect you to be
         wearing in twenty years, and to service when you are.
       </p>
       <div class="hero-actions" data-reveal style="--delay:.32s">
-        <a class="btn btn-primary magnetic" href="shop.html">Discover the collection</a>
+        <a class="btn btn-primary" href="shop.html">See all twelve</a>
         <a class="link-arrow" href="about.html">How they are made</a>
       </div>
       <dl class="hero-meta" data-reveal style="--delay:.4s">
@@ -146,7 +143,6 @@ page("index.html",
     </div>
     <div class="hero-art" data-hero-art data-reveal style="--delay:.1s"></div>
   </div>
-  <span class="scroll-cue"><i></i>Scroll</span>
 </section>
 
 <div data-chapters></div>
@@ -156,9 +152,9 @@ page("index.html",
     <div class="section-head">
       <div>
         <p class="label" data-reveal>Every reference</p>
-        <h2 data-split>All twelve, end to end.</h2>
+        <h2 data-reveal>All twelve, end to end.</h2>
       </div>
-      <a class="link-arrow" href="shop.html" data-reveal style="--delay:.12s">Shop the collection</a>
+      <a class="link-arrow" href="shop.html" data-reveal style="--delay:.12s">All twelve references</a>
     </div>
   </div>
   <div class="rail-wrap">
@@ -170,7 +166,7 @@ page("index.html",
 <section class="section" data-surface="dark">
   <div class="wrap">
     <p class="label" data-reveal>The making</p>
-    <h2 data-split style="margin-bottom:clamp(2.5rem,5vw,4rem)">Four things we will not compromise.</h2>
+    <h2 data-reveal style="margin-bottom:clamp(2.5rem,5vw,4rem)">Four things we will not compromise.</h2>
     <div class="craft" data-reveal style="--delay:.06s">
       <div>
         <div class="num">01</div>
@@ -211,13 +207,13 @@ page("index.html",
 <section class="section" data-surface="light">
   <div class="wrap-narrow" style="text-align:center">
     <p class="label" data-reveal>Begin</p>
-    <h2 data-split>Twelve references. One of them is yours.</h2>
+    <h2 data-reveal>Twelve references. Pick one.</h2>
     <div data-reveal style="--delay:.12s">
       <p class="lede" style="margin:1.8rem auto 2.8rem">
         From $420 for the solar Terrafirma to $3,150 for the Loft Moonphase. Every one
         ships insured and boxed, with a strap tool and a five-year warranty.
       </p>
-      <a class="btn btn-primary magnetic" href="shop.html">Enter the collection</a>
+      <a class="btn btn-primary" href="shop.html">See all twelve references</a>
     </div>
   </div>
 </section>
@@ -356,7 +352,7 @@ page("404.html",
     <p class="lede" style="margin:1.8rem auto 2.8rem">
       The link is wrong, or the page has been retired. The collection has not moved.
     </p>
-    <a class="btn btn-primary magnetic" href="index.html">Return to the maison</a>
+    <a class="btn btn-primary" href="index.html">Back to the watches</a>
   </div>
 </section>
 ''')
@@ -377,7 +373,7 @@ page("about.html",
 
 <section class="statement" data-surface="dark">
   <div class="wrap statement-grid">
-    <h2 class="display-quote" data-split>Three watchmakers turned it away.</h2>
+    <h2 class="display-quote" data-reveal>Three watchmakers turned it away.</h2>
     <p class="lede" data-reveal style="--delay:.1s">
       In 2013 one of us inherited a 1970s diver built on a movement nobody still made
       parts for. That is the whole origin story, and it remains the brief: build watches
