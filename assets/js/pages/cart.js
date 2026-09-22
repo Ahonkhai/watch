@@ -65,7 +65,8 @@ onPageReady(() => {
       Proceed to checkout
     </a>
     <p class="summary-note">
-      Taxes calculated at checkout. This is a demo storefront &mdash; no payment is taken.
+      Taxes calculated at checkout. We confirm your order by email and send a
+      secure payment link before anything is charged.
     </p>
   </aside>
 </div>`;

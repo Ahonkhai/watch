@@ -1,7 +1,14 @@
-/* Checkout: client-side validation and a confirmation state.
-   There is no backend — nothing is transmitted anywhere. The card fields exist
-   so the flow is complete to look at, and the form says plainly not to type a
-   real card number into them. */
+/* Checkout.
+
+   There is no payment processor wired up yet, so this collects the order and
+   hands it to the customer's mail client addressed to us. Nothing is invented:
+   the order is only placed once they send that message, and the page says so.
+
+   When Stripe lands, replace submit() with a call to a serverless function
+   that creates a Checkout session and redirects. Price the line items there,
+   from the server's own catalog — never from the values in this page. */
+
+const ORDER_EMAIL = 'hello@swizzclones.example';   // <- set to a real inbox
 onPageReady(() => {
   const root = document.querySelector('[data-checkout-root]');
   if (!root) return;
@@ -13,9 +20,6 @@ onPageReady(() => {
     city: (v) => (v.trim().length >= 2 ? '' : 'Enter your city'),
     postcode: (v) => (v.trim().length >= 3 ? '' : 'Enter your postal code'),
     country: (v) => (v ? '' : 'Choose a country'),
-    card: (v) => (v.replace(/\s/g, '').length >= 12 ? '' : 'Enter a card number'),
-    expiry: (v) => (/^(0[1-9]|1[0-2])\s*\/\s*\d{2}$/.test(v) ? '' : 'Use MM/YY'),
-    cvc: (v) => (/^\d{3,4}$/.test(v) ? '' : '3 or 4 digits'),
   };
 
   function field(name, label, attrs = '') {
@@ -53,12 +57,6 @@ onPageReady(() => {
     root.innerHTML = `
 <div class="cart-layout">
   <form novalidate data-checkout-form>
-    <div class="notice">
-      <strong>Demo checkout.</strong>
-      Nothing is transmitted anywhere and no payment is taken. Please do not enter a
-      real card number &mdash; any twelve digits will pass.
-    </div>
-
     <p class="form-section-head">Contact</p>
     ${field('email', 'Email', 'type="email" inputmode="email" placeholder="you@example.com"')}
 
@@ -84,14 +82,11 @@ onPageReady(() => {
       <em class="error" data-error-for="country"></em>
     </label>
 
-    <p class="form-section-head">Payment</p>
-    ${field('card', 'Card number', 'inputmode="numeric" placeholder="4242 4242 4242 4242"')}
-    <div class="field-row">
-      ${field('expiry', 'Expiry', 'placeholder="MM/YY" inputmode="numeric"')}
-      ${field('cvc', 'CVC', 'inputmode="numeric" placeholder="123"')}
-    </div>
-
-    <button class="btn btn-primary btn-block" type="submit" style="margin-top:2.5rem">
+    <p class="summary-note" style="margin-top:2.5rem">
+      We confirm every order by email and send a secure payment link before
+      anything is charged. Nothing is taken from you on this page.
+    </p>
+    <button class="btn btn-primary btn-block" type="submit" style="margin-top:1.2rem">
       Place order &mdash; ${money(Cart.total())}
     </button>
     <p style="text-align:center;margin-top:1.8rem">
@@ -113,40 +108,73 @@ onPageReady(() => {
 </div>`;
   }
 
-  function renderConfirmation(orderNumber, total, email) {
-    root.innerHTML = `
-<div style="max-width:620px">
-  <div style="width:54px;height:54px;border:1px solid var(--line);display:grid;
-              place-items:center;color:var(--gold);margin-bottom:2rem">
-    ${ICONS.check}
-  </div>
-  <p class="label">Confirmed</p>
-  <h2 style="margin-bottom:1.6rem">Order ${esc(orderNumber)}</h2>
-  <p class="lede">
-    Thank you. A confirmation is on its way to <strong>${esc(email)}</strong>, and your
-    watch ships within two working days with insured, tracked delivery.
-  </p>
-  <table class="specs" style="margin-top:2rem">
-    <tbody>
-      <tr><th scope="row">Order number</th><td>${esc(orderNumber)}</td></tr>
-      <tr><th scope="row">Total charged</th><td>${money(total)}</td></tr>
-      <tr><th scope="row">Estimated delivery</th><td>${esc(deliveryWindow())}</td></tr>
-    </tbody>
-  </table>
-  <p class="summary-note" style="margin-top:1.6rem">
-    This is a demo storefront. No payment was taken and no order was placed.
-  </p>
-  <p style="margin-top:2.2rem">
-    <a class="btn btn-ghost" href="shop.html">Back to the watches</a>
-  </p>
-</div>`;
+  /* Composes the order as plain text. This is what the customer sends us and
+     what they keep — so it has to be complete on its own. */
+  function orderText(reference, form) {
+    const lines = Cart.detailed().map(
+      (l) => `  ${l.qty} x ${l.product.name} (${l.strap.name}) — ${money(l.lineTotal)}`);
+    const f = (n) => form.elements[n].value.trim();
+    return [
+      `Order ${reference}`,
+      '',
+      ...lines,
+      '',
+      `Subtotal: ${money(Cart.subtotal())}`,
+      `Shipping: ${Cart.shipping() === 0 ? 'Free' : money(Cart.shipping())}`,
+      `Total: ${money(Cart.total())}`,
+      '',
+      'Deliver to:',
+      `  ${f('name')}`,
+      `  ${f('address')}`,
+      `  ${f('city')} ${f('postcode')}`,
+      `  ${f('country')}`,
+      `  ${f('email')}`,
+    ].join('\n');
   }
 
-  function deliveryWindow() {
-    const from = new Date(Date.now() + 4 * 864e5);
-    const to = new Date(Date.now() + 8 * 864e5);
-    const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    return `${fmt(from)} – ${fmt(to)}`;
+  function renderConfirmation(reference, body, email) {
+    root.innerHTML = `
+<div style="max-width:620px">
+  <p class="label">Almost there</p>
+  <h2 style="margin-bottom:1.6rem">Send order ${esc(reference)}</h2>
+  <p class="lede">
+    Your email app should have opened with this order ready to send to
+    <strong>${esc(ORDER_EMAIL)}</strong>. <strong>The order is not placed until you
+    send it.</strong> If nothing opened, copy the details below and email them to us.
+  </p>
+  <pre data-order style="white-space:pre-wrap;font:inherit;font-size:.88rem;
+       background:var(--panel);border:1px solid var(--line);padding:1.2rem;
+       margin-top:1.8rem;overflow-x:auto">${esc(body)}</pre>
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.6rem">
+    <a class="btn btn-primary" href="${esc(mailtoHref(reference, body))}">Open email again</a>
+    <button class="btn btn-ghost" type="button" data-copy>Copy the order</button>
+  </div>
+  <p class="summary-note" style="margin-top:1.6rem">
+    We reply to confirm stock and send a secure payment link. Nothing is charged
+    until you use it. Sent to ${esc(email)}.
+  </p>
+</div>`;
+
+    const copy = root.querySelector('[data-copy]');
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(body);
+        copy.textContent = 'Copied';
+      } catch {
+        // Clipboard access is refused in some embedded views; select it instead.
+        const range = document.createRange();
+        range.selectNodeContents(root.querySelector('[data-order]'));
+        const sel = getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        copy.textContent = 'Selected — press copy';
+      }
+    });
+  }
+
+  function mailtoHref(reference, body) {
+    return `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(`Order ${reference}`)}`
+         + `&body=${encodeURIComponent(body)}`;
   }
 
   function showError(form, name, message) {
@@ -177,11 +205,13 @@ onPageReady(() => {
       return;
     }
 
-    const total = Cart.total();
     const email = form.elements.email.value;
-    const orderNumber = `KC-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+    const reference = `SC-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+    const body = orderText(reference, form);
+
     Cart.clear();
-    renderConfirmation(orderNumber, total, email);
+    renderConfirmation(reference, body, email);
+    window.location.href = mailtoHref(reference, body);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
