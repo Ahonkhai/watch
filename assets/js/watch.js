@@ -509,7 +509,7 @@ function renderWatch(product, opts = {}) {
   const dialText =
     `<text x="${CX}" y="${CY - 40}" font-size="11.5" letter-spacing="2.4"
        font-family="Inter, system-ui, sans-serif" font-weight="600" fill="${ink}"
-       text-anchor="middle">KESTREL</text>` +
+       text-anchor="middle">SWIZZ</text>` +
     `<text x="${CX}" y="${hasComplication ? CY - 25 : CY + 52}" font-size="6.8"
        letter-spacing="1.8" font-family="Inter, system-ui, sans-serif" fill="${ink}"
        fill-opacity=".6" text-anchor="middle">${product.name.toUpperCase()}</text>`;

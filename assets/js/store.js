@@ -2,7 +2,7 @@
    private window or blocked site data degrades to an in-memory cart rather
    than throwing. */
 
-const CART_KEY = 'kestrel.cart.v1';
+const CART_KEY = 'swizz.cart.v1';
 
 const Cart = (() => {
   let memory = [];

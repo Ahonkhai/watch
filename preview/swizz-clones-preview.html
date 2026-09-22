@@ -1,7 +1,7 @@
-<title>Kestrel &amp; Co.</title>
+<title>Swizz Clones</title>
 <script>
 document.documentElement.classList.add('js');
-window.KESTREL_INTRO = false;   // no entry curtain: the first frame is the page
+window.SWIZZ_INTRO = false;   // no entry curtain: the first frame is the page
 </script>
 <style>
 /* Self-hosted variable subsets — one file per family, no third-party request
@@ -34,7 +34,7 @@ window.KESTREL_INTRO = false;   // no entry curtain: the first frame is the page
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* Kestrel & Co. — design system.
+/* Swizz Clones — design system.
    Tokens, then primitives, then components. The look leans on three things:
    a high-contrast serif at large sizes, a great deal of space, and very
    sparing use of gold. */
@@ -1218,7 +1218,7 @@ select option { background: var(--panel); color: var(--text); }
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="#/">Kestrel <span>&amp;</span> Co.</a>
+    <a class="brand" href="#/">Swizz <span>Clones</span></a>
     <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"></button>
     <nav class="nav" aria-label="Primary">
       <a href="#/shop">Shop</a>
@@ -1519,7 +1519,7 @@ select option { background: var(--panel); color: var(--text); }
       A real person reads every message, usually within a working day.
     </p>
     <p data-reveal style="margin-top:1.6rem">
-      <a class="link-arrow" href="mailto:hello@kestrelwatch.example">hello@kestrelwatch.example</a>
+      <a class="link-arrow" href="mailto:hello@swizzclones.example">hello@swizzclones.example</a>
     </p>
   </div>
 </section>
@@ -1528,7 +1528,7 @@ select option { background: var(--panel); color: var(--text); }
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <a class="brand" href="#/">Kestrel <span>&amp;</span> Co.</a>
+        <a class="brand" href="#/">Swizz <span>Clones</span></a>
         <p class="footer-blurb">
           Instruments for the long run. Drawn in Portland, assembled in Biel,
           serviced anywhere you can post a parcel.
@@ -1563,13 +1563,13 @@ select option { background: var(--panel); color: var(--text); }
       </div>
     </div>
     <div class="footer-note">
-      <span>&copy; <span data-year>2026</span> Kestrel &amp; Co.</span>
+      <span>&copy; <span data-year>2026</span> Swizz Clones</span>
       <span>Demo storefront &mdash; no payment is taken and no order is fulfilled.</span>
     </div>
   </div>
 </footer>
 <script>
-/* Kestrel & Co. — catalog data.
+/* Swizz Clones — catalog data.
    Single source of truth for collections and products. Swap this file for a
    fetch() against a real commerce API and nothing else has to change. */
 
@@ -1825,7 +1825,7 @@ const PRODUCTS = [
       'Thickness': '6.8 mm',
       'Case material': '18k rose gold',
       'Crystal': 'Sapphire, double AR, sapphire caseback',
-      'Movement': 'Kestrel cal. 2, hand-wound',
+      'Movement': 'Swizz cal. 2, hand-wound',
       'Power reserve': '72 hours',
       'Water resistance': '30 m',
       'Lug width': '19 mm',
@@ -2508,7 +2508,7 @@ function renderWatch(product, opts = {}) {
   const dialText =
     `<text x="${CX}" y="${CY - 40}" font-size="11.5" letter-spacing="2.4"
        font-family="Inter, system-ui, sans-serif" font-weight="600" fill="${ink}"
-       text-anchor="middle">KESTREL</text>` +
+       text-anchor="middle">SWIZZ</text>` +
     `<text x="${CX}" y="${hasComplication ? CY - 25 : CY + 52}" font-size="6.8"
        letter-spacing="1.8" font-family="Inter, system-ui, sans-serif" fill="${ink}"
        fill-opacity=".6" text-anchor="middle">${product.name.toUpperCase()}</text>`;
@@ -2566,7 +2566,7 @@ function namespaceIds(svg, uid) {
    private window or blocked site data degrades to an in-memory cart rather
    than throwing. */
 
-const CART_KEY = 'kestrel.cart.v1';
+const CART_KEY = 'swizz.cart.v1';
 
 const Cart = (() => {
   let memory = [];
@@ -3012,7 +3012,7 @@ function renderGrid(container, products) {
   }
 
   // Page scripts call this once their markup is in the DOM.
-  window.kestrelMotion = { refresh: setup };
+  window.swizzMotion = { refresh: setup };
 
   if (typeof onPageReady === 'function') onPageReady(setup);
   else document.addEventListener('DOMContentLoaded', setup);
@@ -3077,7 +3077,7 @@ onPageReady(() => {
   // Reveals are ui.js's job; the motion engine only binds drag behaviour. Both
   // have to be told about markup injected after their own setup ran.
   observeReveals(document);
-  window.kestrelMotion?.refresh();
+  window.swizzMotion?.refresh();
 });
 
 
@@ -3264,7 +3264,7 @@ onPageReady(() => {
     return;
   }
 
-  document.title = `${product.name} — Kestrel & Co.`;
+  document.title = `${product.name} — Swizz Clones`;
   let strap = product.straps[0];
   let qty = 1;
 
@@ -3386,7 +3386,7 @@ onPageReady(() => {
 
   render();
   observeReveals(root);
-  window.kestrelMotion?.refresh();
+  window.swizzMotion?.refresh();
 
   const related = PRODUCTS.filter(
     (p) => p.collection === product.collection && p.id !== product.id);
@@ -3710,7 +3710,7 @@ onPageReady(() => {
   document.querySelectorAll('template[data-route]').forEach(function (t) {
     views[t.dataset.route] = t.innerHTML;
   });
-  var TITLES = {"": "Kestrel & Co.", "shop": "The collection", "product": "Watch", "cart": "Your bag", "checkout": "Checkout", "about": "The maison"};
+  var TITLES = {"": "Swizz Clones", "shop": "The collection", "product": "Watch", "cart": "Your bag", "checkout": "Checkout", "about": "The maison"};
 
   function route() {
     var h = location.hash;
@@ -3725,10 +3725,10 @@ onPageReady(() => {
   function paint(dispatch) {
     var r = route();
     main.innerHTML = views[r.name];
-    document.title = TITLES[r.name] + ' \u2014 Kestrel & Co.';
+    document.title = TITLES[r.name] + ' \u2014 Swizz Clones';
     if (dispatch) {
       document.dispatchEvent(new Event('page:render'));
-      if (window.kestrelMotion) window.kestrelMotion.refresh();
+      if (window.swizzMotion) window.swizzMotion.refresh();
     }
     var at = r.params.get('at');
     var target = at && document.getElementById(at);

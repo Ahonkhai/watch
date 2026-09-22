@@ -29,7 +29,7 @@ HEAD = '''<!doctype html>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="index.html">Kestrel <span>&amp;</span> Co.</a>
+    <a class="brand" href="index.html">Swizz <span>Clones</span></a>
     <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"></button>
     <nav class="nav" aria-label="Primary">
       <a href="shop.html">Shop</a>
@@ -54,7 +54,7 @@ FOOT = '''</main>
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <a class="brand" href="index.html">Kestrel <span>&amp;</span> Co.</a>
+        <a class="brand" href="index.html">Swizz <span>Clones</span></a>
         <p class="footer-blurb">
           Instruments for the long run. Drawn in Portland, assembled in Biel,
           serviced anywhere you can post a parcel.
@@ -89,7 +89,7 @@ FOOT = '''</main>
       </div>
     </div>
     <div class="footer-note">
-      <span>&copy; <span data-year>2026</span> Kestrel &amp; Co.</span>
+      <span>&copy; <span data-year>2026</span> Swizz Clones</span>
       <span>Demo storefront &mdash; no payment is taken and no order is fulfilled.</span>
     </div>
   </div>
@@ -117,8 +117,8 @@ def page(filename, title, desc, body, scripts=()):
 
 # ---------------------------------------------------------------- index
 page("index.html",
-     "Kestrel &amp; Co. — Mechanical watches built to be worn",
-     "Dive, field, dress and expedition watches from Kestrel & Co. Swiss and "
+     "Swizz Clones — Mechanical watches built to be worn",
+     "Dive, field, dress and expedition watches from Swizz Clones Swiss and "
      "Japanese movements, sapphire crystals, five-year warranty.",
      '''
 <section class="hero" data-surface="dark">
@@ -221,8 +221,8 @@ page("index.html",
 
 # ---------------------------------------------------------------- shop
 page("shop.html",
-     "The collection — Kestrel &amp; Co.",
-     "Browse every Kestrel reference: dive, field, dress and expedition watches "
+     "The collection — Swizz Clones",
+     "Browse every Swizz Clones reference: dive, field, dress and expedition watches "
      "from $420 to $3,150.",
      '''
 <section class="section-tight" style="padding-bottom:clamp(2.5rem,5vw,4rem)">
@@ -290,7 +290,7 @@ page("shop.html",
 
 # ---------------------------------------------------------------- product
 page("product.html",
-     "Watch — Kestrel &amp; Co.",
+     "Watch — Swizz Clones",
      "Reference detail, full specification and strap options.",
      '''
 <section class="section-tight" style="padding-bottom:var(--section)">
@@ -314,7 +314,7 @@ page("product.html",
 
 # ---------------------------------------------------------------- cart
 page("cart.html",
-     "Your bag — Kestrel &amp; Co.",
+     "Your bag — Swizz Clones",
      "Review the watches in your bag before checkout.",
      '''
 <section class="section-tight" style="padding-bottom:var(--section)">
@@ -328,7 +328,7 @@ page("cart.html",
 
 # ---------------------------------------------------------------- checkout
 page("checkout.html",
-     "Checkout — Kestrel &amp; Co.",
+     "Checkout — Swizz Clones",
      "Complete your order.",
      '''
 <section class="section-tight" style="padding-bottom:var(--section)">
@@ -342,7 +342,7 @@ page("checkout.html",
 
 # ---------------------------------------------------------------- 404
 page("404.html",
-     "Not found — Kestrel &amp; Co.",
+     "Not found — Swizz Clones",
      "That page does not exist.",
      '''
 <section class="section" data-surface="dark" style="min-height:70vh;display:grid;place-items:center">
@@ -359,8 +359,8 @@ page("404.html",
 
 # ---------------------------------------------------------------- about
 page("about.html",
-     "The maison — Kestrel &amp; Co.",
-     "How Kestrel & Co. builds, tests and services its watches.",
+     "The maison — Swizz Clones",
+     "How Swizz Clones builds, tests and services its watches.",
      '''
 <section class="section-tight">
   <div class="wrap-narrow">
@@ -441,7 +441,7 @@ page("about.html",
       A real person reads every message, usually within a working day.
     </p>
     <p data-reveal style="margin-top:1.6rem">
-      <a class="link-arrow" href="mailto:hello@kestrelwatch.example">hello@kestrelwatch.example</a>
+      <a class="link-arrow" href="mailto:hello@swizzclones.example">hello@swizzclones.example</a>
     </p>
   </div>
 </section>
