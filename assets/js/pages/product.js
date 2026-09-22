@@ -16,7 +16,7 @@ onPageReady(() => {
     return;
   }
 
-  document.title = `${product.name} — Kestrel & Co.`;
+  document.title = `${product.name} — Swizz Clones`;
   let strap = product.straps[0];
   let qty = 1;
 
@@ -138,7 +138,7 @@ onPageReady(() => {
 
   render();
   observeReveals(root);
-  window.kestrelMotion?.refresh();
+  window.swizzMotion?.refresh();
 
   const related = PRODUCTS.filter(
     (p) => p.collection === product.collection && p.id !== product.id);

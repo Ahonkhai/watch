@@ -1,4 +1,4 @@
-# Kestrel & Co. — watch storefront
+# Swizz Clones — watch storefront
 
 A static e-commerce front end for a watch brand. No build step, no dependencies,
 no framework: open `index.html` and it works.
@@ -164,7 +164,7 @@ other site.
 
 `assets/js/motion.js` holds only the two drag behaviours and is optional: if it
 fails to load, the site still works. Page scripts that inject markup call
-`observeReveals()` and `window.kestrelMotion?.refresh()` afterwards, since both
+`observeReveals()` and `window.swizzMotion?.refresh()` afterwards, since both
 run their own setup before that content exists.
 
 `prefers-reduced-motion: reduce` disables what remains, and `motion.js` returns
@@ -228,7 +228,7 @@ as-is; navigation would break.
 that routes on the hash instead:
 
 ```bash
-python3 tools/build-preview.py      # -> preview/kestrel-preview.html
+python3 tools/build-preview.py      # -> preview/swizz-clones-preview.html
 ```
 
 Styles and scripts are inlined, the fonts are embedded as data URIs, and each
@@ -236,7 +236,7 @@ page's `<main>` becomes a template a small router swaps in — `#/product?id=x`
 in place of `product.html?id=x`. It makes no external requests, so it also
 works opened straight off disk with no server.
 
-`preview/kestrel-preview.html` is generated. Edit the real sources and re-run
+`preview/swizz-clones-preview.html` is generated. Edit the real sources and re-run
 the script; don't edit the preview by hand.
 
 The multi-page site remains what you deploy — a static host gives you real

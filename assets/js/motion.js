@@ -87,7 +87,7 @@
   }
 
   // Page scripts call this once their markup is in the DOM.
-  window.kestrelMotion = { refresh: setup };
+  window.swizzMotion = { refresh: setup };
 
   if (typeof onPageReady === 'function') onPageReady(setup);
   else document.addEventListener('DOMContentLoaded', setup);

@@ -1,4 +1,4 @@
-/* Kestrel & Co. — catalog data.
+/* Swizz Clones — catalog data.
    Single source of truth for collections and products. Swap this file for a
    fetch() against a real commerce API and nothing else has to change. */
 
@@ -254,7 +254,7 @@ const PRODUCTS = [
       'Thickness': '6.8 mm',
       'Case material': '18k rose gold',
       'Crystal': 'Sapphire, double AR, sapphire caseback',
-      'Movement': 'Kestrel cal. 2, hand-wound',
+      'Movement': 'Swizz cal. 2, hand-wound',
       'Power reserve': '72 hours',
       'Water resistance': '30 m',
       'Lug width': '19 mm',

@@ -56,5 +56,5 @@ onPageReady(() => {
   // Reveals are ui.js's job; the motion engine only binds drag behaviour. Both
   // have to be told about markup injected after their own setup ran.
   observeReveals(document);
-  window.kestrelMotion?.refresh();
+  window.swizzMotion?.refresh();
 });

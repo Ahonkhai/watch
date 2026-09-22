@@ -16,7 +16,7 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-OUT = ROOT / "preview" / "kestrel-preview.html"
+OUT = ROOT / "preview" / "swizz-clones-preview.html"
 
 PAGES = [("", "index.html"), ("shop", "shop.html"), ("product", "product.html"),
          ("cart", "cart.html"), ("checkout", "checkout.html"), ("about", "about.html")]
@@ -27,7 +27,7 @@ SCRIPTS = ["assets/js/data.js", "assets/js/watch.js", "assets/js/store.js",
            "assets/js/pages/product.js", "assets/js/pages/cart.js",
            "assets/js/pages/checkout.js"]
 
-TITLES = {"": "Kestrel & Co.", "shop": "The collection", "product": "Watch",
+TITLES = {"": "Swizz Clones", "shop": "The collection", "product": "Watch",
           "cart": "Your bag", "checkout": "Checkout", "about": "The maison"}
 
 
@@ -96,10 +96,10 @@ ROUTER = """
   function paint(dispatch) {
     var r = route();
     main.innerHTML = views[r.name];
-    document.title = TITLES[r.name] + ' \\u2014 Kestrel & Co.';
+    document.title = TITLES[r.name] + ' \\u2014 Swizz Clones';
     if (dispatch) {
       document.dispatchEvent(new Event('page:render'));
-      if (window.kestrelMotion) window.kestrelMotion.refresh();
+      if (window.swizzMotion) window.swizzMotion.refresh();
     }
     var at = r.params.get('at');
     var target = at && document.getElementById(at);
@@ -121,10 +121,10 @@ templates = "\n".join(
 )
 
 OUT.parent.mkdir(exist_ok=True)
-OUT.write_text(f"""<title>Kestrel &amp; Co.</title>
+OUT.write_text(f"""<title>Swizz Clones</title>
 <script>
 document.documentElement.classList.add('js');
-window.KESTREL_INTRO = false;   // no entry curtain: the first frame is the page
+window.SWIZZ_INTRO = false;   // no entry curtain: the first frame is the page
 </script>
 <style>
 {css}
