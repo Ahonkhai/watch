@@ -44,16 +44,22 @@ the details. Pasted the details with no photos? That works too; add them after.
 
 ### Adding media to a watch already listed
 
-Send the photographs or video, then reply to the bot with just the reference:
+Send the photographs or video, then send the reference on its own:
 
 ```
 126710BLNR
 ```
 
-They are added to that listing and the site redeploys. This is the order you
-actually work in — photograph the watch, then say which one it is — so it does
-not require opening `/edit` first. Reply with anything longer and it is read as
-the details for a new listing instead.
+They are added to that listing and the site redeploys. Type it as an ordinary
+message or as a reply — both work. This is the order you actually work in:
+photograph the watch, then say which one it is, rather than opening `/edit`
+before you shoot.
+
+A reference on its own with **nothing staged** opens that listing for editing,
+the same as `/edit 126710BLNR`.
+
+Anything longer than a single word is read as the details for a new listing,
+so the two cannot be confused.
 
 **The faster shorthand.** Once the order is in your head, one pipe-separated
 line does the same job:

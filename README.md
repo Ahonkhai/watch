@@ -211,6 +211,15 @@ you restyle:
   "Get started". There are no testimonials, no logo wall and no statistics.
 - **No em dashes in the copy.**
 
+## Tests
+
+```bash
+node tests/run.mjs
+```
+
+Starts its own servers, runs all five suites, stops them again. See
+[tests/README.md](tests/README.md).
+
 ## Deploy
 
 ### Vercel

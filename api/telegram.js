@@ -24,6 +24,21 @@ const DRAFTS = '.bot/drafts';
 const MEDIA  = '.bot/media';
 const IMAGES = 'assets/img';
 
+/* A pointer to the media staged most recently, so a reference typed as an
+ * ordinary message — rather than as a reply to the bot — still finds it.
+ * Nobody should have to long-press a message to answer it. */
+const LAST = '.bot/last.json';
+
+/* Once a draft is published, discarded or attached, the pointer to it is
+ * stale. Resolution already tolerates that — it checks the media is still
+ * there — but leaving residue under .bot/ invites the next reader to wonder
+ * whether it means something. */
+async function clearPointer(group, changes) {
+  const raw = await readFile(LAST);
+  if (raw && JSON.parse(raw).group === group) changes.push({ path: LAST, delete: true });
+  return changes;
+}
+
 const draftPath = (g) => `${DRAFTS}/${g}.json`;
 const mediaDir  = (g) => `${MEDIA}/${g}`;
 
@@ -77,7 +92,10 @@ async function stageMedia(msg, group, chat) {
   const file = await download(att.file_id);
   await commitChanges({
     message: `Draft ${group}: ${att.kind}`,
-    changes: [{ path, base64: file.base64 }],
+    changes: [
+      { path, base64: file.base64 },
+      { path: LAST, content: JSON.stringify({ group, chat }, null, 2) },
+    ],
     skipDeploy: true,
   });
 
@@ -214,6 +232,7 @@ async function attachStagedTo(group, chat, needle) {
 
   changes.push({ path: LISTINGS_PATH, content: serialise(catalogue) });
   if (await readFile(draftPath(group))) changes.push({ path: draftPath(group), delete: true });
+  await clearPointer(group, changes);
 
   await commitChanges({ message: `Add media to ${p.name}, ref ${p.reference}`, changes });
 
@@ -390,6 +409,26 @@ async function applyField(t, key, value) {
   return { listing, target };
 }
 
+/* A message that is just a reference. Two useful readings, and which one is
+ * meant is never ambiguous: with media waiting, add it to that watch;
+ * without, open that watch for editing. */
+async function onBareReference(chat, needle) {
+  const catalogue = await load();
+  const p = find(catalogue, needle);
+  if (!p) return false;
+
+  const raw = await readFile(LAST);
+  const group = raw ? (JSON.parse(raw).group || null) : null;
+  const staged = group ? await listTree(`${mediaDir(group)}/`) : [];
+
+  if (staged.length) await attachStagedTo(group, chat, needle);
+  else await showEditor(chat, { kind: 'listing', key: p.id });
+  return true;
+}
+
+const looksLikeReference = (s) =>
+  !!s && !/[\n|:]/.test(s) && s.length <= 40 && /[A-Za-z0-9]/.test(s);
+
 /* A reply to one of the bot's prompts. */
 async function onReply(msg) {
   const chat = msg.chat.id;
@@ -406,9 +445,7 @@ async function onReply(msg) {
     /* A one-word reply is a reference, not a caption — they are adding this
        media to a watch that is already listed. */
     const bare = String(msg.text).trim();
-    if (bare && !/[\n|:]/.test(bare) && bare.length <= 40) {
-      return attachStagedTo(t.key, chat, bare);
-    }
+    if (looksLikeReference(bare)) return attachStagedTo(t.key, chat, bare);
 
     const parsed = parseCaption(msg.text);
     if (!parsed.ok) {
@@ -490,6 +527,7 @@ async function publish(group, chat, messageId) {
 
   changes.push({ path: LISTINGS_PATH, content: serialise(catalogue) });
   changes.push({ path: draftPath(group), delete: true });
+  await clearPointer(group, changes);
 
   await commitChanges({ message: `List ${listing.brand} ${listing.name}, ref ${listing.reference}`, changes });
 
@@ -504,6 +542,7 @@ async function discard(group, chat, messageId) {
   const media = await listTree(`${mediaDir(group)}/`);
   const changes = media.map((f) => ({ path: f.path, delete: true }));
   if (await readFile(draftPath(group))) changes.push({ path: draftPath(group), delete: true });
+  await clearPointer(group, changes);
   if (changes.length) await commitChanges({ message: `Discard draft ${group}`, changes, skipDeploy: true });
   return edit(chat, messageId, 'Discarded. Nothing was published.');
 }
@@ -634,6 +673,14 @@ export default async function handler(req, res) {
     } else if (update.message?.text?.startsWith('/')) {
       await onCommand(update.message);
     } else if (update.message?.text) {
+      const chat = update.message.chat.id;
+      const body = update.message.text.trim();
+
+      /* Typed on its own, not as a reply: still a reference if it names one. */
+      if (looksLikeReference(body) && await onBareReference(chat, body)) {
+        return res.status(200).send('ok');
+      }
+
       /* Loose text that parses as a listing is treated as one — people paste
          the template back without re-attaching it to a photograph. */
       const parsed = parseCaption(update.message.text);

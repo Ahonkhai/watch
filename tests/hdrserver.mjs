@@ -18,7 +18,7 @@ const toRe = (src) => new RegExp('^' + src
 
 const rules = cfg.headers.map((h) => ({ re: toRe(h.source), headers: h.headers }));
 
-http.createServer((req, res) => {
+export const server = http.createServer((req, res) => {
   const url = decodeURIComponent(req.url.split('?')[0]);
   let file = path.join(ROOT, url === '/' ? 'index.html' : url);
   if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
@@ -28,4 +28,8 @@ http.createServer((req, res) => {
   for (const r of rules) if (r.re.test(url)) for (const h of r.headers) applied[h.key] = h.value;
   res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream', ...applied });
   res.end(fs.readFileSync(file));
-}).listen(8099, () => console.log('headers server on 8099'));
+});
+
+server.listen(8099, () => {
+  if (process.argv[1].endsWith('hdrserver.mjs')) console.log('headers server on 8099');
+});
