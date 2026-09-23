@@ -49,6 +49,11 @@ const lastText = (w) => w.log.at(-1).text;
 const lastKb = (w) => w.log.at(-1).reply_markup?.inline_keyboard || [];
 const btn = (w, label) => lastKb(w).flat().find((b) => b.text.includes(label));
 
+/* Media filenames carry a content hash, so assert the shape rather than an
+   exact name: 01-a1b2c3d4.jpg, video-a1b2c3d4.mp4. */
+const photoAt = (id, n) => new RegExp(`^assets/img/${id}/${String(n).padStart(2, '0')}-[0-9a-f]{8}\\.jpg$`);
+const videoAt = (id) => new RegExp(`^assets/img/${id}/video-[0-9a-f]{8}\\.mp4$`);
+
 const fresh = async () => {
   /* Seed the photographs the catalogue already points at, so numbering is
      tested against a repository that looks like the real one. */
@@ -112,7 +117,7 @@ await step('publish writes listing and media in ONE deploying commit', async () 
   ok(!after[0].message.includes('[skip ci]'), 'deploys');
   const p = listing(w, 'rolex-226570');
   eq(p.price, 9800, 'price'); eq(p.images.length, 2, 'images');
-  eq(p.images[0], 'assets/img/rolex-226570/01.jpg', 'path');
+  ok(photoAt('rolex-226570', 1).test(p.images[0]), `first photograph path: ${p.images[0]}`);
   eq([...w.files.keys()].filter((f) => f.startsWith('.bot/')).length, 0, 'draft cleaned up');
 });
 
@@ -161,9 +166,9 @@ await step('a video in the album is published alongside the photographs', async 
   ok(/1 video/.test(lastText(w)) || /video\(s\)/.test(lastText(w)), 'counted on the card');
   await tap('pub:');
   const p = listing(w, 'rolex-226570');
-  eq(p.video, 'assets/img/rolex-226570/video.mp4', 'video path');
+  ok(videoAt('rolex-226570').test(p.video), `video path: ${p.video}`);
   eq(p.images.length, 1, 'photographs unaffected');
-  ok(w.files.has('assets/img/rolex-226570/video.mp4'), 'file in place');
+  ok(w.files.has(p.video), 'file in place');
 });
 
 await step('a video sent as a file is accepted; a PDF is not', async () => {
@@ -252,9 +257,9 @@ await step('editing the reference renames the listing and moves its media', asyn
   await deliver(handler, textMsg('226570A', { replyTo: lastText(w) }));
   const p = listing(w, 'rolex-226570a');
   ok(p, 'listing renamed');
-  eq(p.images[0], 'assets/img/rolex-226570a/01.jpg', 'image path rewritten');
-  ok(w.files.has('assets/img/rolex-226570a/01.jpg'), 'file moved');
-  ok(!w.files.has('assets/img/rolex-226570/01.jpg'), 'old file gone');
+  ok(photoAt('rolex-226570a', 1).test(p.images[0]), `image path rewritten: ${p.images[0]}`);
+  ok(w.files.has(p.images[0]), 'file moved');
+  ok(![...w.files.keys()].some((f) => f.startsWith('assets/img/rolex-226570/')), 'old files gone');
   ok(!listing(w, 'rolex-226570'), 'old id gone');
 });
 
@@ -334,7 +339,7 @@ await step('a video can be added to an existing listing the same way', async () 
   const { w, handler } = await fresh();
   await deliver(handler, videoMsg({ group: 'g5', uid: 'v9' }));
   await deliver(handler, textMsg('126610LN', { replyTo: w.sent.at(-1).text }));
-  eq(listing(w, 'rolex-126610ln').video, 'assets/img/rolex-126610ln/video.mp4', 'video attached');
+  ok(videoAt('rolex-126610ln').test(listing(w, 'rolex-126610ln').video), 'video attached');
 });
 
 await step('added photographs are numbered after the ones already there', async () => {
@@ -343,7 +348,7 @@ await step('added photographs are numbered after the ones already there', async 
   await deliver(handler, textMsg('129720BLNR', { replyTo: w.sent[0].text }));
   const p = listing(w, 'rolex-129720blnr');
   eq(p.images.length, 2, 'photograph count');
-  eq(p.images[1], 'assets/img/rolex-129720blnr/02.jpg', 'numbered on from the existing one');
+  ok(photoAt('rolex-129720blnr', 2).test(p.images[1]), `numbered on from the existing one: ${p.images[1]}`);
   ok(w.files.has('assets/img/rolex-129720blnr/01.jpg'), 'the original is untouched');
 });
 
@@ -485,6 +490,26 @@ await step('cancelling /sold keeps the listing', async () => {
   eq(w.commitLog.length, 0, 'commits');
 });
 
+await step('a relisted reference cannot serve the old watch from cache', async () => {
+  /* Sell a watch, list the same reference again with a different photograph,
+     and the new file must not land on the path the old one used — anyone
+     holding it in cache would otherwise see the wrong watch. */
+  const { w, handler, tap } = await fresh();
+  await deliver(handler, photoMsg({ group: 'r1', uid: 'first', caption: CAPTION }));
+  await tap('pub:');
+  const firstPath = listing(w, 'rolex-226570').images[0];
+
+  await deliver(handler, textMsg('/sold 226570'));
+  await tap('sold:', w.sent.at(-1).text);
+
+  await deliver(handler, photoMsg({ group: 'r2', uid: 'second', caption: CAPTION, mid: 9 }));
+  await tap('pub:');
+  const secondPath = listing(w, 'rolex-226570').images[0];
+
+  ok(firstPath !== secondPath, `both photographs used ${firstPath}`);
+  ok(photoAt('rolex-226570', 1).test(secondPath), `unexpected name: ${secondPath}`);
+});
+
 /* ---------- drafts left behind ---------- */
 
 await step('/drafts says so when there are none', async () => {
@@ -536,7 +561,7 @@ await step('the generated file stays valid JavaScript the site can load', async 
   vm.createContext(ctx);
   vm.runInContext(w.files.get(LP).toString() + '\nthis.OUT = CATALOGUE;', ctx);
   eq(ctx.OUT.products.length, STOCK + 1, 'evaluates');
-  eq(ctx.OUT.products[0].video, 'assets/img/rolex-226570/video.mp4', 'video survives the round trip');
+  ok(videoAt('rolex-226570').test(ctx.OUT.products[0].video), 'video survives the round trip');
 });
 
 /* ---------- the health endpoint ---------- */

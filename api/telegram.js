@@ -12,6 +12,7 @@
  * keeps callback_data well inside its 64-byte limit: it carries the field
  * name only, never the id. */
 
+import { createHash } from 'node:crypto';
 import { commitChanges, listTree, readFile } from './_lib/github.js';
 import { send, edit, answer, download, buttons, esc, publishCommands } from './_lib/tg.js';
 import { load, serialise, listingId, ensureCollection, money, LISTINGS_PATH } from './_lib/catalogue.js';
@@ -40,6 +41,18 @@ async function clearPointer(group, changes) {
 }
 
 const draftPath = (g) => `${DRAFTS}/${g}.json`;
+
+/* A listing's media filename carries a content hash, so a path is never
+ * reused. Without it, selling a watch and relisting the same reference would
+ * write a different photograph to assets/img/<id>/01.jpg — and anyone holding
+ * the old one in cache would see the wrong watch. With it, these files can be
+ * cached forever. */
+const mediaName = (n, ext, sha) =>
+  ext === 'mp4' ? `video-${String(sha).slice(0, 8)}.mp4`
+                : `${String(n).padStart(2, '0')}-${String(sha).slice(0, 8)}.jpg`;
+
+/* Leading digits of the basename, so both 01.jpg and 01-a1b2c3d4.jpg count. */
+const numberIn = (p) => Number(/(?:^|\/)(\d+)/.exec(p.split('/').pop() || '')?.[1] || 0);
 const mediaDir  = (g) => `${MEDIA}/${g}`;
 
 /* ---------- targets ---------- */
@@ -162,15 +175,13 @@ async function addMediaToListing(msg, t, chat) {
   }
 
   const existing = await listTree(`${IMAGES}/${t.key}/`);
-  const numberIn = (path) => Number(/(\d+)\.jpg$/i.exec(path)?.[1] || 0);
   const n = Math.max(0, ...existing.map((f) => numberIn(f.path)),
                         ...(found.listing.images || []).map(numberIn)) + 1;
-  const dest = att.kind === 'video'
-    ? `${IMAGES}/${t.key}/video.mp4`
-    : `${IMAGES}/${t.key}/${String(n).padStart(2, '0')}.jpg`;
-  if (att.kind !== 'video' && existing.some((f) => f.path === dest)) return null;
 
   const file = await download(att.file_id);
+  const sha = createHash('sha1').update(Buffer.from(file.base64, 'base64')).digest('hex');
+  const dest = `${IMAGES}/${t.key}/${mediaName(n, att.ext, sha)}`;
+  if (existing.some((f) => f.path === dest)) return null;
   const { listing, catalogue } = found;
   if (att.kind === 'video') listing.video = dest;
   else listing.images = [...(listing.images || []), dest];
@@ -208,7 +219,6 @@ async function attachStagedTo(group, chat, needle) {
      the sequence — 01 and 03, after one was removed — would otherwise make the
      next upload overwrite 03. */
   const onDisk = (await listTree(`${IMAGES}/${p.id}/`)).filter((f) => isPhoto(f.path));
-  const numberIn = (path) => Number(/(\d+)\.jpg$/i.exec(path)?.[1] || 0);
   let n = Math.max(0, ...onDisk.map((f) => numberIn(f.path)),
                       ...(p.images || []).map(numberIn));
   const changes = [];
@@ -216,13 +226,13 @@ async function attachStagedTo(group, chat, needle) {
 
   for (const f of staged) {
     if (isVideo(f.path)) {
-      const dest = `${IMAGES}/${p.id}/video.mp4`;
+      const dest = `${IMAGES}/${p.id}/${mediaName(0, 'mp4', f.sha)}`;
       changes.push({ path: dest, sha: f.sha });
       p.video = dest;
       video = true;
     } else {
       n += 1;
-      const dest = `${IMAGES}/${p.id}/${String(n).padStart(2, '0')}.jpg`;
+      const dest = `${IMAGES}/${p.id}/${mediaName(n, 'jpg', f.sha)}`;
       changes.push({ path: dest, sha: f.sha });
       p.images = [...(p.images || []), dest];
       photos += 1;
@@ -504,13 +514,13 @@ async function publish(group, chat, messageId) {
   let video = null;
 
   photos.forEach((f, i) => {
-    const dest = `${IMAGES}/${id}/${String(i + 1).padStart(2, '0')}.jpg`;
+    const dest = `${IMAGES}/${id}/${mediaName(i + 1, 'jpg', f.sha)}`;
     changes.push({ path: dest, sha: f.sha }, { path: f.path, delete: true });
     images.push(dest);
   });
   videos.forEach((f, i) => {
     if (i === 0) {
-      video = `${IMAGES}/${id}/video.mp4`;
+      video = `${IMAGES}/${id}/${mediaName(0, 'mp4', f.sha)}`;
       changes.push({ path: video, sha: f.sha });
     }
     changes.push({ path: f.path, delete: true });

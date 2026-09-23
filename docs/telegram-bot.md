@@ -316,6 +316,19 @@ start publishing but never appearing, check the Vercel dashboard for
   Telegram and re-hosted on the site, because a Telegram file URL contains the
   bot token and would hand the bot to anyone who viewed source.
 
+## Media filenames
+
+```
+assets/img/rolex-126710blnr/01-a1b2c3d4.jpg
+assets/img/rolex-126710blnr/video-9f8e7d6c.mp4
+```
+
+The suffix is a content hash. It exists so a path is never reused: sell a
+watch, relist the same reference, and the new photograph would otherwise be
+written to the `01.jpg` the old one used — and anyone holding that in their
+cache would see the wrong watch. Because the paths are unique, these files are
+cached for a year.
+
 ## Limits worth knowing
 
 - **Photographs go into git.** Telegram compresses them to roughly 100–300 KB,
