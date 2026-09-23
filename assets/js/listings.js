@@ -4,7 +4,7 @@
  * your edit would be lost. To change a listing, use the bot (/list, /price,
  * /sold). To change how a listing is SHOWN, edit assets/js/data.js instead. */
 const CATALOGUE = {
-  "updated": "2026-09-23T09:29:45.988Z",
+  "updated": "2026-09-23T10:17:37.799Z",
   "collections": [
     {
       "id": "rolex",
@@ -111,7 +111,9 @@ const CATALOGUE = {
       "price": 17800,
       "tagline": "Blue and black bezel on Jubilee bracelet.",
       "description": "Worn sparingly and kept in a collection. Light surface marks to the clasp consistent with the stated condition, bracelet stretch minimal. Original box and card present.",
-      "images": [],
+      "images": [
+        "assets/img/rolex-126710blnr/01-439a7900.jpg"
+      ],
       "specs": {
         "Case diameter": "40 mm",
         "Case material": "Oystersteel",

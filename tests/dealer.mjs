@@ -228,12 +228,25 @@ await step('a listing with a video serves it playably', async () => {
   if (!withVideo) return;                       // nothing to check yet
 
   await go(`product.html?id=${withVideo.id}`);
+
+  /* With photographs present the video is last in the thumbnail strip, not in
+     the stage — the stills are what a buyer scans. Reaching it is a tap, so
+     the test has to take that tap rather than assume the video is on top. */
+  const thumbs = await page.locator('[data-thumb]').count();
+  if ((withVideo.images || []).length) {
+    if (thumbs !== (withVideo.images.length + 1)) {
+      throw new Error(`${thumbs} thumbnails for ${withVideo.images.length} photo(s) + 1 video`);
+    }
+    await page.locator(`[data-thumb="${thumbs - 1}"]`).click();
+    await page.waitForTimeout(400);
+  }
+
   const el = await page.evaluate(() => {
     const v = document.querySelector('[data-stage] video');
     return v ? { src: v.getAttribute('src'), controls: v.hasAttribute('controls'),
                  playsinline: v.hasAttribute('playsinline') } : null;
   });
-  if (!el) throw new Error('no <video> rendered on a listing that has one');
+  if (!el) throw new Error('the video is not reachable from the listing page');
   if (!el.controls) throw new Error('video has no controls');
   if (!el.playsinline) throw new Error('video is not playsinline — iOS would go fullscreen');
 
