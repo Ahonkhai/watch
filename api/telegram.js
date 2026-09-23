@@ -141,11 +141,12 @@ async function onMedia(msg) {
   }
 
   if (parsed && !parsed.ok) {
+    const eg = exampleRef(await load());
     return send(chat,
       ['<b>I could not read that caption.</b>', '',
        ...parsed.errors.map((e) => `• ${esc(e)}`), '',
        'The media is saved. Reply to this message with a corrected caption, /new for a template,',
-       'or just a reference like <code>126710BLNR</code> to add this to a watch already listed.',
+       `or just a reference like <code>${esc(eg)}</code> to add this to a watch already listed.`,
        '', marker({ kind: 'draft', key: group })].join('\n'));
   }
 
@@ -155,9 +156,10 @@ async function onMedia(msg) {
   if (await readFile(draftPath(group))) return null;
 
   if (res.before === 0 && res.staged) {
+    const eg = exampleRef(await load());
     return send(chat,
       ['Media saved. Reply to this message with either:', '',
-       '• a <b>reference</b> like <code>126710BLNR</code> — adds it to that listing',
+       `• a <b>reference</b> like <code>${esc(eg)}</code> — adds it to that listing`,
        '• the <b>full details</b> — starts a new listing (/new for a template)', '',
        marker({ kind: 'draft', key: group })].join('\n'));
   }
@@ -213,6 +215,17 @@ async function attachStagedTo(group, chat, needle) {
   const staged = await listTree(`${mediaDir(group)}/`);
   if (!staged.length) {
     return send(chat, `Nothing is staged to add. Send the photographs, then reply with ${esc(p.reference)}.`);
+  }
+
+  if (isPlaceholder(p)) {
+    return send(chat,
+      [`<b>${esc(p.name)}, ref ${esc(p.reference)} is a placeholder</b>, not your stock —`,
+       'one of the example listings the site ships with.', '',
+       'Putting your photographs on it would show them against a watch you are',
+       'not selling. Send the reference of your own listing instead, or the full',
+       'details to create one (/new for a template).', '',
+       `Your media is still saved as draft <code>${esc(group)}</code>.`, '',
+       marker({ kind: 'draft', key: group })].join('\n'));
   }
 
   /* Number on from the highest that exists, not from how many exist: a gap in
@@ -439,6 +452,20 @@ async function onBareReference(chat, needle) {
 const looksLikeReference = (s) =>
   !!s && !/[\n|:]/.test(s) && s.length <= 40 && /[A-Za-z0-9]/.test(s);
 
+/* A listing shipped with the site rather than added by you. The seeded
+ * catalogue is real references with published specifications, kept only so
+ * the shop has something to lay out — putting a photograph of YOUR watch on
+ * one is a lie about what is for sale, which is the whole thing this site is
+ * built not to do. */
+const isPlaceholder = (p) => !p.listed;
+
+/* An example reference for a prompt, taken from stock actually listed, so the
+ * bot never suggests typing the name of a placeholder. */
+function exampleRef(catalogue) {
+  const real = catalogue.products.filter((p) => !isPlaceholder(p));
+  return real.length ? real[0].reference : 'the reference from /list';
+}
+
 /* A reply to one of the bot's prompts. */
 async function onReply(msg) {
   const chat = msg.chat.id;
@@ -624,7 +651,8 @@ async function onCommand(msg) {
       const rows = c.products.map((p) =>
         `<b>${money(p.price)}</b> — ${esc(p.name)}, ref ${esc(p.reference)}\n` +
         `   ${p.year} · ${esc(p.condition)} · ${(p.images || []).length} photo(s)` +
-        `${p.video ? ' + video' : ''} · /edit ${esc(p.reference)}`);
+        `${p.video ? ' + video' : ''} · /edit ${esc(p.reference)}` +
+        `${isPlaceholder(p) ? '\n   <i>placeholder — not your stock</i>' : ''}`);
       return send(chat, [`<b>${c.products.length} in stock</b>`, '', ...rows].join('\n'));
     }
 

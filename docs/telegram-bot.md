@@ -122,6 +122,26 @@ that would collide with an existing listing.
 
 `/list` shows everything in stock with an `/edit` shortcut per row.
 
+## Placeholder listings
+
+The catalogue ships with example listings — real references with published
+specifications, kept so the shop has something to lay out. They are **not your
+stock**, and `/list` marks them:
+
+```
+$14,200 — Submariner Date, ref 126610LN
+   2023 · Unworn · 0 photo(s) · /edit 126610LN
+   placeholder — not your stock
+```
+
+The bot refuses to put photographs on one. A picture of your watch against a
+listing you are not selling is the exact misrepresentation this site is built
+to avoid, so it says so and keeps the media staged for another try. Prompts
+also only ever suggest a reference from stock you have actually listed.
+
+Once you have listed your own watches, `/sold` the placeholders, or replace
+`assets/js/listings.js` in one go.
+
 ## The other commands
 
 | | |

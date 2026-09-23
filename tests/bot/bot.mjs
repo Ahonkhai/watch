@@ -321,25 +321,30 @@ await step('the no-caption nudge offers both routes', async () => {
 });
 
 await step('replying with a bare reference attaches the media to that listing', async () => {
-  const { w, handler } = await fresh();
-  const before = listing(w, 'rolex-126610ln').images.length;
-  await deliver(handler, photoMsg({ group: 'g5', uid: 'n1' }));
-  await deliver(handler, photoMsg({ group: 'g5', uid: 'n2', mid: 2 }));
-  await deliver(handler, textMsg('126610LN', { replyTo: w.sent[0].text }));
+  const { w, handler, tap } = await fresh();
+  await deliver(handler, photoMsg({ group: 'g0', uid: 'seed', caption: CAPTION }));
+  await tap('pub:');                                   // a listing that is real stock
+  const before = listing(w, 'rolex-226570').images.length;
 
-  const p = listing(w, 'rolex-126610ln');
+  await deliver(handler, photoMsg({ group: 'g5', uid: 'n1', mid: 5 }));
+  await deliver(handler, photoMsg({ group: 'g5', uid: 'n2', mid: 6 }));
+  await deliver(handler, textMsg('226570', { replyTo: w.sent.at(-1).text, mid: 7 }));
+
+  const p = listing(w, 'rolex-226570');
   eq(p.images.length, before + 2, 'photographs added');
-  ok(p.images.at(-1).startsWith('assets/img/rolex-126610ln/'), 'stored under the listing');
-  eq(load(w).products.length, STOCK, 'no new listing was created');
+  ok(p.images.at(-1).startsWith('assets/img/rolex-226570/'), 'stored under the listing');
+  eq(load(w).products.length, STOCK + 1, 'no extra listing was created');
   eq([...w.files.keys()].filter((f) => f.startsWith('.bot/')).length, 0, 'draft cleaned up');
   ok(!w.commitLog.at(-1).message.includes('[skip ci]'), 'deploys');
 });
 
 await step('a video can be added to an existing listing the same way', async () => {
-  const { w, handler } = await fresh();
-  await deliver(handler, videoMsg({ group: 'g5', uid: 'v9' }));
-  await deliver(handler, textMsg('126610LN', { replyTo: w.sent.at(-1).text }));
-  ok(videoAt('rolex-126610ln').test(listing(w, 'rolex-126610ln').video), 'video attached');
+  const { w, handler, tap } = await fresh();
+  await deliver(handler, photoMsg({ group: 'g0', uid: 'seed', caption: CAPTION }));
+  await tap('pub:');
+  await deliver(handler, videoMsg({ group: 'g5', uid: 'v9', mid: 5 }));
+  await deliver(handler, textMsg('226570', { replyTo: w.sent.at(-1).text, mid: 6 }));
+  ok(videoAt('rolex-226570').test(listing(w, 'rolex-226570').video), 'video attached');
 });
 
 await step('added photographs are numbered after the ones already there', async () => {
@@ -353,12 +358,15 @@ await step('added photographs are numbered after the ones already there', async 
 });
 
 await step('a reference TYPED, not replied, still attaches the media', async () => {
-  const { w, handler } = await fresh();
-  const before = listing(w, 'rolex-126610ln').images.length;
-  await deliver(handler, photoMsg({ group: 'g6', uid: 't1' }));
-  await deliver(handler, textMsg('126610LN'));          // no reply_to_message
-  eq(listing(w, 'rolex-126610ln').images.length, before + 1, 'photograph added');
-  eq(load(w).products.length, STOCK, 'no new listing');
+  const { w, handler, tap } = await fresh();
+  await deliver(handler, photoMsg({ group: 'g0', uid: 'seed', caption: CAPTION }));
+  await tap('pub:');
+  const before = listing(w, 'rolex-226570').images.length;
+
+  await deliver(handler, photoMsg({ group: 'g6', uid: 't1', mid: 5 }));
+  await deliver(handler, textMsg('226570', { mid: 6 }));        // no reply_to_message
+  eq(listing(w, 'rolex-226570').images.length, before + 1, 'photograph added');
+  eq(load(w).products.length, STOCK + 1, 'no extra listing');
 });
 
 await step('a reference typed with nothing staged opens that listing for editing', async () => {
@@ -382,6 +390,41 @@ await step('text that is not a reference is still read as listing details', asyn
   const { w, handler } = await fresh();
   await deliver(handler, textMsg(CAPTION));
   ok(/Explorer II/.test(lastText(w)), 'preview shown');
+});
+
+await step('media is refused on a placeholder listing, and kept', async () => {
+  /* The seeded catalogue is examples, not stock. Photographs of a real watch
+     on one of those would show them against something not for sale. */
+  const { w, handler } = await fresh();
+  const placeholder = JSON.parse(SEED.slice(SEED.indexOf('{'), SEED.lastIndexOf('}') + 1))
+    .products.find((p) => !p.listed);
+  ok(placeholder, 'the seed should contain placeholders');
+
+  await deliver(handler, photoMsg({ group: 'gP', uid: 'x1' }));
+  await deliver(handler, textMsg(placeholder.reference, { replyTo: w.sent[0].text }));
+
+  const t = w.sent.at(-1).text;
+  ok(/placeholder/i.test(t), 'says it is a placeholder');
+  ok(/not your stock/i.test(t), 'says why');
+  eq(listing(w, placeholder.id).images.length, placeholder.images.length, 'listing untouched');
+  ok(w.files.has('.bot/media/gP/x1.jpg'), 'media kept for another try');
+});
+
+await step('prompts never suggest a reference that is a placeholder', async () => {
+  const { w, handler } = await fresh();
+  await deliver(handler, photoMsg({ group: 'gQ', uid: 'y1' }));
+  const suggested = /<code>([^<]+)<\/code>/.exec(w.sent[0].text);
+  if (suggested) {
+    const cat = JSON.parse(SEED.slice(SEED.indexOf('{'), SEED.lastIndexOf('}') + 1));
+    const named = cat.products.find((p) => p.reference === suggested[1]);
+    ok(!named || named.listed, `suggested ${suggested[1]}, which is a placeholder`);
+  }
+});
+
+await step('/list marks placeholders so they are not mistaken for stock', async () => {
+  const { w, handler } = await fresh();
+  await deliver(handler, textMsg('/list'));
+  ok(/placeholder — not your stock/.test(w.sent[0].text), 'marked');
 });
 
 await step('an unknown reference is a one-line answer, not a wall of errors', async () => {
