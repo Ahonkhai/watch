@@ -4,7 +4,7 @@
  * your edit would be lost. To change a listing, use the bot (/list, /price,
  * /sold). To change how a listing is SHOWN, edit assets/js/data.js instead. */
 const CATALOGUE = {
-  "updated": "2026-09-23T10:17:37.799Z",
+  "updated": "2026-09-23T10:20:59.078Z",
   "collections": [
     {
       "id": "rolex",
@@ -74,7 +74,8 @@ const CATALOGUE = {
       },
       "size": 40,
       "movement": "automatic",
-      "listed": "2026-09-23"
+      "listed": "2026-09-23",
+      "video": "assets/img/rolex-129720blnr/video-2081dce3.mp4"
     },
     {
       "id": "rolex-126610ln",
@@ -111,9 +112,7 @@ const CATALOGUE = {
       "price": 17800,
       "tagline": "Blue and black bezel on Jubilee bracelet.",
       "description": "Worn sparingly and kept in a collection. Light surface marks to the clasp consistent with the stated condition, bracelet stretch minimal. Original box and card present.",
-      "images": [
-        "assets/img/rolex-126710blnr/01-439a7900.jpg"
-      ],
+      "images": [],
       "specs": {
         "Case diameter": "40 mm",
         "Case material": "Oystersteel",
@@ -125,7 +124,7 @@ const CATALOGUE = {
       },
       "size": 40,
       "movement": "automatic",
-      "video": "assets/img/rolex-126710blnr/video.mp4"
+      "video": null
     },
     {
       "id": "rolex-116500ln",
