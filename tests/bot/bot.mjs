@@ -169,7 +169,7 @@ await step('a video in the album is published alongside the photographs', async 
 await step('a video sent as a file is accepted; a PDF is not', async () => {
   const { w, handler } = await fresh();
   await deliver(handler, docMsg({ uid: 'd1', mime: 'video/quicktime', name: 'clip.mov' }));
-  eq([...w.files.keys()].filter((p) => p.endsWith('.mp4')).length, 1, 'video staged');
+  eq([...w.files.keys()].filter((p) => p.startsWith('.bot/') && p.endsWith('.mp4')).length, 1, 'video staged');
   await deliver(handler, docMsg({ uid: 'd2', mime: 'application/pdf', name: 'spec.pdf' }));
   ok(/neither/.test(w.sent.at(-1).text), 'PDF refused');
 });
@@ -483,6 +483,38 @@ await step('cancelling /sold keeps the listing', async () => {
   await tap('cancel:', w.sent.at(-1).text);
   eq(load(w).products.length, STOCK, 'catalogue size');
   eq(w.commitLog.length, 0, 'commits');
+});
+
+/* ---------- drafts left behind ---------- */
+
+await step('/drafts says so when there are none', async () => {
+  const { w, handler } = await fresh();
+  await deliver(handler, textMsg('/drafts'));
+  ok(/No drafts waiting/.test(w.sent[0].text), 'says so');
+});
+
+await step('/drafts lists what is staged, with and without details', async () => {
+  const { w, handler } = await fresh();
+  await deliver(handler, photoMsg({ group: 'gA', uid: 'a1', caption: CAPTION }));
+  await deliver(handler, videoMsg({ group: 'gB', uid: 'b1', mid: 2 }));
+  w.sent.length = 0; w.log.length = 0;
+  await deliver(handler, textMsg('/drafts'));
+  const t = w.sent[0].text;
+  ok(/2 draft\(s\) waiting/.test(t), 'counts them');
+  ok(/Explorer II/.test(t), 'names the one with details');
+  ok(/no details yet/.test(t), 'flags the one without');
+  eq(lastKb(w).length, 2, 'a discard button each');
+});
+
+await step('a draft can be discarded from the /drafts list by name', async () => {
+  const { w, handler, tap } = await fresh();
+  await deliver(handler, photoMsg({ group: 'gA', uid: 'a1', caption: CAPTION }));
+  await deliver(handler, videoMsg({ group: 'gB', uid: 'b1', mid: 2 }));
+  await deliver(handler, textMsg('/drafts'));
+  await tap('dis:gB');
+  ok(!w.files.has('.bot/media/gB/b1.mp4'), 'the named draft is gone');
+  ok(w.files.has('.bot/media/gA/a1.jpg'), 'the other is untouched');
+  eq(load(w).products.length, STOCK, 'nothing published');
 });
 
 /* ---------- resilience ---------- */

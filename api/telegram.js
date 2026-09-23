@@ -583,6 +583,31 @@ async function onCommand(msg) {
         ['Copy this, fill it in, and send it as the caption on your photographs.', '',
          `<pre>${esc(TEMPLATE)}</pre>`].join('\n'));
 
+    case '/drafts': {
+      /* Media staged and never published leaves files behind. Without a way
+         to see them they accumulate silently, and a forgotten video is the
+         most expensive thing in the repository. */
+      const staged = await listTree(`${MEDIA}/`);
+      const groups = [...new Set(staged.map((f) => f.path.split('/')[2]))];
+      if (!groups.length) return send(chat, 'No drafts waiting.');
+
+      const rows = [];
+      const lines = [];
+      for (const g of groups) {
+        const files = staged.filter((f) => f.path.startsWith(`${mediaDir(g)}/`));
+        const raw = await readFile(draftPath(g));
+        const l = raw ? JSON.parse(raw).listing : null;
+        lines.push(`<b>${esc(g)}</b> — ${files.filter((f) => isPhoto(f.path)).length} photo(s), ` +
+                   `${files.filter((f) => isVideo(f.path)).length} video(s)` +
+                   (l ? `\n   ${esc(l.brand)} ${esc(l.name)}, ref ${esc(l.reference)}` : '\n   <i>no details yet</i>'));
+        rows.push([{ text: `🗑 Discard ${g}`, callback_data: `dis:${g}` }]);
+      }
+      return send(chat,
+        [`<b>${groups.length} draft(s) waiting</b>`, '', ...lines, '',
+         'Send a reference to attach one to a listing, or discard it.'].join('\n'),
+        buttons(rows));
+    }
+
     case '/list': {
       const c = await load();
       if (!c.products.length) return send(chat, 'Nothing listed yet.');
@@ -655,6 +680,8 @@ export default async function handler(req, res) {
       const t = targetOf(q.message.text);
       await answer(q.id);
 
+      const key = a || t?.key;
+
       if (action === 'f' && t) await askForField(chat, mid, t, a);
       else if (action === 'back' && t) await showEditor(chat, t, mid);
       else if (action === 'v' && t) {
@@ -662,9 +689,9 @@ export default async function handler(req, res) {
         const r = await applyField(t, a, value);
         if (r.error) await edit(chat, mid, r.error);
         else await showEditor(chat, r.target, mid, `<b>${FIELDS[a].label} set to ${esc(value)}.</b>`);
-      } else if (action === 'pub' && t) await publish(t.key, chat, mid);
-      else if (action === 'dis' && t) await discard(t.key, chat, mid);
-      else if (action === 'sold' && t) await markSold(t.key, chat, mid);
+      } else if (action === 'pub' && key) await publish(key, chat, mid);
+      else if (action === 'dis' && key) await discard(key, chat, mid);
+      else if (action === 'sold' && key) await markSold(key, chat, mid);
       else if (action === 'cancel') await edit(chat, mid, 'Cancelled.');
     } else if (update.message?.photo || update.message?.video || update.message?.document) {
       await onMedia(update.message);
