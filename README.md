@@ -248,7 +248,7 @@ response headers:
 | | |
 |---|---|
 | **Content-Security-Policy** | `default-src 'self'` with one inline script allowed by SHA-256 hash. No third-party origin can load anything into the page. |
-| **Cache-Control** | HTML revalidates every request, CSS and JS cache for an hour, fonts for thirty days. The asset filenames are not content-hashed, so nothing is marked `immutable`. |
+| **Cache-Control** | HTML, CSS and JS revalidate on every request; fonts cache for thirty days; listing photographs are `immutable` for a year. Those filenames carry a content hash, so a path is never reused — everything else is un-versioned, and `max-age=0` is what keeps a deploy from taking up to an hour to reach a returning visitor. |
 | **Security headers** | `nosniff`, `strict-origin-when-cross-origin`, HSTS, and a `Permissions-Policy` that turns off camera, microphone, geolocation and payment. |
 
 URLs keep their `.html` extension (`cleanUrls` is off). Turning it on would make
