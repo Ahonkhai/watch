@@ -130,6 +130,7 @@ that would collide with an existing listing.
 | `/list` | Everything in stock, with photo counts and edit shortcuts |
 | `/edit 126710BLNR` | Change any field, or add media |
 | `/price 126710BLNR 13900` | Quick reprice without opening the menu |
+| `/drafts` | Media staged but never published, with a discard button each |
 | `/sold 126710BLNR` | Remove from the site — asks first |
 | `/help` | The caption format, and registers the `/` menu |
 
@@ -138,6 +139,11 @@ Telegram lists everything instead of you having to remember.
 
 `/sold` deletes the listing and its media from the site. Both stay in git
 history, so nothing is truly lost.
+
+**Check `/drafts` now and then.** Media you sent and never published stays
+staged, waiting for you to say which watch it belongs to. It is not served and
+it costs no deploy, but a forgotten video is the most expensive thing that can
+sit in the repository.
 
 ## Setting it up
 

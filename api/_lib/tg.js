@@ -31,6 +31,7 @@ export const publishCommands = () =>
     commands: [
       { command: 'new', description: 'Template to copy for a new listing' },
       { command: 'list', description: 'Everything in stock' },
+      { command: 'drafts', description: 'Media staged but not yet published' },
       { command: 'edit', description: 'Change a listing — /edit 126710BLNR' },
       { command: 'price', description: 'Reprice — /price 126710BLNR 13900' },
       { command: 'sold', description: 'Take a watch off the site' },

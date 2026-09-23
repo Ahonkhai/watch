@@ -234,6 +234,7 @@ export const USAGE = [
   '',
   '<b>Commands</b>',
   '/list — everything in stock',
+  '/drafts — media staged but not yet published',
   '/edit 126710BLNR — change any field, or the photographs',
   '/price 126710BLNR 13900 — quick reprice',
   '/sold 126710BLNR — take it off the site',
