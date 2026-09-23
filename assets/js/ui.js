@@ -5,6 +5,7 @@ const ICONS = {
   menu: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><path d="M3 7h18M3 17h18"/></svg>',
   shield: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>',
   truck: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+  telegram: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3 18.7 19.4c-.2 1-.9 1.3-1.7.8l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8L18 6.3c.4-.3-.1-.5-.6-.2L7.5 12.4l-4.7-1.5c-1-.3-1-1 .2-1.5l18.4-7.1c.9-.3 1.6.2 1.3 1.5z"/></svg>',
   rotate: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>',
 };
 
@@ -166,6 +167,11 @@ function initChrome() {
 
   markCurrentNavLink();
 
+  document.querySelectorAll('[data-telegram-link]').forEach((a) => {
+    a.href = `https://t.me/${TELEGRAM_HANDLE}`;
+    if (!a.querySelector('svg')) a.insertAdjacentHTML('afterbegin', ICONS.telegram + ' ');
+  });
+
   const year = document.querySelector('[data-year]');
   if (year) year.textContent = new Date().getFullYear();
 
@@ -209,9 +215,23 @@ function collectionOf(product) {
   return COLLECTIONS.find((c) => c.id === product.collection);
 }
 
+/* A listing's photograph. With none uploaded we say so, rather than showing a
+   stand-in image: a generic picture of a different watch would misrepresent
+   the specific item being sold. */
+function productImage(product) {
+  const brand = collectionOf(product).name;
+  const alt = `${brand} ${product.name}, reference ${product.reference}`;
+  if (product.images && product.images.length) {
+    return `<img src="${esc(product.images[0])}" alt="${esc(alt)}" loading="lazy">`;
+  }
+  return `
+<div class="photo-pending" role="img" aria-label="Photography to follow for ${esc(alt)}">
+  <span>Photography<br>to follow</span>
+</div>`;
+}
+
 function badgeHTML(product) {
-  if (product.stock <= 3) return `<span class="badge badge-low">${product.stock} remaining</span>`;
-  return product.badge ? `<span class="badge">${esc(product.badge)}</span>` : '';
+  return product.condition === 'Unworn' ? '<span class="badge">Unworn</span>' : '';
 }
 
 /* `index` staggers the reveal so a grid settles row by row rather than at once. */
@@ -222,12 +242,14 @@ function productCardHTML(product, index = 0) {
 <article class="card" data-reveal style="--delay:${delay}s">
   ${badgeHTML(product)}
   <a class="card-art" href="${href}" tabindex="-1" aria-hidden="true">
-    ${renderWatch(product)}
+    ${productImage(product)}
   </a>
   <div class="card-body">
     <p class="card-collection">${esc(collectionOf(product).name)}</p>
     <h3 class="card-name"><a href="${href}">${esc(product.name)}</a></h3>
-    <p class="card-tagline">${esc(product.tagline)}</p>
+    <p class="card-meta">
+      Ref. ${esc(product.reference)} &middot; ${product.year} &middot; ${esc(product.condition)}
+    </p>
     <div class="card-foot">
       <span class="price">${money(product.price)}</span>
     </div>

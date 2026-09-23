@@ -10,13 +10,19 @@ onPageReady(() => {
     { id: 'lg', label: 'Over 41 mm', test: (p) => p.size > 41 },
   ];
   const MOVEMENTS = [...new Set(PRODUCTS.map((p) => p.movement))].sort();
+  // Listed in condition order, not alphabetically.
+  const CONDITIONS_PRESENT = CONDITIONS.filter(
+    (c) => PRODUCTS.some((p) => p.condition === c));
 
+  const PRICE_CEILING = Math.ceil(Math.max(...PRODUCTS.map((p) => p.price)) / 1000) * 1000;
+  const PRICE_FLOOR = Math.floor(Math.min(...PRODUCTS.map((p) => p.price)) / 1000) * 1000;
   const params = pageParams();
   const state = {
     collections: new Set((params.get('collection') || '').split(',').filter(Boolean)),
     movements: new Set((params.get('movement') || '').split(',').filter(Boolean)),
     sizes: new Set((params.get('size') || '').split(',').filter(Boolean)),
-    maxPrice: Number(params.get('max')) || 3200,
+    conditions: new Set((params.get('condition') || '').split(',').filter(Boolean)),
+    maxPrice: Number(params.get('max')) || PRICE_CEILING,
     sort: params.get('sort') || 'featured',
   };
 
@@ -32,6 +38,8 @@ onPageReady(() => {
         (b) => state.sizes.has(b.id) && b.test(product));
       if (!inBucket) return false;
     }
+    if (skip !== 'conditions' && state.conditions.size &&
+        !state.conditions.has(product.condition)) return false;
     if (skip !== 'price' && product.price > state.maxPrice) return false;
     return true;
   }
@@ -66,13 +74,27 @@ onPageReady(() => {
         PRODUCTS.filter((p) => p.movement === m && matches(p, 'movements')).length)
     ).join('');
 
+    const condBox = document.querySelector('[data-filter-conditions]');
+    if (condBox) {
+      condBox.innerHTML = CONDITIONS_PRESENT.map((c) =>
+        checkbox('conditions', c, c,
+          PRODUCTS.filter((p) => p.condition === c && matches(p, 'conditions')).length)
+      ).join('');
+    }
+
     document.querySelector('[data-filter-sizes]').innerHTML = SIZE_BUCKETS.map((b) =>
       checkbox('sizes', b.id, b.label,
         PRODUCTS.filter((p) => b.test(p) && matches(p, 'sizes')).length)
     ).join('');
 
+    const slider = document.querySelector('#price-max');
+    slider.min = PRICE_FLOOR;
+    slider.max = PRICE_CEILING;
+    slider.step = 500;
+    slider.value = state.maxPrice;
     document.querySelector('[data-price-label]').textContent = money(state.maxPrice);
-    document.querySelector('#price-max').value = state.maxPrice;
+    const floorLabel = document.querySelector('[data-price-floor]');
+    if (floorLabel) floorLabel.textContent = money(PRICE_FLOOR);
     document.querySelector('[data-sort]').value = state.sort;
   }
 
@@ -81,7 +103,8 @@ onPageReady(() => {
     if (state.collections.size) q.set('collection', [...state.collections].join(','));
     if (state.movements.size) q.set('movement', [...state.movements].join(','));
     if (state.sizes.size) q.set('size', [...state.sizes].join(','));
-    if (state.maxPrice < 3200) q.set('max', state.maxPrice);
+    if (state.conditions.size) q.set('condition', [...state.conditions].join(','));
+    if (state.maxPrice < PRICE_CEILING) q.set('max', state.maxPrice);
     if (state.sort !== 'featured') q.set('sort', state.sort);
     setPageParams(q.toString());
   }
@@ -99,8 +122,8 @@ onPageReady(() => {
     }
     title.textContent = 'All watches';
     blurb.textContent =
-      'Twelve references across four families. Every one ships with a five-year ' +
-      'warranty and a strap change tool.';
+      'Each listing is one specific watch, with its reference, year, condition ' +
+      'and set stated. Photographs are of the actual piece.';
   }
 
   function render() {
@@ -118,7 +141,7 @@ onPageReady(() => {
 </div>`;
     }
     document.querySelector('[data-result-count]').textContent =
-      `${results.length} ${results.length === 1 ? 'watch' : 'watches'}`;
+      `${results.length} ${results.length === 1 ? 'watch' : 'watches'} in stock`;
     renderFilters();
     renderHeading();
     syncUrl();
@@ -150,7 +173,8 @@ onPageReady(() => {
       state.collections.clear();
       state.movements.clear();
       state.sizes.clear();
-      state.maxPrice = 3200;
+      state.conditions.clear();
+      state.maxPrice = PRICE_CEILING;
       render();
     }
     if (e.target.closest('[data-filter-toggle]')) {

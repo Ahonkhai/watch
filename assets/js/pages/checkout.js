@@ -1,14 +1,13 @@
 /* Checkout.
 
-   There is no payment processor wired up yet, so this collects the order and
-   hands it to the customer's mail client addressed to us. Nothing is invented:
-   the order is only placed once they send that message, and the page says so.
+   Orders run through Telegram. This collects the delivery details, composes
+   the order, and opens the chat with it ready to send. Nothing is invented:
+   the order is placed when the buyer sends that message, and the page says so.
 
-   When Stripe lands, replace submit() with a call to a serverless function
-   that creates a Checkout session and redirects. Price the line items there,
-   from the server's own catalog — never from the values in this page. */
+   If card payment is added later, price the line items server-side from your
+   own catalogue, never from the values in this page. */
 
-const ORDER_EMAIL = 'hello@swizzclones.example';   // <- set to a real inbox
+/* Orders are placed on Telegram. TELEGRAM_HANDLE lives in data.js. */
 onPageReady(() => {
   const root = document.querySelector('[data-checkout-root]');
   if (!root) return;
@@ -39,15 +38,16 @@ onPageReady(() => {
   <h3>Order summary</h3>
   ${lines.map((l) => `
     <div class="summary-row">
-      <span>${esc(l.product.name)} <span style="color:var(--faint)">&times;${l.qty}</span><br>
-        <span style="font-size:.78rem;color:var(--faint)">${esc(l.strap.name)}</span></span>
+      <span>${esc(collectionOf(l.product).name)} ${esc(l.product.name)}<br>
+        <span style="font-size:.78rem;color:var(--faint)">Ref. ${esc(l.product.reference)}
+        &middot; ${l.product.year} &middot; ${esc(l.product.condition)}</span></span>
       <span style="white-space:nowrap">${money(l.lineTotal)}</span>
     </div>`).join('')}
   <div class="summary-row" style="border-top:1px solid var(--line);margin-top:.6rem;padding-top:.8rem">
     <span>Subtotal</span><span>${money(Cart.subtotal())}</span>
   </div>
   <div class="summary-row">
-    <span>Shipping</span><span>${shipping === 0 ? 'Free' : money(shipping)}</span>
+    <span>Delivery</span><span>Quoted per order</span>
   </div>
   <div class="summary-row total"><span>Total</span><span>${money(Cart.total())}</span></div>
 </aside>`;
@@ -83,11 +83,11 @@ onPageReady(() => {
     </label>
 
     <p class="summary-note" style="margin-top:2.5rem">
-      We confirm every order by email and send a secure payment link before
-      anything is charged. Nothing is taken from you on this page.
+      Orders are placed on Telegram. We confirm the watch is still available
+      and quote insured delivery before any payment. Nothing is taken here.
     </p>
-    <button class="btn btn-primary btn-block" type="submit" style="margin-top:1.2rem">
-      Place order &middot; ${money(Cart.total())}
+    <button class="btn btn-telegram btn-block" type="submit" style="margin-top:1.2rem">
+      ${ICONS.telegram} Order on Telegram &middot; ${money(Cart.total())}
     </button>
     <p style="text-align:center;margin-top:1.8rem">
       <a class="btn-quiet" href="cart.html">Return to bag</a>
@@ -111,24 +111,25 @@ onPageReady(() => {
   /* Composes the order as plain text. This is what the customer sends us and
      what they keep — so it has to be complete on its own. */
   function orderText(reference, form) {
-    const lines = Cart.detailed().map(
-      (l) => `  ${l.qty} x ${l.product.name} (${l.strap.name})   ${money(l.lineTotal)}`);
+    const lines = Cart.detailed().map((l) => {
+      const brand = collectionOf(l.product);
+      return `${brand.name} ${l.product.name}, ref. ${l.product.reference} ` +
+             `(${l.product.year}, ${l.product.condition}) — ${money(l.lineTotal)}`;
+    });
     const f = (n) => form.elements[n].value.trim();
     return [
       `Order ${reference}`,
       '',
       ...lines,
       '',
-      `Subtotal: ${money(Cart.subtotal())}`,
-      `Shipping: ${Cart.shipping() === 0 ? 'Free' : money(Cart.shipping())}`,
-      `Total: ${money(Cart.total())}`,
+      `Total: ${money(Cart.total())} plus insured delivery`,
       '',
       'Deliver to:',
-      `  ${f('name')}`,
-      `  ${f('address')}`,
-      `  ${f('city')} ${f('postcode')}`,
-      `  ${f('country')}`,
-      `  ${f('email')}`,
+      `${f('name')}`,
+      `${f('address')}`,
+      `${f('city')} ${f('postcode')}`,
+      `${f('country')}`,
+      `${f('email')}`,
     ].join('\n');
   }
 
@@ -138,20 +139,21 @@ onPageReady(() => {
   <p class="label">Almost there</p>
   <h2 style="margin-bottom:1.6rem">Send order ${esc(reference)}</h2>
   <p class="lede">
-    Your email app should have opened with this order ready to send to
-    <strong>${esc(ORDER_EMAIL)}</strong>. <strong>The order is not placed until you
-    send it.</strong> If nothing opened, copy the details below and email them to us.
+    Telegram should have opened with this order ready to send.
+    <strong>The order is placed when you send it.</strong> If nothing opened,
+    copy the details below and message us on Telegram.
   </p>
   <pre data-order style="white-space:pre-wrap;font:inherit;font-size:.88rem;
        background:var(--panel);border:1px solid var(--line);padding:1.2rem;
        margin-top:1.8rem;overflow-x:auto">${esc(body)}</pre>
   <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.6rem">
-    <a class="btn btn-primary" href="${esc(mailtoHref(reference, body))}">Open email again</a>
+    <a class="btn btn-telegram" href="${esc(telegramHref(body))}"
+       target="_blank" rel="noopener">${ICONS.telegram} Open Telegram</a>
     <button class="btn btn-ghost" type="button" data-copy>Copy the order</button>
   </div>
   <p class="summary-note" style="margin-top:1.6rem">
-    We reply to confirm stock and send a secure payment link. Nothing is charged
-    until you use it. Sent to ${esc(email)}.
+    We confirm availability and quote insured delivery before any payment.
+    A copy has been noted against ${esc(email)}.
   </p>
 </div>`;
 
@@ -172,9 +174,8 @@ onPageReady(() => {
     });
   }
 
-  function mailtoHref(reference, body) {
-    return `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(`Order ${reference}`)}`
-         + `&body=${encodeURIComponent(body)}`;
+  function telegramHref(body) {
+    return `https://t.me/${TELEGRAM_HANDLE}?text=${encodeURIComponent(body)}`;
   }
 
   function showError(form, name, message) {
@@ -211,7 +212,7 @@ onPageReady(() => {
 
     Cart.clear();
     renderConfirmation(reference, body, email);
-    window.location.href = mailtoHref(reference, body);
+    window.open(telegramHref(body), '_blank', 'noopener');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
