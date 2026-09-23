@@ -158,10 +158,10 @@ h3 { font-size: clamp(1.35rem, 2.2vw, 1.85rem); letter-spacing: -0.005em; }
 h1 em, h2 em { font-style: italic; color: var(--gold-lit); }
 
 /* Cormorant defaults to old-style figures, which ride above and below the
-   baseline. Fine in running prose, but in a model number like "Tidewater 300"
+   baseline. Fine in running prose, but in a reference like "126610LN"
    they read as a mistake. */
 h1, h2, h3, h4,
-.card-name, .chapter-name, .chapter-tagline, .display-quote,
+.card-name, .display-quote,
 .pdp-tagline, .hero-meta dd, .empty-state strong {
   font-variant-numeric: lining-nums;
 }
@@ -389,8 +389,7 @@ p:last-child { margin-bottom: 0; }
 .hero-inner {
   position: relative;
   display: grid;
-  grid-template-columns: 1.08fr 0.92fr;
-  gap: clamp(2rem, 5vw, 5rem);
+  max-width: 68ch;
   align-items: center;
   min-height: min(84vh, 820px);
   padding: clamp(3rem, 7vw, 5rem) 0;
@@ -402,12 +401,6 @@ p:last-child { margin-bottom: 0; }
 }
 .hero .lede { max-width: 42ch; }
 .hero-actions { display: flex; gap: 1.6rem; margin-top: 2.8rem; flex-wrap: wrap; align-items: center; }
-
-.hero-art { position: relative; display: grid; place-items: center; }
-.hero-art .watch-svg {
-  width: min(100%, 372px);
-  filter: drop-shadow(0 40px 70px rgba(0, 0, 0, 0.75));
-}
 
 .hero-meta {
   display: flex;
@@ -431,9 +424,7 @@ p:last-child { margin-bottom: 0; }
 }
 
 @media (max-width: 940px) {
-  .hero-inner { grid-template-columns: 1fr; min-height: 0; text-align: left; }
-  .hero-art { order: -1; }
-  .hero-art .watch-svg { width: min(62%, 280px); }
+  .hero-inner { min-height: 0; text-align: left; }
 }
 
 /* ---------- product cards ---------- */
@@ -453,15 +444,6 @@ p:last-child { margin-bottom: 0; }
   padding: 2rem 1rem 1rem;
   background: radial-gradient(58% 52% at 50% 42%, var(--art-glow), transparent 72%);
 }
-.card-art .watch-svg {
-  position: relative;
-  z-index: 1;
-  width: auto;
-  height: clamp(210px, 22vw, 270px);
-  transition: transform 0.85s var(--ease);
-}
-.card:hover .card-art .watch-svg { transform: translateY(-10px) scale(1.02); }
-
 .card-body { padding-top: 1.6rem; border-top: 1px solid var(--hair); position: relative; }
 .card-body::before {
   content: '';
@@ -748,32 +730,6 @@ select option { background: var(--panel); color: var(--text); }
     linear-gradient(180deg, var(--panel), var(--bg) 82%);
   border: 1px solid var(--hair);
 }
-.pdp-stage .watch-svg {
-  position: relative;
-  z-index: 1;
-  width: auto;
-  height: min(58vh, 520px);
-  filter: drop-shadow(0 26px 44px rgba(0, 0, 0, 0.6));
-}
-
-.swatches { display: flex; gap: 1.6rem; margin-top: 1.8rem; flex-wrap: wrap; }
-.swatch {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.3rem 0;
-  font-size: 0.78rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--faint);
-  cursor: pointer;
-  border-bottom: 1px solid transparent;
-  transition: color 0.45s var(--ease), border-color 0.45s var(--ease);
-}
-.swatch:hover { color: var(--muted); }
-.swatch[aria-pressed='true'] { color: var(--text); border-bottom-color: var(--gold); }
-.swatch i { width: 11px; height: 11px; display: block; border: 1px solid var(--line); }
-
 .breadcrumb {
   font-size: 0.78rem;
   letter-spacing: 0.15em;
@@ -882,7 +838,6 @@ select option { background: var(--panel); color: var(--text); }
 @media (max-width: 940px) {
   .pdp { grid-template-columns: 1fr; }
   .pdp-media { position: static; }
-  .pdp-stage .watch-svg { height: min(46vh, 360px); }
 }
 
 /* ---------- cart ---------- */
@@ -903,7 +858,6 @@ select option { background: var(--panel); color: var(--text); }
   padding: 0.5rem;
   background: radial-gradient(60% 55% at 50% 45%, var(--art-glow), transparent 72%);
 }
-.cart-line-art .watch-svg { height: 130px; width: auto; }
 .cart-line h3 { font-size: 1.5rem; }
 .cart-line h3 a:hover { color: var(--gold-lit); }
 .cart-line-meta {
@@ -961,7 +915,6 @@ select option { background: var(--panel); color: var(--text); }
   .summary { position: static; }
   .cart-line { grid-template-columns: 86px 1fr; }
   .cart-line-price { grid-column: 2; text-align: left; margin-top: 0.8rem; }
-  .cart-line-art .watch-svg { height: 96px; }
 }
 
 /* ---------- forms ---------- */
@@ -1102,28 +1055,6 @@ select option { background: var(--panel); color: var(--text); }
    Motion
    ============================================================ */
 
-/* --- running seconds ---
-   A quartz hand steps once a second; a mechanical one beats with its
-   escapement, 4 Hz for these calibres, so eight steps a second. The pose the
-   watches are drawn in puts the hand at 210deg, so the sweep starts there. */
-@keyframes watch-sweep {
-  from { transform: rotate(210deg); }
-  to   { transform: rotate(570deg); }
-}
-
-.watch-svg .watch-seconds { transform-origin: 0 0; }
-
-.watch-svg.is-live .watch-seconds,
-.card:hover .watch-svg .watch-seconds {
-  animation: watch-sweep 60s steps(480, end) infinite;
-}
-.watch-svg.beat-quartz.is-live .watch-seconds,
-.card:hover .watch-svg.beat-quartz .watch-seconds {
-  animation-timing-function: steps(60, end);
-}
-
-
-
 /* --- bag count reacts when something lands in it --- */
 @keyframes badge-bump {
   0%   { transform: scale(1); }
@@ -1133,170 +1064,9 @@ select option { background: var(--panel); color: var(--text); }
 .cart-count { display: inline-block; }
 .cart-count.is-bumped { animation: badge-bump 0.55s var(--ease); }
 
-/* --- strap change crossfades rather than cutting --- */
-.pdp-stage { perspective: 1400px; }
-.pdp-stage .watch-svg {
-  transform: rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg)) scale(var(--ts, 1));
-  transition: opacity 0.2s ease, transform 0.5s var(--ease);
-}
-.pdp-stage[data-dragging='true'] .watch-svg { transition: opacity 0.2s ease; cursor: grabbing; }
-.pdp-stage.is-swapping .watch-svg { opacity: 0; --ts: 0.985; }
-
-
-
-
-/* ============================================================
-   Cinematic chapters
-   Full-viewport panels, one reference each, alternating ground.
-   ============================================================ */
-
-.chapter {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100svh;
-  display: grid;
-  place-items: center;
-  padding: clamp(7rem, 14vh, 10rem) 0 clamp(3rem, 7vh, 5rem);
-  background: var(--bg);
-  color: var(--text);
-  overflow: hidden;
-  isolation: isolate;
-}
-.chapter-inner {
-  position: relative;
-  z-index: 1;
-  width: min(100% - (var(--gutter) * 2), 1100px);
-  display: grid;
-  justify-items: center;
-  text-align: center;
-  gap: clamp(0.6rem, 1.8vh, 1.4rem);
-}
-
-/* Two asymmetric variants so four consecutive references do not read as one
-   template stamped four times. The art takes a column, the words take the
-   other, and the sides swap. */
-.chapter-aside .chapter-inner {
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  justify-items: start;
-  text-align: left;
-  gap: clamp(1.5rem, 4vw, 4rem);
-  column-gap: clamp(2rem, 6vw, 6rem);
-}
-.chapter-aside .chapter-art { grid-row: 1 / span 4; }
-.chapter-aside.chapter-flip .chapter-art { grid-column: 2; }
-.chapter-aside.chapter-flip .chapter-inner { justify-items: end; text-align: right; }
-.chapter-aside.chapter-flip .chapter-name,
-.chapter-aside.chapter-flip .label,
-.chapter-aside.chapter-flip .chapter-tagline { grid-column: 1; }
-.chapter-aside.chapter-flip .chapter-meta { grid-column: 1; justify-content: flex-end; }
-.chapter-aside .chapter-meta { justify-content: flex-start; }
-.chapter-aside .chapter-name { font-size: clamp(2.2rem, 4.4vw, 4rem); }
-
-@media (max-width: 860px) {
-  .chapter-aside .chapter-inner,
-  .chapter-aside.chapter-flip .chapter-inner {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
-  }
-  .chapter-aside .chapter-art,
-  .chapter-aside.chapter-flip .chapter-art { grid-row: auto; grid-column: 1; }
-  .chapter-aside .chapter-meta,
-  .chapter-aside.chapter-flip .chapter-meta { grid-column: 1; justify-content: center; }
-}
-.chapter-name {
-  font-family: var(--serif);
-  font-size: clamp(2.6rem, 7vw, 6rem);
-  line-height: 0.98;
-  font-weight: 400;
-}
-.chapter-art {
-  display: grid;
-  place-items: center;
-  width: 100%;
-}
-.chapter-art .watch-svg {
-  height: clamp(220px, 36vh, 380px);
-  width: auto;
-  filter: drop-shadow(0 30px 44px var(--art-shade));
-}
-.chapter-meta {
-  display: flex;
-  align-items: center;
-  gap: clamp(1rem, 3vw, 2.4rem);
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.chapter-tagline {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(1.1rem, 1.8vw, 1.5rem);
-  color: var(--gold);
-}
-.chapter-index {
-  position: absolute;
-  top: clamp(4.5rem, 12vh, 7rem);
-  left: var(--gutter);
-  z-index: 1;
-  font-size: 0.78rem;
-  letter-spacing: 0.18em;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-
-
-/* --- horizontal reference rail --- */
-.rail-wrap { position: relative; }
-.rail {
-  display: flex;
-  gap: clamp(1.5rem, 3vw, 3rem);
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  padding: 0 var(--gutter) 1.5rem;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  cursor: grab;
-}
-.rail::-webkit-scrollbar { display: none; }
-.rail[data-dragging='true'] { cursor: grabbing; scroll-snap-type: none; }
-.rail[data-dragging='true'] * { pointer-events: none; }
-.rail > .card {
-  flex: 0 0 clamp(230px, 24vw, 310px);
-  scroll-snap-align: center;
-}
-.rail-hint {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  padding: 0 var(--gutter);
-  margin-top: 1rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--faint);
-}
-.rail-hint i {
-  flex: 1;
-  height: 1px;
-  background: var(--hair);
-  position: relative;
-  overflow: hidden;
-}
-.rail-hint i::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--gold);
-  transform-origin: left;
-  transform: scaleX(var(--rail-p, 0));
-}
-
 /* ============================================================
    Page furniture
    ============================================================ */
-
-
 
 
 
@@ -2416,102 +2186,6 @@ function renderGrid(container, products) {
 }
 
 
-/* Interaction that belongs to the product itself: turning a watch over in your
-   hand, and dragging along a row of them. Everything decorative was removed —
-   what stays is behaviour you would want on a watch page and nowhere else.
-
-   This file is optional. If it fails to load, the site still works. */
-
-(function () {
-  if (typeof prefersReducedMotion === 'function' && prefersReducedMotion()) return;
-
-  /* --- drag the product to turn it --- */
-  function initTilt(root) {
-    const stage = root.querySelector('.pdp-stage');
-    if (!stage || stage.dataset.tilt) return;
-    stage.dataset.tilt = 'on';
-
-    let dragging = false, startX = 0, startY = 0;
-
-    stage.addEventListener('pointerdown', (e) => {
-      dragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      stage.dataset.dragging = 'true';
-      stage.setPointerCapture(e.pointerId);
-    });
-
-    stage.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
-      const ty = Math.max(-26, Math.min(26, (e.clientX - startX) * 0.22));
-      const tx = Math.max(-20, Math.min(20, -(e.clientY - startY) * 0.18));
-      stage.style.setProperty('--ty', `${ty.toFixed(1)}deg`);
-      stage.style.setProperty('--tx', `${tx.toFixed(1)}deg`);
-    });
-
-    const release = () => {
-      if (!dragging) return;
-      dragging = false;
-      stage.dataset.dragging = 'false';
-      stage.style.setProperty('--ty', '0deg');
-      stage.style.setProperty('--tx', '0deg');
-    };
-    stage.addEventListener('pointerup', release);
-    stage.addEventListener('pointercancel', release);
-  }
-
-  /* --- drag along the reference rail --- */
-  function initRail(root) {
-    const rail = root.querySelector('[data-rail]');
-    if (!rail || rail.dataset.bound) return;
-    rail.dataset.bound = 'on';
-
-    let down = false, startX = 0, startLeft = 0, moved = 0;
-
-    rail.addEventListener('pointerdown', (e) => {
-      down = true;
-      moved = 0;
-      startX = e.clientX;
-      startLeft = rail.scrollLeft;
-    });
-    rail.addEventListener('pointermove', (e) => {
-      if (!down) return;
-      const dx = e.clientX - startX;
-      moved = Math.abs(dx);
-      if (moved > 6) rail.dataset.dragging = 'true';
-      rail.scrollLeft = startLeft - dx;
-    });
-    const up = () => { down = false; rail.dataset.dragging = 'false'; };
-    rail.addEventListener('pointerup', up);
-    rail.addEventListener('pointerleave', up);
-    rail.addEventListener('pointercancel', up);
-    // A drag that ends on a card must not also open it.
-    rail.addEventListener('click', (e) => { if (moved > 6) e.preventDefault(); }, true);
-
-    const hint = root.querySelector('[data-rail-hint]');
-    if (hint) {
-      const sync = () => {
-        const max = rail.scrollWidth - rail.clientWidth;
-        hint.style.setProperty('--rail-p', max > 0 ? (rail.scrollLeft / max).toFixed(3) : '1');
-      };
-      rail.addEventListener('scroll', sync, { passive: true });
-      sync();
-    }
-  }
-
-  function setup() {
-    initTilt(document);
-    initRail(document);
-  }
-
-  // Page scripts call this once their markup is in the DOM.
-  window.swizzMotion = { refresh: setup };
-
-  if (typeof onPageReady === 'function') onPageReady(setup);
-  else document.addEventListener('DOMContentLoaded', setup);
-})();
-
-
 /* Home: brands, then what is currently in stock. */
 
 onPageReady(() => {
@@ -2543,7 +2217,6 @@ onPageReady(() => {
   const all = document.querySelector('[data-stock-count]');
   if (all) all.textContent = PRODUCTS.length;
 
-  window.swizzMotion?.refresh();
 });
 
 
@@ -2846,7 +2519,6 @@ onPageReady(() => {
   });
 
   observeReveals(root);
-  window.swizzMotion?.refresh();
 
   const related = PRODUCTS.filter(
     (p) => p.collection === product.collection && p.id !== product.id);
@@ -3205,7 +2877,6 @@ onPageReady(() => {
     document.title = TITLES[r.name] + ' \u2014 Swizz Clones';
     if (dispatch) {
       document.dispatchEvent(new Event('page:render'));
-      if (window.swizzMotion) window.swizzMotion.refresh();
     }
     var at = r.params.get('at');
     var target = at && document.getElementById(at);

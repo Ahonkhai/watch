@@ -108,7 +108,6 @@ onPageReady(() => {
   });
 
   observeReveals(root);
-  window.swizzMotion?.refresh();
 
   const related = PRODUCTS.filter(
     (p) => p.collection === product.collection && p.id !== product.id);
