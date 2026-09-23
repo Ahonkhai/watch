@@ -29,5 +29,4 @@ onPageReady(() => {
   const all = document.querySelector('[data-stock-count]');
   if (all) all.textContent = PRODUCTS.length;
 
-  window.swizzMotion?.refresh();
 });

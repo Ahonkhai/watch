@@ -89,7 +89,6 @@ FOOT = '''</main>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/store.js"></script>
 <script src="assets/js/ui.js"></script>
-<script src="assets/js/motion.js"></script>
 {scripts}
 </body>
 </html>
@@ -294,7 +293,7 @@ page("shop.html",
 # ---------------------------------------------------------------- product
 page("product.html",
      "Watch | Swizz Clones",
-     "Reference detail, full specification and strap options.",
+     "Reference, year, condition and the full specification of one watch.",
      '''
 <section class="section-tight" style="padding-bottom:var(--section)">
   <div class="wrap">

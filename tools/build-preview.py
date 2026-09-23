@@ -22,7 +22,7 @@ PAGES = [("", "index.html"), ("shop", "shop.html"), ("product", "product.html"),
          ("cart", "cart.html"), ("checkout", "checkout.html"), ("about", "about.html")]
 
 SCRIPTS = ["assets/js/data.js", "assets/js/store.js",
-           "assets/js/ui.js", "assets/js/motion.js",
+           "assets/js/ui.js",
            "assets/js/pages/home.js", "assets/js/pages/shop.js",
            "assets/js/pages/product.js", "assets/js/pages/cart.js",
            "assets/js/pages/checkout.js"]
@@ -99,7 +99,6 @@ ROUTER = """
     document.title = TITLES[r.name] + ' \\u2014 Swizz Clones';
     if (dispatch) {
       document.dispatchEvent(new Event('page:render'));
-      if (window.swizzMotion) window.swizzMotion.refresh();
     }
     var at = r.params.get('at');
     var target = at && document.getElementById(at);
