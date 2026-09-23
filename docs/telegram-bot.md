@@ -42,6 +42,19 @@ Set must be one of: Full set, Watch and box, Watch and papers, Watch only.
 Forgot the caption? Send the photos anyway — the bot asks, and you reply with
 the details. Pasted the details with no photos? That works too; add them after.
 
+### Adding media to a watch already listed
+
+Send the photographs or video, then reply to the bot with just the reference:
+
+```
+126710BLNR
+```
+
+They are added to that listing and the site redeploys. This is the order you
+actually work in — photograph the watch, then say which one it is — so it does
+not require opening `/edit` first. Reply with anything longer and it is read as
+the details for a new listing instead.
+
 **The faster shorthand.** Once the order is in your head, one pipe-separated
 line does the same job:
 

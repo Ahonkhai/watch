@@ -50,7 +50,14 @@ const lastKb = (w) => w.log.at(-1).reply_markup?.inline_keyboard || [];
 const btn = (w, label) => lastKb(w).flat().find((b) => b.text.includes(label));
 
 const fresh = async () => {
-  const w = makeWorld({ files: { [LP]: SEED } });
+  /* Seed the photographs the catalogue already points at, so numbering is
+     tested against a repository that looks like the real one. */
+  const seedFiles = { [LP]: SEED };
+  for (const p of JSON.parse(SEED.slice(SEED.indexOf('{'), SEED.lastIndexOf('}') + 1)).products) {
+    (p.images || []).forEach((src) => { seedFiles[src] = 'EXISTING'; });
+    if (p.video) seedFiles[p.video] = 'EXISTING';
+  }
+  const w = makeWorld({ files: seedFiles });
   const { default: handler } = await import(new URL('../../api/telegram.js', import.meta.url).href + '?v=' + Math.random());
   /* Buttons act on the bot's own message, so a tap has to carry it back. */
   const tap = (data, text = lastText(w)) =>
@@ -298,6 +305,58 @@ await step('a draft can be corrected before publishing', async () => {
   eq(listing(w, 'rolex-226570').price, 8750, 'price carried into the listing');
 });
 
+/* ---------- adding media to something already listed ---------- */
+
+await step('the no-caption nudge offers both routes', async () => {
+  const { w, handler } = await fresh();
+  await deliver(handler, photoMsg({ group: 'g5', uid: 'n1' }));
+  const t = w.sent[0].text;
+  ok(/reference/i.test(t), 'mentions attaching to an existing listing');
+  ok(/full details/i.test(t), 'mentions starting a new one');
+});
+
+await step('replying with a bare reference attaches the media to that listing', async () => {
+  const { w, handler } = await fresh();
+  const before = listing(w, 'rolex-126610ln').images.length;
+  await deliver(handler, photoMsg({ group: 'g5', uid: 'n1' }));
+  await deliver(handler, photoMsg({ group: 'g5', uid: 'n2', mid: 2 }));
+  await deliver(handler, textMsg('126610LN', { replyTo: w.sent[0].text }));
+
+  const p = listing(w, 'rolex-126610ln');
+  eq(p.images.length, before + 2, 'photographs added');
+  ok(p.images.at(-1).startsWith('assets/img/rolex-126610ln/'), 'stored under the listing');
+  eq(load(w).products.length, STOCK, 'no new listing was created');
+  eq([...w.files.keys()].filter((f) => f.startsWith('.bot/')).length, 0, 'draft cleaned up');
+  ok(!w.commitLog.at(-1).message.includes('[skip ci]'), 'deploys');
+});
+
+await step('a video can be added to an existing listing the same way', async () => {
+  const { w, handler } = await fresh();
+  await deliver(handler, videoMsg({ group: 'g5', uid: 'v9' }));
+  await deliver(handler, textMsg('126610LN', { replyTo: w.sent.at(-1).text }));
+  eq(listing(w, 'rolex-126610ln').video, 'assets/img/rolex-126610ln/video.mp4', 'video attached');
+});
+
+await step('added photographs are numbered after the ones already there', async () => {
+  const { w, handler } = await fresh();
+  await deliver(handler, photoMsg({ group: 'g5', uid: 'n1' }));
+  await deliver(handler, textMsg('129720BLNR', { replyTo: w.sent[0].text }));
+  const p = listing(w, 'rolex-129720blnr');
+  eq(p.images.length, 2, 'photograph count');
+  eq(p.images[1], 'assets/img/rolex-129720blnr/02.jpg', 'numbered on from the existing one');
+  ok(w.files.has('assets/img/rolex-129720blnr/01.jpg'), 'the original is untouched');
+});
+
+await step('an unknown reference is a one-line answer, not a wall of errors', async () => {
+  const { w, handler } = await fresh();
+  await deliver(handler, photoMsg({ group: 'g5', uid: 'n1' }));
+  await deliver(handler, textMsg('NOSUCHREF', { replyTo: w.sent[0].text }));
+  const t = w.sent.at(-1).text;
+  ok(/No listing matches/.test(t), 'says what is wrong');
+  ok(!/is missing/.test(t), 'does not list every field as missing');
+  ok(w.files.has('.bot/media/g5/n1.jpg'), 'media kept so they can retry');
+});
+
 /* ---------- bad input ---------- */
 
 await step('a bad caption explains itself and keeps the media', async () => {
@@ -330,7 +389,7 @@ await step('an album with no caption at all says so once', async () => {
   await deliver(handler, photoMsg({ group: 'g3', uid: 'r1' }));
   await deliver(handler, photoMsg({ group: 'g3', uid: 'r2', mid: 2 }));
   eq(w.sent.length, 1, 'messages');
-  ok(/no caption/.test(w.sent[0].text), 'explains');
+  ok(/reference/i.test(w.sent[0].text) && /full details/i.test(w.sent[0].text), 'offers both routes');
 });
 
 await step('a duplicate reference is refused rather than shadowing the old one', async () => {
