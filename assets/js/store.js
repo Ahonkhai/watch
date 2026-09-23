@@ -2,7 +2,7 @@
    private window or blocked site data degrades to an in-memory cart rather
    than throwing. */
 
-const CART_KEY = 'swizz.cart.v1';
+const CART_KEY = 'swizz.cart.v2';
 
 const Cart = (() => {
   let memory = [];
@@ -39,53 +39,49 @@ const Cart = (() => {
     if (!line || typeof line !== 'object') return false;
     const product = PRODUCTS.find((p) => p.id === line.id);
     if (!product) return false;
-    if (!product.straps.some((s) => s.id === line.strap)) return false;
     return Number.isInteger(line.qty) && line.qty > 0;
   }
 
-  const keyOf = (line) => `${line.id}::${line.strap}`;
+  const keyOf = (line) => line.id;
 
   return {
     items: read,
 
-    /* Returns each line joined to its product and strap, ready to render. */
+    /* Returns each line joined to its listing, ready to render. */
     detailed() {
       return read().map((line) => {
         const product = PRODUCTS.find((p) => p.id === line.id);
-        const strap = product.straps.find((s) => s.id === line.strap);
-        return { ...line, product, strap, lineTotal: product.price * line.qty };
+        return { ...line, product, lineTotal: product.price * line.qty };
       });
     },
 
-    add(id, strapId, qty = 1) {
+    add(id, qty = 1) {
       const lines = read();
-      const key = `${id}::${strapId}`;
-      const existing = lines.find((l) => keyOf(l) === key);
+      const existing = lines.find((l) => l.id === id);
       const product = PRODUCTS.find((p) => p.id === id);
-      const cap = product ? product.stock : 99;
+      const cap = product ? product.stock : 1;
       if (existing) {
         existing.qty = Math.min(existing.qty + qty, cap);
       } else {
-        lines.push({ id, strap: strapId, qty: Math.min(qty, cap) });
+        lines.push({ id, qty: Math.min(qty, cap) });
       }
       write(lines);
     },
 
-    setQty(id, strapId, qty) {
-      const key = `${id}::${strapId}`;
+    setQty(id, qty) {
       let lines = read();
       if (qty <= 0) {
-        lines = lines.filter((l) => keyOf(l) !== key);
+        lines = lines.filter((l) => l.id !== id);
       } else {
-        const line = lines.find((l) => keyOf(l) === key);
+        const line = lines.find((l) => l.id === id);
         const product = PRODUCTS.find((p) => p.id === id);
-        if (line) line.qty = Math.min(qty, product ? product.stock : 99);
+        if (line) line.qty = Math.min(qty, product ? product.stock : 1);
       }
       write(lines);
     },
 
-    remove(id, strapId) {
-      write(read().filter((l) => keyOf(l) !== `${id}::${strapId}`));
+    remove(id) {
+      write(read().filter((l) => l.id !== id));
     },
 
     clear() { write([]); },

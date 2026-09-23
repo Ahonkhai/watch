@@ -489,7 +489,30 @@ p:last-child { margin-bottom: 0; }
   margin: 0.55rem 0 0.4rem;
   line-height: 1.1;
 }
+.card-meta {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: 0.35rem 0 0;
+  font-variant-numeric: lining-nums tabular-nums;
+}
 .card-tagline { color: var(--muted); font-size: 0.9rem; line-height: 1.6; margin: 0; }
+
+/* Stands in until a photograph of the actual watch is uploaded. */
+.photo-pending {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--faint);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.8;
+}
+.card-art img, .pdp-stage img { width: 100%; height: auto; display: block; }
 .card-foot { display: flex; align-items: baseline; gap: 1rem; margin-top: 1.1rem; }
 .price {
   font-family: var(--sans);
@@ -534,6 +557,38 @@ p:last-child { margin-bottom: 0; }
 .collection-card:hover h3 { color: var(--gold-lit); }
 .collection-card p { color: var(--muted); font-size: 0.87rem; line-height: 1.7; }
 .collection-card .link-arrow { margin-top: 1.6rem; font-size: 0.78rem; }
+
+/* ---------- brand tiles ---------- */
+
+.brand-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 1px;
+  background: var(--hair);
+  border: 1px solid var(--hair);
+}
+.brand-tile {
+  display: grid;
+  align-content: center;
+  gap: 0.5rem;
+  padding: clamp(1.6rem, 3vw, 2.4rem) clamp(1.2rem, 2vw, 1.8rem);
+  background: var(--bg);
+  min-height: 132px;
+  transition: background 0.4s var(--ease);
+}
+.brand-tile:hover { background: var(--panel); }
+.brand-tile-name {
+  font-family: var(--serif);
+  font-size: clamp(1.3rem, 2vw, 1.7rem);
+  line-height: 1.1;
+}
+.brand-tile-meta {
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-variant-numeric: lining-nums tabular-nums;
+}
 
 /* ---------- editorial ---------- */
 
@@ -769,6 +824,33 @@ select option { background: var(--panel); color: var(--text); }
 .qty output { width: 40px; text-align: center; font-variant-numeric: tabular-nums; font-size: 0.9rem; }
 
 .buy-row { display: flex; gap: 1rem; margin-bottom: 3.5rem; flex-wrap: wrap; }
+.buy-row .btn-telegram { flex: 1; min-width: 230px; }
+
+/* Telegram's own blue, so the button reads as the channel it opens. */
+.btn-telegram { background: #229ED9; color: #FFFFFF; }
+.btn-telegram:hover { background: #1B87BB; color: #FFFFFF; }
+
+/* The four facts a pre-owned buyer decides on. */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1px;
+  background: var(--hair);
+  border: 1px solid var(--hair);
+  margin: 2rem 0 0;
+}
+.facts > div { background: var(--bg); padding: 0.9rem 1rem; }
+.facts dt {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.facts dd {
+  margin: 0.4rem 0 0;
+  font-size: 0.95rem;
+  font-variant-numeric: lining-nums tabular-nums;
+}
 .buy-row .btn-primary { flex: 1; min-width: 210px; }
 
 .specs { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
@@ -1237,12 +1319,12 @@ select option { background: var(--panel); color: var(--text); }
     <a class="brand" href="#/">Swizz <span>Clones</span></a>
     <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"></button>
     <nav class="nav" aria-label="Primary">
-      <a href="#/shop">Shop</a>
-      <a href="#/shop?collection=tidewater">Tidewater</a>
-      <a href="#/shop?collection=meridian">Meridian</a>
-      <a href="#/shop?collection=loft">Loft</a>
-      <a href="#/shop?collection=terrafirma">Terrafirma</a>
-      <a href="#/about">Maison</a>
+      <a href="#/shop">All watches</a>
+      <a href="#/shop?collection=rolex">Rolex</a>
+      <a href="#/shop?collection=omega">Omega</a>
+      <a href="#/shop?collection=tudor">Tudor</a>
+      <a href="#/shop?collection=cartier">Cartier</a>
+      <a href="#/about">About</a>
     </nav>
     <div class="header-actions">
       <a class="cart-btn" href="#/cart">
@@ -1256,80 +1338,89 @@ select option { background: var(--panel); color: var(--text); }
 <section class="hero" data-surface="dark">
   <div class="wrap hero-inner">
     <div>
-      <p class="label" data-reveal>Est. 2014, Portland &amp; Biel</p>
-      <h1 data-reveal style="--delay:.06s">Instruments for<br>the <em>long run</em>.</h1>
-      <p class="lede" data-reveal style="--delay:.24s">
-        Four families of mechanical watches and nothing else. No seasonal colourways,
-        no drops you have to set an alarm for. Only watches we expect you to be
-        wearing in twenty years, and to service when you are.
+      <p class="label" data-reveal>Authenticated pre-owned</p>
+      <h1 data-reveal style="--delay:.06s">Every watch,<br>checked in hand.</h1>
+      <p class="lede" data-reveal style="--delay:.12s">
+        We list reference, year, condition and what comes in the box, then
+        photograph the actual watch. No stock images, no descriptions copied
+        off a spec sheet. What you see is the watch you receive.
       </p>
-      <div class="hero-actions" data-reveal style="--delay:.32s">
-        <a class="btn btn-primary" href="#/shop">See all twelve</a>
-        <a class="link-arrow" href="#/about">How they are made</a>
+      <div class="hero-actions" data-reveal style="--delay:.18s">
+        <a class="btn btn-primary" href="#/shop">
+          See all <span data-stock-count>12</span> watches
+        </a>
+        <a class="link-arrow" href="#/about">How we authenticate</a>
       </div>
-      <dl class="hero-meta" data-reveal style="--delay:.4s">
-        <div><dt>Warranty</dt><dd>Five years</dd></div>
-        <div><dt>Movements</dt><dd>Swiss &amp; Japanese</dd></div>
+      <dl class="hero-meta" data-reveal style="--delay:.24s">
+        <div><dt>Inspection</dt><dd>In hand, every piece</dd></div>
         <div><dt>Delivery</dt><dd>Insured, worldwide</dd></div>
+        <div><dt>Orders</dt><dd>On Telegram</dd></div>
       </dl>
     </div>
-    <div class="hero-art" data-hero-art data-reveal style="--delay:.1s"></div>
   </div>
 </section>
 
-<div data-chapters></div>
+<section class="section-tight" data-surface="light">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <p class="label" data-reveal>Browse by brand</p>
+        <h2 data-reveal style="--delay:.06s">Nine houses in stock.</h2>
+      </div>
+      <a class="link-arrow" href="#/shop" data-reveal style="--delay:.1s">All watches</a>
+    </div>
+    <div class="brand-grid" data-brands></div>
+  </div>
+</section>
 
 <section class="section" data-surface="light">
   <div class="wrap">
     <div class="section-head">
       <div>
-        <p class="label" data-reveal>Every reference</p>
-        <h2 data-reveal>All twelve, end to end.</h2>
+        <p class="label" data-reveal>Latest arrivals</p>
+        <h2 data-reveal style="--delay:.06s">Recently listed.</h2>
       </div>
-      <a class="link-arrow" href="#/shop" data-reveal style="--delay:.12s">All twelve references</a>
+      <a class="link-arrow" href="#/shop" data-reveal style="--delay:.1s">See everything</a>
     </div>
-  </div>
-  <div class="rail-wrap">
-    <div class="rail" data-rail></div>
-    <div class="rail-hint" data-rail-hint><span>Drag</span><i></i><span>12 references</span></div>
+    <div class="grid-products" data-latest></div>
   </div>
 </section>
 
 <section class="section" data-surface="dark">
   <div class="wrap">
-    <p class="label" data-reveal>The making</p>
-    <h2 data-reveal style="margin-bottom:clamp(2.5rem,5vw,4rem)">Four things we will not compromise.</h2>
+    <p class="label" data-reveal>How we work</p>
+    <h2 data-reveal style="margin-bottom:clamp(2.5rem,5vw,4rem)">Four things we do on every watch.</h2>
     <div class="craft" data-reveal style="--delay:.06s">
       <div>
         <div class="num">01</div>
-        <h3>Movements we can service</h3>
+        <h3>Inspected in hand</h3>
         <p>
-          Sellita, Miyota, Soprod, La Joux&#8209;Perret. Widely supported calibres, so any
-          competent watchmaker can open one in 2045 and find parts waiting.
+          Case, dial, movement and bracelet checked against the reference, and
+          the serial matched to the papers where they are supplied.
         </p>
       </div>
       <div>
         <div class="num">02</div>
-        <h3>Sapphire, without exception</h3>
+        <h3>Photographed as it is</h3>
         <p>
-          Every reference takes a sapphire crystal with anti-reflective coating, including
-          the quartz at $420. Mineral glass is cheaper and we do not use it.
+          Our own photographs of the actual watch, including the marks. If
+          there is wear, you will see it before you buy.
         </p>
       </div>
       <div>
         <div class="num">03</div>
-        <h3>Regulated in five positions</h3>
+        <h3>Stated plainly</h3>
         <p>
-          We will not ship an automatic running outside &minus;5/+8 seconds a day,
-          tighter than the movement suppliers' own specification.
+          Reference, year, condition and exactly what is in the box. No
+          "excellent" doing the work of a description.
         </p>
       </div>
       <div>
         <div class="num">04</div>
-        <h3>Tested twice</h3>
+        <h3>Insured in transit</h3>
         <p>
-          Once at the movement stage and once fully cased. Dive references are
-          pressure-tested to 125&nbsp;% of their rating before they see a box.
+          Tracked and insured to full value, quoted per order and per
+          destination rather than hidden in the price.
         </p>
       </div>
     </div>
@@ -1338,14 +1429,14 @@ select option { background: var(--panel); color: var(--text); }
 
 <section class="section" data-surface="light">
   <div class="wrap-narrow" style="text-align:center">
-    <p class="label" data-reveal>Begin</p>
-    <h2 data-reveal>Twelve references. Pick one.</h2>
-    <div data-reveal style="--delay:.12s">
+    <p class="label" data-reveal>Get in touch</p>
+    <h2 data-reveal>Questions go to Telegram.</h2>
+    <div data-reveal style="--delay:.1s">
       <p class="lede" style="margin:1.8rem auto 2.8rem">
-        From $420 for the solar Terrafirma to $3,150 for the Loft Moonphase. Every one
-        ships insured and boxed, with a strap tool and a five-year warranty.
+        Ask about condition, request more photographs, or check whether a piece
+        is still available. We answer on Telegram.
       </p>
-      <a class="btn btn-primary" href="#/shop">See all twelve references</a>
+      <a class="btn btn-primary" href="#/shop">See all watches</a>
     </div>
   </div>
 </section>
@@ -1357,8 +1448,8 @@ select option { background: var(--panel); color: var(--text); }
     <p class="label" data-reveal>The collection</p>
     <h1 data-shop-title data-reveal style="--delay:.06s;font-size:clamp(2.6rem,6vw,5rem)">All watches</h1>
     <p class="lede" data-shop-blurb data-reveal style="--delay:.12s;margin-top:1.6rem">
-      Twelve references across four families. Every one ships with a five-year
-      warranty and a strap change tool.
+      Each listing is one specific watch, with its reference, year, condition
+      and set stated. Photographs are of the actual piece.
     </p>
   </div>
 </section>
@@ -1372,6 +1463,10 @@ select option { background: var(--panel); color: var(--text); }
           <div data-filter-collections></div>
         </div>
         <div class="filter-group">
+          <h4>Condition</h4>
+          <div data-filter-conditions></div>
+        </div>
+        <div class="filter-group">
           <h4>Movement</h4>
           <div data-filter-movements></div>
         </div>
@@ -1381,10 +1476,9 @@ select option { background: var(--panel); color: var(--text); }
         </div>
         <div class="filter-group">
           <h4>Maximum price</h4>
-          <input type="range" id="price-max" min="400" max="3200" step="10" value="3200"
-                 aria-label="Maximum price">
-          <div class="range-row"><span>$400</span><span style="margin-left:auto"
-            data-price-label>$3,200</span></div>
+          <input type="range" id="price-max" aria-label="Maximum price">
+          <div class="range-row"><span data-price-floor></span><span style="margin-left:auto"
+            data-price-label></span></div>
         </div>
         <div class="filter-group" style="border:0">
           <button class="btn-quiet" type="button" data-clear-filters>Clear all</button>
@@ -1458,84 +1552,85 @@ select option { background: var(--panel); color: var(--text); }
 
 <section class="section-tight">
   <div class="wrap-narrow">
-    <p class="label" data-reveal>Our story</p>
+    <p class="label" data-reveal>About</p>
     <h1 data-reveal style="--delay:.06s;font-size:clamp(2.4rem,5.4vw,4.4rem)">
-      We began because a watch we loved stopped, and nobody would fix it.
+      We sell watches we have held.
     </h1>
   </div>
 </section>
 
 <section class="statement" data-surface="dark">
   <div class="wrap statement-grid">
-    <h2 class="display-quote" data-reveal>Three watchmakers turned it away.</h2>
+    <h2 class="display-quote" data-reveal>Nothing here is listed from a photograph we did not take.</h2>
     <p class="lede" data-reveal style="--delay:.1s">
-      In 2013 one of us inherited a 1970s diver built on a movement nobody still made
-      parts for. That is the whole origin story, and it remains the brief: build watches
-      out of calibres that will be serviceable long after we are not around to service
-      them ourselves.
+      Every watch is inspected in hand before it goes up, and photographed as it
+      actually is. Where a piece has wear, the pictures show it and the listing
+      says so. A buyer should not be surprised by the parcel.
     </p>
   </div>
 </section>
 
 <section class="section">
-  <div class="wrap">
-    <div class="craft" data-reveal>
-      <div><div class="num">2014</div><h3>The first Tidewater</h3>
-        <p>Eighty pieces, funded by pre-orders, assembled on a kitchen table in Portland.</p></div>
-      <div><div class="num">11</div><h3>Watchmakers</h3>
-        <p>Nine in Biel, two in Portland. Every Loft movement is finished by one person, start to finish.</p></div>
-      <div><div class="num">5</div><h3>Year warranty</h3>
-        <p>Transferable with the watch. If you sell it, the warranty goes with it.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="section" style="padding-top:0">
   <div class="wrap-narrow">
-    <h2 id="workshop" data-reveal>The workshop</h2>
+    <h2 id="authenticity" data-reveal>Authenticity</h2>
     <p class="lede" data-reveal style="margin:1.5rem 0 clamp(3rem,6vw,4.5rem)">
-      Cases are machined in Switzerland and Japan to our drawings. Assembly, regulation
-      and testing happen in Biel. We regulate every automatic in five positions and will
-      not ship one running outside &minus;5/+8 seconds a day, tighter than the
-      movement suppliers' own specification.
+      Each watch is checked against its reference: case dimensions, dial and
+      handset, movement, bracelet and clasp. Where papers are supplied, the
+      serial is matched to the card. Anything we cannot verify is described as
+      unverified rather than assumed.
     </p>
 
-    <h2 id="movements" data-reveal>Movements</h2>
+    <h2 id="photography" data-reveal>Photography</h2>
     <p class="lede" data-reveal style="margin:1.5rem 0 clamp(3rem,6vw,4.5rem)">
-      We use Sellita, Miyota, Soprod and La Joux&#8209;Perret calibres, plus our own
-      hand-wound cal.&nbsp;2 in the Loft Ultrathin. Nothing exotic, nothing proprietary
-      enough to strand you. Parts for every calibre we have shipped remain available
-      through ordinary supply channels.
+      All images are our own, of the specific watch in the listing. We do not
+      use manufacturer press images or stock photography. If you want more
+      pictures of a particular detail, ask and we will take them.
     </p>
 
-    <h2 id="servicing" data-reveal>Servicing</h2>
+    <h2 id="condition" data-reveal>How we grade condition</h2>
+    <p class="lede" data-reveal style="margin:1.5rem 0 1rem">
+      Four grades, used consistently:
+    </p>
+    <table class="specs" data-reveal style="margin-bottom:clamp(3rem,6vw,4.5rem)">
+      <tbody>
+        <tr><th scope="row">Unworn</th><td>Never worn, stickers usually intact, as supplied by the retailer.</td></tr>
+        <tr><th scope="row">Excellent</th><td>Worn lightly. Marks only under close inspection, case unpolished.</td></tr>
+        <tr><th scope="row">Very good</th><td>Visible wear consistent with regular use. All marks photographed.</td></tr>
+        <tr><th scope="row">Good</th><td>Honest wear throughout. Described and photographed in detail.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="payment" data-reveal>Ordering and payment</h2>
     <p class="lede" data-reveal style="margin:1.5rem 0 clamp(3rem,6vw,4.5rem)">
-      Send it back whenever it needs attention. A full service is $220 for automatics and
-      $160 for quartz, including gaskets, a pressure test and a new strap if yours is
-      finished. We will service watches bought second-hand, and we do not mind who owned
-      it first.
+      Orders are placed on Telegram. Add a watch to your bag and the checkout
+      composes the order for you, or message us directly from any listing. We
+      confirm the piece is still available and quote insured delivery to your
+      address before any payment is arranged.
     </p>
 
-    <h2 id="warranty" data-reveal>Warranty</h2>
+    <h2 id="delivery" data-reveal>Delivery</h2>
     <p class="lede" data-reveal style="margin:1.5rem 0 clamp(3rem,6vw,4.5rem)">
-      Five years against defects in materials and workmanship, transferable with the
-      watch. It does not cover scratches, a crystal cracked in a fall, or water damage
-      where the crown was left unscrewed. But tell us what happened and we will
-      usually find a way to help.
+      Shipped tracked and insured to the full value of the watch, worldwide.
+      Cost depends on destination and declared value, so it is quoted per order
+      rather than built into the price. Import duties are the buyer's
+      responsibility.
     </p>
 
-    <h2 id="shipping" data-reveal>Shipping &amp; returns</h2>
+    <h2 id="returns" data-reveal>Returns</h2>
     <p class="lede" data-reveal style="margin:1.5rem 0 clamp(3rem,6vw,4.5rem)">
-      Free insured shipping on orders over $1,500, $25 flat otherwise. Thirty days to
-      change your mind, unworn, in the box it arrived in. Return shipping is ours.
+      Fourteen days from delivery, returned unworn and as supplied with all
+      packaging and papers. Tell us before sending it back so we can arrange
+      insured return carriage.
     </p>
 
     <h2 id="contact" data-reveal>Contact</h2>
     <p class="lede" data-reveal style="margin-top:1.5rem">
-      A real person reads every message, usually within a working day.
+      Telegram is the fastest way to reach us, and where orders are placed.
     </p>
     <p data-reveal style="margin-top:1.6rem">
-      <a class="link-arrow" href="mailto:hello@swizzclones.example">hello@swizzclones.example</a>
+      <a class="btn btn-telegram" data-telegram-link href="#" target="_blank" rel="noopener">
+        Message us on Telegram
+      </a>
     </p>
   </div>
 </section>
@@ -1546,1043 +1641,407 @@ select option { background: var(--panel); color: var(--text); }
       <div>
         <a class="brand" href="#/">Swizz <span>Clones</span></a>
         <p class="footer-blurb">
-          Instruments for the long run. Drawn in Portland, assembled in Biel,
-          serviced anywhere you can post a parcel.
+          Authenticated pre-owned watches. Every piece inspected in hand, with
+          its reference, year and condition stated plainly.
         </p>
       </div>
       <div>
-        <h4>Collections</h4>
+        <h4>Brands</h4>
         <ul>
-          <li><a href="#/shop?collection=tidewater">Tidewater</a></li>
-          <li><a href="#/shop?collection=meridian">Meridian</a></li>
-          <li><a href="#/shop?collection=loft">Loft</a></li>
-          <li><a href="#/shop?collection=terrafirma">Terrafirma</a></li>
+          <li><a href="#/shop?collection=rolex">Rolex</a></li>
+          <li><a href="#/shop?collection=omega">Omega</a></li>
+          <li><a href="#/shop?collection=audemars-piguet">Audemars Piguet</a></li>
+          <li><a href="#/shop?collection=patek-philippe">Patek Philippe</a></li>
+          <li><a href="#/shop">See all</a></li>
         </ul>
       </div>
       <div>
-        <h4>Client care</h4>
+        <h4>Buying</h4>
         <ul>
-          <li><a href="#/about?at=servicing">Servicing</a></li>
-          <li><a href="#/about?at=warranty">Five-year warranty</a></li>
-          <li><a href="#/about?at=shipping">Shipping &amp; returns</a></li>
-          <li><a href="#/about?at=contact">Contact</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Maison</h4>
-        <ul>
-          <li><a href="#/about">Our story</a></li>
-          <li><a href="#/about?at=workshop">The workshop</a></li>
-          <li><a href="#/about?at=movements">Movements</a></li>
-          <li><a href="#/shop">Shop all</a></li>
+          <li><a href="#/about?at=authenticity">Authenticity</a></li>
+          <li><a href="#/about?at=delivery">Delivery</a></li>
+          <li><a href="#/about?at=returns">Returns</a></li>
+          <li><a href="#/about?at=payment">Payment</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-note">
       <span>&copy; <span data-year>2026</span> Swizz Clones</span>
-      <span>Insured worldwide delivery &middot; Thirty-day returns</span>
+      <span>Insured worldwide delivery &middot; Fourteen-day returns</span>
     </div>
   </div>
 </footer>
 <script>
-/* Swizz Clones — catalog data.
-   Single source of truth for collections and products. Swap this file for a
-   fetch() against a real commerce API and nothing else has to change. */
+/* Catalogue.
+ *
+ * This is a dealer in authentic pre-owned watches, so every entry is ONE
+ * specific watch: it has a year, a condition, a set, and a stock of one. It is
+ * not a product line with variants.
+ *
+ * ── READ THIS BEFORE LISTING ──────────────────────────────────────────────
+ * The entries below are REAL references with published manufacturer
+ * specifications, used as a working placeholder so the site has something
+ * accurate to render. They are NOT your stock.
+ *
+ * Before any of this goes live:
+ *   1. Replace these with the watches you actually hold.
+ *   2. Verify every figure against the watch in hand and its papers. A
+ *      specification copied from a spec sheet is not a description of the
+ *      item you are selling.
+ *   3. Set `price` from your own valuation. The figures here are indicative
+ *      of the secondary market and will be wrong for your stock.
+ *   4. Add photographs of the actual watch to `images`. Until you do, the
+ *      listing shows a "photography to follow" panel rather than a stand-in
+ *      picture, because a generic image of a different watch is a lie about
+ *      what you are selling.
+ * ──────────────────────────────────────────────────────────────────────────
+ */
 
+/* Brands. `id` is used in URLs and filters. */
 const COLLECTIONS = [
-  {
-    id: 'tidewater',
-    name: 'Tidewater',
-    tagline: 'Dive instruments, 300 m rated',
-    blurb:
-      'Built around a unidirectional bezel and a case that stays legible at depth. ' +
-      'Every Tidewater is pressure-tested twice: once at the movement stage and ' +
-      'once fully cased.',
-  },
-  {
-    id: 'meridian',
-    name: 'Meridian',
-    tagline: 'Field and travel watches',
-    blurb:
-      'A second time zone, a dial you can read at a glance, and a case slim enough ' +
-      'to disappear under a cuff. Made for people who keep two clocks in their head.',
-  },
-  {
-    id: 'loft',
-    name: 'Loft',
-    tagline: 'Dress watches, quietly made',
-    blurb:
-      'Thin cases, applied indices, and hand-finished movements visible through a ' +
-      'sapphire back. The Loft line is the least loud thing we make.',
-  },
-  {
-    id: 'terrafirma',
-    name: 'Terrafirma',
-    tagline: 'Expedition-grade, built to be beaten',
-    blurb:
-      'Titanium cases, drilled lugs, and a movement suspended on a shock cage. ' +
-      'Tested from −30 °C to 60 °C because someone, somewhere, will.',
-  },
+  { id: 'rolex', name: 'Rolex', blurb: 'Submariner, GMT-Master, Daytona.' },
+  { id: 'omega', name: 'Omega', blurb: 'Speedmaster and Seamaster.' },
+  { id: 'tudor', name: 'Tudor', blurb: 'Black Bay and Pelagos.' },
+  { id: 'cartier', name: 'Cartier', blurb: 'Santos, Tank, Ballon Bleu.' },
+  { id: 'iwc', name: 'IWC', blurb: 'Pilot, Portugieser, Ingenieur.' },
+  { id: 'audemars-piguet', name: 'Audemars Piguet', blurb: 'Royal Oak.' },
+  { id: 'patek-philippe', name: 'Patek Philippe', blurb: 'Nautilus, Calatrava, Aquanaut.' },
+  { id: 'panerai', name: 'Panerai', blurb: 'Luminor and Radiomir.' },
+  { id: 'breitling', name: 'Breitling', blurb: 'Navitimer and Superocean.' },
 ];
+
+const CONDITIONS = ['Unworn', 'Excellent', 'Very good', 'Good'];
+const SETS = ['Full set', 'Watch and box', 'Watch and papers', 'Watch only'];
 
 const PRODUCTS = [
   {
-    id: 'tidewater-300',
-    name: 'Tidewater 300',
-    collection: 'tidewater',
-    price: 1450,
-    tagline: 'The one we are known for.',
+    id: 'rolex-126610ln',
+    collection: 'rolex',
+    name: 'Submariner Date',
+    reference: '126610LN',
+    year: 2023,
+    condition: 'Unworn',
+    set: 'Full set',
+    price: 14200,
+    tagline: 'Oystersteel on Oyster bracelet, black Cerachrom bezel.',
     description:
-      'The watch that paid for our workshop. A 40 mm steel diver with a ceramic ' +
-      'bezel, a matte black dial, and enough lume to read it an hour into a night ' +
-      'dive. Nothing on it is decorative.',
-    badge: 'Bestseller',
-    art: {
-      case: 'steel', dial: '#101418', accent: '#C8A45C', bezel: 'dive',
-      bezelColor: '#1B2026', hands: 'sword', lume: '#BFE8D9',
-    },
-    straps: [
-      { id: 'bracelet', name: 'Steel bracelet', color: '#9BA3AB', type: 'bracelet' },
-      { id: 'rubber', name: 'Black rubber', color: '#15181C', type: 'rubber' },
-      { id: 'nato', name: 'Slate NATO', color: '#3C454E', type: 'nato' },
-    ],
-    specs: {
-      'Case diameter': '40 mm',
-      'Lug-to-lug': '47.5 mm',
-      'Thickness': '11.8 mm',
-      'Case material': '316L stainless steel',
-      'Crystal': 'Sapphire, double AR',
-      'Movement': 'Sellita SW200-1, automatic',
-      'Power reserve': '38 hours',
-      'Water resistance': '300 m',
-      'Lug width': '20 mm',
-    },
-    size: 40, movement: 'automatic', stock: 12,
-  },
-  {
-    id: 'tidewater-gmt',
-    name: 'Tidewater GMT',
-    collection: 'tidewater',
-    price: 1890,
-    tagline: 'Depth rating, second time zone.',
-    description:
-      'We kept the 300 m case and added a true traveller GMT. The local hour hand ' +
-      'jumps forward or back without stopping the seconds. The bezel is 24-hour, ' +
-      'so you can track a third zone if you are really committed.',
-    art: {
-      case: 'steel', dial: '#0E1B2A', finish: 'sunburst', accent: '#E06B4A', bezel: 'gmt',
-      bezelColor: '#16283C', hands: 'sword', lume: '#BFE8D9',
-    },
-    straps: [
-      { id: 'bracelet', name: 'Steel bracelet', color: '#9BA3AB', type: 'bracelet' },
-      { id: 'leather', name: 'Tan leather', color: '#8A5A33', type: 'leather' },
-    ],
+      'Unworn 2023 example with stickers intact, supplied with the original ' +
+      'box, card and hang tags. Purchased from an authorised dealer; the card ' +
+      'is dated and matches the case number.',
+    images: [],
     specs: {
       'Case diameter': '41 mm',
-      'Lug-to-lug': '48 mm',
-      'Thickness': '12.4 mm',
-      'Case material': '316L stainless steel',
-      'Crystal': 'Sapphire, double AR',
-      'Movement': 'Soprod C125, automatic GMT',
-      'Power reserve': '42 hours',
+      'Case material': 'Oystersteel',
+      'Bezel': 'Unidirectional, black Cerachrom insert',
+      'Movement': 'Rolex calibre 3235, automatic',
+      'Power reserve': 'Approximately 70 hours',
       'Water resistance': '300 m',
-      'Lug width': '20 mm',
+      'Bracelet': 'Oyster, folding Oysterlock clasp with Glidelock',
     },
-    size: 41, movement: 'automatic', stock: 6,
+    size: 41, movement: 'automatic',
   },
   {
-    id: 'tidewater-bronze',
-    name: 'Tidewater Bronze',
-    collection: 'tidewater',
-    price: 1680,
-    tagline: 'Ages the way you do.',
+    id: 'rolex-126710blnr',
+    collection: 'rolex',
+    name: 'GMT-Master II',
+    reference: '126710BLNR',
+    year: 2021,
+    condition: 'Excellent',
+    set: 'Full set',
+    price: 17800,
+    tagline: 'Blue and black bezel on Jubilee bracelet.',
     description:
-      'CuSn8 bronze case that patinas to whatever your wrist and your climate decide. ' +
-      'The caseback is titanium, so the part touching skin never turns green. ' +
-      'Limited to 300 pieces a year.',
-    badge: 'Limited',
-    art: {
-      case: 'bronze', dial: '#1D2A21', finish: 'sunburst', accent: '#D8B978', bezel: 'dive',
-      bezelColor: '#2A3A2E', hands: 'sword', lume: '#E4D3A0',
+      'Worn sparingly and kept in a collection. Light surface marks to the ' +
+      'clasp consistent with the stated condition, bracelet stretch minimal. ' +
+      'Original box and card present.',
+    images: [],
+    specs: {
+      'Case diameter': '40 mm',
+      'Case material': 'Oystersteel',
+      'Bezel': 'Bidirectional 24-hour, two-colour Cerachrom insert',
+      'Movement': 'Rolex calibre 3285, automatic',
+      'Power reserve': 'Approximately 70 hours',
+      'Water resistance': '100 m',
+      'Bracelet': 'Jubilee, folding Oysterlock clasp',
     },
-    straps: [
-      { id: 'leather', name: 'Oiled brown leather', color: '#6E4526', type: 'leather' },
-      { id: 'nato', name: 'Olive NATO', color: '#4A5039', type: 'nato' },
-    ],
+    size: 40, movement: 'automatic',
+  },
+  {
+    id: 'rolex-116500ln',
+    collection: 'rolex',
+    name: 'Cosmograph Daytona',
+    reference: '116500LN',
+    year: 2019,
+    condition: 'Very good',
+    set: 'Watch and papers',
+    price: 27500,
+    tagline: 'White dial, black Cerachrom bezel. Discontinued reference.',
+    description:
+      'Honest example of the discontinued 116500LN with visible wear to the ' +
+      'bracelet and a light scratch on the case flank, photographed in detail. ' +
+      'Card present, outer box not included.',
+    images: [],
+    specs: {
+      'Case diameter': '40 mm',
+      'Case material': 'Oystersteel',
+      'Bezel': 'Fixed, black Cerachrom with tachymetric scale',
+      'Movement': 'Rolex calibre 4130, automatic chronograph',
+      'Power reserve': 'Approximately 72 hours',
+      'Water resistance': '100 m',
+      'Bracelet': 'Oyster, folding Oysterlock clasp',
+    },
+    size: 40, movement: 'automatic',
+  },
+  {
+    id: 'omega-31030425001002',
+    collection: 'omega',
+    name: 'Speedmaster Moonwatch Professional',
+    reference: '310.30.42.50.01.002',
+    year: 2022,
+    condition: 'Excellent',
+    set: 'Full set',
+    price: 6400,
+    tagline: 'Hesalite crystal, co-axial Master Chronometer.',
+    description:
+      'The current-generation Moonwatch on the Hesalite crystal specification. ' +
+      'Worn occasionally, no notable marks. Complete with the full presentation ' +
+      'box, warranty card and extra strap.',
+    images: [],
     specs: {
       'Case diameter': '42 mm',
-      'Lug-to-lug': '49 mm',
-      'Thickness': '13 mm',
-      'Case material': 'CuSn8 bronze, titanium back',
-      'Crystal': 'Sapphire, box profile',
-      'Movement': 'Sellita SW200-1, automatic',
-      'Power reserve': '38 hours',
+      'Case material': 'Stainless steel',
+      'Crystal': 'Hesalite, domed',
+      'Movement': 'Omega calibre 3861, manual winding',
+      'Power reserve': '50 hours',
+      'Water resistance': '50 m',
+      'Certification': 'METAS Master Chronometer',
+    },
+    size: 42, movement: 'manual',
+  },
+  {
+    id: 'omega-21030422001001',
+    collection: 'omega',
+    name: 'Seamaster Diver 300M',
+    reference: '210.30.42.20.01.001',
+    year: 2020,
+    condition: 'Excellent',
+    set: 'Full set',
+    price: 4300,
+    tagline: 'Black ceramic bezel, laser-engraved wave dial.',
+    description:
+      'Regularly worn but carefully kept, with light marks to the bracelet ' +
+      'only. Box, card and manuals present. Bracelet full length with all ' +
+      'removed links included.',
+    images: [],
+    specs: {
+      'Case diameter': '42 mm',
+      'Case material': 'Stainless steel',
+      'Bezel': 'Unidirectional, black ceramic with enamel scale',
+      'Movement': 'Omega calibre 8800, automatic',
+      'Power reserve': '55 hours',
       'Water resistance': '300 m',
-      'Lug width': '22 mm',
+      'Certification': 'METAS Master Chronometer',
     },
-    size: 42, movement: 'automatic', stock: 3,
+    size: 42, movement: 'automatic',
   },
   {
-    id: 'meridian-38',
-    name: 'Meridian 38',
-    collection: 'meridian',
-    price: 980,
-    tagline: 'A field watch with the volume turned down.',
+    id: 'tudor-79030n',
+    collection: 'tudor',
+    name: 'Black Bay Fifty-Eight',
+    reference: '79030N',
+    year: 2022,
+    condition: 'Unworn',
+    set: 'Full set',
+    price: 3450,
+    tagline: 'Thirty-nine millimetres, in-house Manufacture calibre.',
     description:
-      'Sandblasted steel, a sector dial, and syringe hands. At 38 mm and 10.2 mm ' +
-      'thick it fits under anything, which is the entire point of a field watch ' +
-      'people actually wear.',
-    badge: 'Bestseller',
-    art: {
-      case: 'steel', dial: '#E8E3D8', accent: '#1B1F24', bezel: 'fixed',
-      bezelColor: '#A8B0B8', hands: 'syringe', lume: '#C9B283',
-    },
-    straps: [
-      { id: 'leather', name: 'Grey suede', color: '#6B6E70', type: 'leather' },
-      { id: 'nato', name: 'Khaki NATO', color: '#7C7351', type: 'nato' },
-      { id: 'bracelet', name: 'Steel bracelet', color: '#9BA3AB', type: 'bracelet' },
-    ],
-    specs: {
-      'Case diameter': '38 mm',
-      'Lug-to-lug': '45 mm',
-      'Thickness': '10.2 mm',
-      'Case material': '316L stainless steel, sandblasted',
-      'Crystal': 'Sapphire, box profile',
-      'Movement': 'Miyota 9039, automatic',
-      'Power reserve': '42 hours',
-      'Water resistance': '100 m',
-      'Lug width': '19 mm',
-    },
-    size: 38, movement: 'automatic', stock: 21,
-  },
-  {
-    id: 'meridian-worldtimer',
-    name: 'Meridian Worldtimer',
-    collection: 'meridian',
-    price: 2350,
-    tagline: 'Twenty-four cities, one crown.',
-    description:
-      'A rotating city ring under a fired-enamel dial. Set your home city at noon ' +
-      'and every other time zone reads off the chapter ring. The most complicated ' +
-      'thing we build, and still only 11.6 mm thick.',
-    art: {
-      case: 'steel', dial: '#16324F', finish: 'sunburst', accent: '#D6C08A', bezel: 'worldtimer',
-      bezelColor: '#25415E', hands: 'dauphine', lume: '#D9E8F0',
-    },
-    straps: [
-      { id: 'leather', name: 'Navy alligator-grain', color: '#22334A', type: 'leather' },
-      { id: 'bracelet', name: 'Steel bracelet', color: '#9BA3AB', type: 'bracelet' },
-    ],
-    specs: {
-      'Case diameter': '39.5 mm',
-      'Lug-to-lug': '46 mm',
-      'Thickness': '11.6 mm',
-      'Case material': '316L stainless steel, polished',
-      'Crystal': 'Sapphire, double AR',
-      'Movement': 'La Joux-Perret G101 with worldtime module',
-      'Power reserve': '68 hours',
-      'Water resistance': '50 m',
-      'Lug width': '20 mm',
-    },
-    size: 39.5, movement: 'automatic', stock: 4,
-  },
-  {
-    id: 'meridian-quartz',
-    name: 'Meridian Quartz',
-    collection: 'meridian',
-    price: 420,
-    tagline: 'Set it once a year. Forget it.',
-    description:
-      'The same sector dial as the 38, driven by a thermocompensated quartz movement ' +
-      'accurate to ±10 seconds a year. Our answer to everyone who asked for something ' +
-      'they could leave in a drawer.',
-    art: {
-      case: 'steel', dial: '#1A1D21', accent: '#BFC5CB', bezel: 'fixed',
-      bezelColor: '#8E979F', hands: 'syringe', lume: '#C9B283',
-    },
-    straps: [
-      { id: 'nato', name: 'Black NATO', color: '#1C1F23', type: 'nato' },
-      { id: 'leather', name: 'Black leather', color: '#26282B', type: 'leather' },
-    ],
-    specs: {
-      'Case diameter': '37 mm',
-      'Lug-to-lug': '44 mm',
-      'Thickness': '8.4 mm',
-      'Case material': '316L stainless steel',
-      'Crystal': 'Sapphire, single AR',
-      'Movement': 'ETA F06.415, thermocompensated quartz',
-      'Battery life': '5 years',
-      'Water resistance': '100 m',
-      'Lug width': '18 mm',
-    },
-    size: 37, movement: 'quartz', stock: 40,
-  },
-  {
-    id: 'loft-ultrathin',
-    name: 'Loft Ultrathin',
-    collection: 'loft',
-    price: 2780,
-    tagline: 'Six point eight millimetres.',
-    description:
-      'A hand-wound dress watch with a grand-feu enamel dial and blued steel hands. ' +
-      'The movement is finished by one watchmaker start to finish, and the caseback ' +
-      'is sapphire so you can check their work.',
-    art: {
-      case: 'gold', dial: '#F2EDE3', accent: '#2A3550', bezel: 'thin',
-      bezelColor: '#C9A44E', hands: 'dauphine', lume: null,
-    },
-    straps: [
-      { id: 'leather', name: 'Black alligator-grain', color: '#1E1E20', type: 'leather' },
-      { id: 'leather-brown', name: 'Chestnut leather', color: '#5E3A22', type: 'leather' },
-    ],
-    specs: {
-      'Case diameter': '38 mm',
-      'Lug-to-lug': '44.5 mm',
-      'Thickness': '6.8 mm',
-      'Case material': '18k rose gold',
-      'Crystal': 'Sapphire, double AR, sapphire caseback',
-      'Movement': 'Swizz cal. 2, hand-wound',
-      'Power reserve': '72 hours',
-      'Water resistance': '30 m',
-      'Lug width': '19 mm',
-    },
-    size: 38, movement: 'hand-wound', stock: 2,
-  },
-  {
-    id: 'loft-sector',
-    name: 'Loft Sector',
-    collection: 'loft',
-    price: 1240,
-    tagline: 'A 1940s dial, drawn again from scratch.',
-    description:
-      'Two-tone sector dial, printed rather than applied, with a small seconds ' +
-      'register at six. We redrew the numerals rather than copying a vintage ' +
-      'reference. They are ours, and they are better spaced.',
-    art: {
-      case: 'steel', dial: '#EFE9DC', accent: '#232323', bezel: 'thin',
-      bezelColor: '#AEB5BC', hands: 'leaf', lume: null, subdial: true,
-    },
-    straps: [
-      { id: 'leather', name: 'Cognac leather', color: '#7A4A24', type: 'leather' },
-      { id: 'leather-black', name: 'Black leather', color: '#26282B', type: 'leather' },
-    ],
-    specs: {
-      'Case diameter': '36.5 mm',
-      'Lug-to-lug': '43 mm',
-      'Thickness': '9.1 mm',
-      'Case material': '316L stainless steel, polished',
-      'Crystal': 'Sapphire, box profile',
-      'Movement': 'Sellita SW261-1, automatic small seconds',
-      'Power reserve': '38 hours',
-      'Water resistance': '50 m',
-      'Lug width': '18 mm',
-    },
-    size: 36.5, movement: 'automatic', stock: 9,
-  },
-  {
-    id: 'loft-moonphase',
-    name: 'Loft Moonphase',
-    collection: 'loft',
-    price: 3150,
-    tagline: 'Accurate to a day every 122 years.',
-    description:
-      'An aventurine moonphase disc at twelve, cut from a single slab so the ' +
-      'flecking is different on every watch. The correction is set through the ' +
-      'crown, with no pushers, no tools and no tiny hole in the case.',
-    badge: 'New',
-    art: {
-      case: 'steel', dial: '#151B2E', finish: 'sunburst', accent: '#D6C08A', bezel: 'thin',
-      bezelColor: '#AEB5BC', hands: 'dauphine', lume: null, moon: true,
-    },
-    straps: [
-      { id: 'leather', name: 'Midnight alligator-grain', color: '#1B2136', type: 'leather' },
-      { id: 'bracelet', name: 'Steel bracelet', color: '#9BA3AB', type: 'bracelet' },
-    ],
+      'Unworn with protective stickers in place, on the riveted steel ' +
+      'bracelet. Supplied with the original box, warranty card and the ' +
+      'additional fabric strap.',
+    images: [],
     specs: {
       'Case diameter': '39 mm',
-      'Lug-to-lug': '45.5 mm',
-      'Thickness': '10.4 mm',
-      'Case material': '316L stainless steel',
-      'Crystal': 'Sapphire, double AR, sapphire caseback',
-      'Movement': 'La Joux-Perret G100 with moonphase module',
-      'Power reserve': '68 hours',
-      'Water resistance': '50 m',
-      'Lug width': '20 mm',
+      'Case material': 'Stainless steel',
+      'Bezel': 'Unidirectional, black anodised aluminium insert',
+      'Movement': 'Tudor Manufacture calibre MT5402, automatic',
+      'Power reserve': 'Approximately 70 hours',
+      'Water resistance': '200 m',
+      'Certification': 'COSC chronometer',
     },
-    size: 39, movement: 'automatic', stock: 5,
+    size: 39, movement: 'automatic',
   },
   {
-    id: 'terrafirma-ti',
-    name: 'Terrafirma Ti',
-    collection: 'terrafirma',
-    price: 1620,
-    tagline: 'Grade 5 titanium. Drilled lugs. No apologies.',
+    id: 'cartier-wssa0018',
+    collection: 'cartier',
+    name: 'Santos de Cartier, large model',
+    reference: 'WSSA0018',
+    year: 2021,
+    condition: 'Excellent',
+    set: 'Full set',
+    price: 6100,
+    tagline: 'QuickSwitch bracelet with the interchangeable leather strap.',
     description:
-      'The movement sits on a silicone shock cage, the lugs are drilled so you can ' +
-      'change straps in a tent with a paperclip, and the crown guards are machined ' +
-      'from the case rather than welded on.',
-    badge: 'Bestseller',
-    art: {
-      case: 'titanium', dial: '#23282C', accent: '#E0A33C', bezel: 'fixed',
-      bezelColor: '#6F7679', hands: 'sword', lume: '#D8C48A',
+      'Large model in steel with both the steel bracelet and the leather ' +
+      'strap, each fitted with the QuickSwitch system. Minor marks to the ' +
+      'bracelet, case sharp. Box and certificate present.',
+    images: [],
+    specs: {
+      'Case size': '39.8 mm x 47.5 mm',
+      'Case material': 'Stainless steel',
+      'Movement': 'Cartier calibre 1847 MC, automatic',
+      'Power reserve': 'Approximately 40 hours',
+      'Water resistance': '100 m',
+      'Bracelet': 'Steel with QuickSwitch, plus leather strap',
+      'Crystal': 'Sapphire',
     },
-    straps: [
-      { id: 'nato', name: 'Coyote NATO', color: '#7A6A4F', type: 'nato' },
-      { id: 'rubber', name: 'Graphite rubber', color: '#2A2E32', type: 'rubber' },
-      { id: 'bracelet', name: 'Titanium bracelet', color: '#878D90', type: 'bracelet' },
-    ],
+    size: 39.8, movement: 'automatic',
+  },
+  {
+    id: 'iwc-iw329301',
+    collection: 'iwc',
+    name: "Big Pilot's Watch 43",
+    reference: 'IW329301',
+    year: 2022,
+    condition: 'Excellent',
+    set: 'Full set',
+    price: 7900,
+    tagline: 'The 43 mm case, on the EasX-CHANGE bracelet.',
+    description:
+      'The smaller 43 mm Big Pilot with the soft-iron inner case. Supplied on ' +
+      'the steel bracelet with the quick-change system, plus the original ' +
+      'leather strap, box and papers.',
+    images: [],
+    specs: {
+      'Case diameter': '43 mm',
+      'Case material': 'Stainless steel',
+      'Movement': 'IWC-manufactured calibre 82100, automatic',
+      'Power reserve': '60 hours',
+      'Water resistance': '100 m',
+      'Crystal': 'Sapphire, secured against drops in pressure',
+      'Bracelet': 'Steel with EasX-CHANGE, plus leather strap',
+    },
+    size: 43, movement: 'automatic',
+  },
+  {
+    id: 'ap-15500st',
+    collection: 'audemars-piguet',
+    name: 'Royal Oak Selfwinding',
+    reference: '15500ST.OO.1220ST.03',
+    year: 2021,
+    condition: 'Excellent',
+    set: 'Full set',
+    price: 38500,
+    tagline: 'Forty-one millimetres, blue Grande Tapisserie dial.',
+    description:
+      'Worn lightly and kept boxed. Brushed surfaces crisp with no ' +
+      'polishing, bevels sharp. Complete with box, certificate and the ' +
+      'original purchase documentation.',
+    images: [],
     specs: {
       'Case diameter': '41 mm',
-      'Lug-to-lug': '47 mm',
-      'Thickness': '11.9 mm',
-      'Case material': 'Grade 5 titanium, bead-blasted',
-      'Crystal': 'Sapphire, double AR',
-      'Movement': 'Miyota 9015, automatic, shock-mounted',
-      'Power reserve': '42 hours',
-      'Water resistance': '200 m',
-      'Lug width': '22 mm',
+      'Case material': 'Stainless steel',
+      'Dial': 'Blue, Grande Tapisserie pattern',
+      'Movement': 'Audemars Piguet calibre 4302, automatic',
+      'Power reserve': 'Approximately 70 hours',
+      'Water resistance': '50 m',
+      'Bracelet': 'Integrated steel with AP folding clasp',
     },
-    size: 41, movement: 'automatic', stock: 15,
+    size: 41, movement: 'automatic',
   },
   {
-    id: 'terrafirma-alpine',
-    name: 'Terrafirma Alpine',
-    collection: 'terrafirma',
-    price: 1980,
-    tagline: 'Tested from −30 °C to 60 °C.',
+    id: 'patek-5711-1a-010',
+    collection: 'patek-philippe',
+    name: 'Nautilus',
+    reference: '5711/1A-010',
+    year: 2019,
+    condition: 'Very good',
+    set: 'Full set',
+    price: 92000,
+    tagline: 'Blue dial, discontinued in 2021.',
     description:
-      'A compressor-style case with an internal rotating bezel driven by a second ' +
-      'crown, so nothing snags on a pack strap. The lubricants are rated for cold ' +
-      'that would stop an ordinary movement dead.',
-    art: {
-      case: 'titanium', dial: '#1C2B24', finish: 'sunburst', accent: '#E8E2D2', bezel: 'compressor',
-      bezelColor: '#5F6A64', hands: 'sword', lume: '#BFE8D9',
-    },
-    straps: [
-      { id: 'rubber', name: 'Black rubber', color: '#15181C', type: 'rubber' },
-      { id: 'nato', name: 'Forest NATO', color: '#3A4A3C', type: 'nato' },
-    ],
-    specs: {
-      'Case diameter': '42 mm',
-      'Lug-to-lug': '48.5 mm',
-      'Thickness': '13.2 mm',
-      'Case material': 'Grade 5 titanium',
-      'Crystal': 'Sapphire, double AR',
-      'Movement': 'Sellita SW200-1, low-temperature lubricants',
-      'Power reserve': '38 hours',
-      'Water resistance': '200 m',
-      'Lug width': '22 mm',
-    },
-    size: 42, movement: 'automatic', stock: 7,
-  },
-  {
-    id: 'terrafirma-solar',
-    name: 'Terrafirma Solar',
-    collection: 'terrafirma',
-    price: 690,
-    tagline: 'Ten months of darkness on a full charge.',
-    description:
-      'A solar movement under a translucent dial, which means no battery changes and ' +
-      'no winding. Leave it in a drawer for most of a year and it will still be ' +
-      'running when you find it.',
-    badge: 'New',
-    art: {
-      case: 'black', dial: '#2C3338', accent: '#5FD3A8', bezel: 'fixed',
-      bezelColor: '#22262A', hands: 'syringe', lume: '#8FE8C4',
-    },
-    straps: [
-      { id: 'rubber', name: 'Black rubber', color: '#15181C', type: 'rubber' },
-      { id: 'nato', name: 'Charcoal NATO', color: '#31363B', type: 'nato' },
-    ],
+      'The blue-dial steel Nautilus, discontinued in 2021. Light wear ' +
+      'consistent with careful use, no polishing. Complete with box, ' +
+      'certificate of origin and setting pin.',
+    images: [],
     specs: {
       'Case diameter': '40 mm',
-      'Lug-to-lug': '46 mm',
-      'Thickness': '10.8 mm',
-      'Case material': 'DLC-coated stainless steel',
-      'Crystal': 'Sapphire, single AR',
-      'Movement': 'Seiko VS75, solar quartz',
-      'Full-charge reserve': '10 months',
-      'Water resistance': '100 m',
-      'Lug width': '20 mm',
+      'Case material': 'Stainless steel',
+      'Dial': 'Blue with horizontal embossing',
+      'Movement': 'Patek Philippe calibre 26-330 S C, automatic',
+      'Power reserve': '35 to 45 hours',
+      'Water resistance': '120 m',
+      'Bracelet': 'Integrated steel with fold-over clasp',
     },
-    size: 40, movement: 'solar', stock: 26,
+    size: 40, movement: 'automatic',
+  },
+  {
+    id: 'panerai-pam01312',
+    collection: 'panerai',
+    name: 'Luminor Marina',
+    reference: 'PAM01312',
+    year: 2022,
+    condition: 'Excellent',
+    set: 'Full set',
+    price: 6200,
+    tagline: 'Forty-four millimetres, three-day movement.',
+    description:
+      'Brushed steel case with the crown-protecting bridge, on the original ' +
+      'leather strap with a spare rubber strap included. Box, papers and the ' +
+      'strap-change tool present.',
+    images: [],
+    specs: {
+      'Case diameter': '44 mm',
+      'Case material': 'Brushed stainless steel',
+      'Movement': 'Panerai calibre P.9010, automatic',
+      'Power reserve': '3 days',
+      'Water resistance': '300 m',
+      'Crystal': 'Sapphire, anti-reflective',
+      'Strap': 'Leather, with additional rubber strap',
+    },
+    size: 44, movement: 'automatic',
+  },
+  {
+    id: 'breitling-ab0138241c1p1',
+    collection: 'breitling',
+    name: 'Navitimer B01 Chronograph 43',
+    reference: 'AB0138241C1P1',
+    year: 2023,
+    condition: 'Unworn',
+    set: 'Full set',
+    price: 7600,
+    tagline: 'In-house B01 chronograph with the slide rule bezel.',
+    description:
+      'Unworn, stickered, on the alligator strap with folding clasp. ' +
+      'Supplied with the full box set and warranty documentation dated 2023.',
+    images: [],
+    specs: {
+      'Case diameter': '43 mm',
+      'Case material': 'Stainless steel',
+      'Bezel': 'Bidirectional, circular slide rule',
+      'Movement': 'Breitling calibre 01, automatic chronograph',
+      'Power reserve': 'Approximately 70 hours',
+      'Water resistance': '30 m',
+      'Certification': 'COSC chronometer',
+    },
+    size: 43, movement: 'automatic',
   },
 ];
 
-const SHIPPING_FLAT = 25;
-const FREE_SHIPPING_OVER = 1500;
+/* Every listing is a single watch. */
+PRODUCTS.forEach((p) => { p.stock = 1; });
 
+const SHIPPING_FLAT = 0;          // insured delivery quoted per order
+const FREE_SHIPPING_OVER = 0;
 
-/* Procedural watch illustration.
-   Draws a product as inline SVG from its `art` block and a chosen strap, so the
-   catalog needs no photography. Deterministic: same product + strap always
-   renders identically. */
-
-const CASE_METALS = {
-  steel:    { light: '#EDF1F4', mid: '#A7B0B8', dark: '#6E767E', edge: '#D5DCE2' },
-  gold:     { light: '#F7E2AE', mid: '#C9A04A', dark: '#8A6624', edge: '#EBCE87' },
-  bronze:   { light: '#EBCB96', mid: '#B07C3F', dark: '#74501F', edge: '#D9B071' },
-  titanium: { light: '#D5DADD', mid: '#939A9E', dark: '#616A6E', edge: '#BCC2C6' },
-  black:    { light: '#555B60', mid: '#26292D', dark: '#101214', edge: '#3E4448' },
-};
-
-const CX = 160, CY = 220;
-const R_CASE = 99, R_BEZEL_IN = 83, R_DIAL = 82;
-
-/* Relative luminance, used to pick dial-contrasting ink instead of trusting a flag. */
-function luminance(hex) {
-  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '#000');
-  if (!m) return 0;
-  const [r, g, b] = [1, 2, 3].map((i) => {
-    const c = parseInt(m[i], 16) / 255;
-    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
-function isLightDial(art) { return luminance(art.dial) > 0.4; }
-function dialInk(art) { return isLightDial(art) ? '#1B1E22' : '#F0EDE6'; }
-
-function polar(angleDeg, radius) {
-  const a = ((angleDeg - 90) * Math.PI) / 180;
-  return [CX + radius * Math.cos(a), CY + radius * Math.sin(a)];
-}
-
-/* ---------- straps ---------- */
-
-function strapBracelet(color, isTop) {
-  const out = [];
-  const h = 15, gap = 3.5;
-  for (let i = 0; i < 9; i++) {
-    const y = isTop ? 116 - i * (h + gap) - h : 324 + i * (h + gap);
-    if (y < -30 || y > 470) continue;
-    const w = 62 - i * 1.9;          // taper toward the clasp
-    const cw = w * 0.34;             // centre link, polished
-    out.push(
-      `<rect x="${CX - w / 2}" y="${y}" width="${w}" height="${h}" rx="3"
-         fill="url(#braceletGrad)"/>` +
-      `<rect x="${CX - cw / 2}" y="${y}" width="${cw}" height="${h}" rx="2"
-         fill="url(#linkGrad)"/>` +
-      `<line x1="${CX - cw / 2}" y1="${y}" x2="${CX - cw / 2}" y2="${y + h}"
-         stroke="rgba(0,0,0,.4)" stroke-width="0.8"/>` +
-      `<line x1="${CX + cw / 2}" y1="${y}" x2="${CX + cw / 2}" y2="${y + h}"
-         stroke="rgba(0,0,0,.4)" stroke-width="0.8"/>` +
-      `<rect x="${CX - w / 2}" y="${y}" width="${w}" height="1.1"
-         fill="rgba(255,255,255,.22)"/>`
-    );
-  }
-  return `<g>${out.join('')}</g>`;
-}
-
-function strapLeather(color, isTop) {
-  const y0 = isTop ? -20 : 322;
-  const y1 = isTop ? 120 : 462;
-  const wTop = isTop ? 50 : 60;
-  const wBot = isTop ? 60 : 50;
-  const path =
-    `M ${CX - wTop / 2} ${y0} L ${CX + wTop / 2} ${y0} ` +
-    `L ${CX + wBot / 2} ${y1} L ${CX - wBot / 2} ${y1} Z`;
-  const stitch = [];
-  for (const side of [-1, 1]) {
-    const pts = [];
-    for (let t = 0; t <= 1.001; t += 0.1) {
-      const w = wTop + (wBot - wTop) * t;
-      pts.push(`${CX + side * (w / 2 - 7)},${y0 + (y1 - y0) * t}`);
-    }
-    stitch.push(
-      `<polyline points="${pts.join(' ')}" fill="none" stroke="rgba(255,255,255,.34)"
-         stroke-width="1.6" stroke-dasharray="5 5" stroke-linecap="round"/>`
-    );
-  }
-  return (
-    `<path d="${path}" fill="${color}"/>` +
-    `<path d="${path}" fill="url(#strapShade)"/>` +
-    stitch.join('')
-  );
-}
-
-function strapRubber(color, isTop) {
-  const y0 = isTop ? -20 : 322;
-  const y1 = isTop ? 120 : 462;
-  const ribs = [];
-  for (let y = y0 + 14; y < y1 - 6; y += 16) {
-    const t = (y - y0) / (y1 - y0);
-    const w = (isTop ? 52 + 10 * t : 62 - 10 * t) - 16;
-    ribs.push(
-      `<rect x="${CX - w / 2}" y="${y}" width="${w}" height="6" rx="3"
-         fill="rgba(0,0,0,.35)"/>`
-    );
-  }
-  const wTop = isTop ? 52 : 64, wBot = isTop ? 64 : 52;
-  const path =
-    `M ${CX - wTop / 2} ${y0} L ${CX + wTop / 2} ${y0} ` +
-    `L ${CX + wBot / 2} ${y1} L ${CX - wBot / 2} ${y1} Z`;
-  return `<path d="${path}" fill="${color}"/>${ribs.join('')}` +
-         `<path d="${path}" fill="url(#strapShade)"/>`;
-}
-
-function strapNato(color, isTop) {
-  const y0 = isTop ? -20 : 322;
-  const y1 = isTop ? 120 : 462;
-  const w = 58;
-  const stripe = `<rect x="${CX - 9}" y="${y0}" width="18" height="${y1 - y0}"
-      fill="rgba(0,0,0,.28)"/>`;
-  const hw = `<rect x="${CX - w / 2 - 3}" y="${isTop ? 74 : 344}" width="${w + 6}" height="13"
-      rx="3" fill="url(#hardwareGrad)"/>`;
-  return (
-    `<rect x="${CX - w / 2}" y="${y0}" width="${w}" height="${y1 - y0}" fill="${color}"/>` +
-    stripe +
-    `<rect x="${CX - w / 2}" y="${y0}" width="${w}" height="${y1 - y0}" fill="url(#strapShade)"/>` +
-    hw
-  );
-}
-
-function renderStrap(strap, isTop) {
-  const fn = { bracelet: strapBracelet, leather: strapLeather,
-               rubber: strapRubber, nato: strapNato }[strap.type] || strapLeather;
-  return fn(strap.color, isTop);
-}
-
-/* ---------- bezel variants ---------- */
-
-function bezelDive(art) {
-  const ticks = [];
-  for (let i = 0; i < 60; i += 1) {
-    const ang = i * 6;
-    const major = i % 5 === 0;
-    const [x1, y1] = polar(ang, R_CASE - 5);
-    const [x2, y2] = polar(ang, R_CASE - (major ? 14 : 10));
-    ticks.push(
-      `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
-         stroke="rgba(255,255,255,${major ? 0.85 : 0.4})" stroke-width="${major ? 2.4 : 1.2}"
-         stroke-linecap="round"/>`
-    );
-  }
-  const [px, py] = polar(0, R_CASE - 11);
-  return (
-    `<circle cx="${CX}" cy="${CY}" r="${(R_CASE + R_BEZEL_IN) / 2}"
-       fill="none" stroke="${art.bezelColor}" stroke-width="${R_CASE - R_BEZEL_IN}"/>` +
-    ticks.join('') +
-    `<circle cx="${px}" cy="${py}" r="4.6" fill="${art.lume || art.accent}"/>`
-  );
-}
-
-function bezelGmt(art) {
-  const half = [];
-  for (const [from, to, fill] of [[0, 180, art.bezelColor], [180, 360, '#8C2F22']]) {
-    const [x1, y1] = polar(from, (R_CASE + R_BEZEL_IN) / 2);
-    const [x2, y2] = polar(to, (R_CASE + R_BEZEL_IN) / 2);
-    half.push(
-      `<path d="M ${x1} ${y1} A ${(R_CASE + R_BEZEL_IN) / 2} ${(R_CASE + R_BEZEL_IN) / 2} 0 0 1 ${x2} ${y2}"
-         fill="none" stroke="${fill}" stroke-width="${R_CASE - R_BEZEL_IN}"/>`
-    );
-  }
-  const labels = [];
-  for (let h = 0; h < 24; h += 2) {
-    const ang = h * 15;
-    const [tx, ty] = polar(ang, R_CASE - 9.5);
-    labels.push(
-      `<text x="${tx}" y="${ty}" font-size="8" font-family="Inter, system-ui, sans-serif"
-         font-weight="600" fill="rgba(255,255,255,.92)" text-anchor="middle"
-         dominant-baseline="central" transform="rotate(${ang} ${tx} ${ty})">${h}</text>`
-    );
-  }
-  return half.join('') + labels.join('');
-}
-
-function bezelWorldtimer(art) {
-  const cities = ['LON', 'PAR', 'CAI', 'MOW', 'DXB', 'KHI', 'DAC', 'BKK', 'HKG', 'TYO',
-                  'SYD', 'NOU', 'AKL', 'MDY', 'HNL', 'ANC', 'LAX', 'DEN', 'CHI', 'NYC',
-                  'CCS', 'RIO', 'FEN', 'AZO'];
-  const labels = cities.map((c, i) => {
-    const ang = i * 15;
-    const [tx, ty] = polar(ang, R_CASE - 10);
-    return `<text x="${tx}" y="${ty}" font-size="5.6" font-family="Inter, system-ui, sans-serif"
-        font-weight="600" letter-spacing="0.2" fill="rgba(255,255,255,.82)" text-anchor="middle"
-        dominant-baseline="central" transform="rotate(${ang} ${tx} ${ty})">${c}</text>`;
-  });
-  return (
-    `<circle cx="${CX}" cy="${CY}" r="${(R_CASE + R_BEZEL_IN) / 2}"
-       fill="none" stroke="${art.bezelColor}" stroke-width="${R_CASE - R_BEZEL_IN}"/>` +
-    labels.join('')
-  );
-}
-
-function bezelCompressor(art) {
-  const ticks = [];
-  for (let i = 0; i < 60; i += 5) {
-    const [x1, y1] = polar(i * 6, R_BEZEL_IN - 2);
-    const [x2, y2] = polar(i * 6, R_BEZEL_IN - 11);
-    ticks.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
-      stroke="rgba(255,255,255,.55)" stroke-width="1.6" stroke-linecap="round"/>`);
-  }
-  const [px, py] = polar(0, R_BEZEL_IN - 7);
-  return (
-    `<circle cx="${CX}" cy="${CY}" r="${(R_CASE + R_BEZEL_IN) / 2}"
-       fill="none" stroke="${art.bezelColor}" stroke-width="${R_CASE - R_BEZEL_IN}"/>` +
-    ticks.join('') +
-    `<circle cx="${px}" cy="${py}" r="3.4" fill="${art.accent}"/>`
-  );
-}
-
-function bezelPlain(art, width) {
-  return `<circle cx="${CX}" cy="${CY}" r="${R_CASE - width / 2}"
-     fill="none" stroke="${art.bezelColor}" stroke-width="${width}" opacity=".95"/>`;
-}
-
-function renderBezel(art) {
-  switch (art.bezel) {
-    case 'dive': return bezelDive(art);
-    case 'gmt': return bezelGmt(art);
-    case 'worldtimer': return bezelWorldtimer(art);
-    case 'compressor': return bezelCompressor(art);
-    case 'thin': return bezelPlain(art, 8);
-    default: return bezelPlain(art, R_CASE - R_BEZEL_IN);
-  }
-}
-
-/* ---------- dial ---------- */
-
-/* A sunburst dial is hundreds of fine radial brush lines catching the light.
-   Ninety alternating strokes is enough to read as one at any size we render. */
-function renderDialFinish(art, uid) {
-  if (art.finish !== 'sunburst') return '';
-  const rays = [];
-  for (let i = 0; i < 90; i++) {
-    const [x, y] = polar(i * 4, R_DIAL);
-    rays.push(
-      `<line x1="${CX}" y1="${CY}" x2="${x}" y2="${y}"
-         stroke="rgba(255,255,255,${i % 2 ? 0.045 : 0.014})" stroke-width="1.1"/>`
-    );
-  }
-  return `<g clip-path="url(#dialClip)">${rays.join('')}</g>`;
-}
-
-function renderIndices(art) {
-  const ink = dialInk(art);
-  const lume = art.lume;
-  const out = [];
-  const rOuter = art.bezel === 'compressor' ? R_DIAL - 16 : R_DIAL - 6;
-
-  for (let i = 0; i < 60; i++) {
-    const ang = i * 6;
-    if (i % 5 === 0) {
-      const [x, y] = polar(ang, rOuter - 11);
-      if (lume) {
-        out.push(
-          `<rect x="${x - 4}" y="${y - 9}" width="8" height="18" rx="2"
-             fill="${lume}" stroke="${ink}" stroke-opacity=".35" stroke-width="1"
-             transform="rotate(${ang} ${x} ${y})"/>`
-        );
-      } else {
-        out.push(
-          `<rect x="${x - 1.6}" y="${y - 9}" width="3.2" height="18" rx="1.4"
-             fill="${art.accent}" transform="rotate(${ang} ${x} ${y})"/>`
-        );
-      }
-    } else {
-      const [x1, y1] = polar(ang, rOuter);
-      const [x2, y2] = polar(ang, rOuter - 5);
-      out.push(
-        `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${ink}"
-           stroke-opacity=".45" stroke-width="1.1" stroke-linecap="round"/>`
-      );
-    }
-  }
-
-  // 12 o'clock marker: doubled baton, the usual orientation cue.
-  const [tx, ty] = polar(0, rOuter - 11);
-  out.push(
-    `<rect x="${tx - 9}" y="${ty - 9}" width="7" height="18" rx="2"
-       fill="${lume || art.accent}"/>` +
-    `<rect x="${tx + 2}" y="${ty - 9}" width="7" height="18" rx="2"
-       fill="${lume || art.accent}"/>`
-  );
-  return out.join('');
-}
-
-function renderSubdial(art) {
-  const ink = dialInk(art);
-  const [sx, sy] = polar(180, 40);
-  const ticks = [];
-  for (let i = 0; i < 12; i++) {
-    const a = ((i * 30 - 90) * Math.PI) / 180;
-    ticks.push(
-      `<line x1="${sx + 20 * Math.cos(a)}" y1="${sy + 20 * Math.sin(a)}"
-         x2="${sx + 16 * Math.cos(a)}" y2="${sy + 16 * Math.sin(a)}"
-         stroke="${ink}" stroke-opacity=".75" stroke-width="1.2"/>`
-    );
-  }
-  return (
-    `<circle cx="${sx}" cy="${sy}" r="22" fill="${isLightDial(art) ? 'rgba(0,0,0,.09)' : 'rgba(255,255,255,.07)'}"
-       stroke="${ink}" stroke-opacity=".5" stroke-width="1.2"/>` +
-    ticks.join('') +
-    `<line x1="${sx}" y1="${sy}" x2="${sx + 9}" y2="${sy - 13}" stroke="${art.accent}"
-       stroke-width="1.8" stroke-linecap="round"/>` +
-    `<circle cx="${sx}" cy="${sy}" r="2" fill="${art.accent}"/>`
-  );
-}
-
-function renderMoonphase(art) {
-  const [mx, my] = polar(180, 40);
-  const stars = [];
-  for (let i = 0; i < 14; i++) {
-    const a = (i * 137.5 * Math.PI) / 180;
-    const r = 4 + (i % 5) * 4;
-    stars.push(
-      `<circle cx="${mx + r * Math.cos(a) * 2.1}" cy="${my + r * Math.sin(a) * 0.7}"
-         r="${0.7 + (i % 3) * 0.3}" fill="#CFE0F0" opacity=".85"/>`
-    );
-  }
-  return (
-    `<clipPath id="moonWin"><path d="M ${mx - 26} ${my} a 26 16 0 0 1 52 0 Z
-       M ${mx - 26} ${my} a 26 16 0 0 0 52 0 Z"/></clipPath>` +
-    `<g clip-path="url(#moonWin)">` +
-      `<rect x="${mx - 28}" y="${my - 18}" width="56" height="36" fill="#0C1430"/>` +
-      stars.join('') +
-      `<circle cx="${mx - 9}" cy="${my - 1}" r="9.5" fill="#EFE3C2"/>` +
-      `<circle cx="${mx - 12}" cy="${my - 4}" r="1.8" fill="#D9CBA4"/>` +
-      `<circle cx="${mx - 6}" cy="${my + 2}" r="1.3" fill="#D9CBA4"/>` +
-    `</g>` +
-    `<path d="M ${mx - 26} ${my} a 26 16 0 0 1 52 0 Z M ${mx - 26} ${my} a 26 16 0 0 0 52 0 Z"
-       fill="none" stroke="${art.accent}" stroke-width="1.4" opacity=".9"/>`
-  );
-}
-
-/* ---------- hands ---------- */
-
-const HAND_SHAPES = {
-  sword: (len, w) => `M 0 6 L ${-w} 0 L ${-w * 0.55} ${-len + 8} L 0 ${-len}
-                      L ${w * 0.55} ${-len + 8} L ${w} 0 Z`,
-  syringe: (len, w) => `M ${-w * 0.5} 6 L ${-w * 0.5} ${-len + 22} L ${-w} ${-len + 22}
-                        L ${-w} ${-len + 6} L 0 ${-len} L ${w} ${-len + 6}
-                        L ${w} ${-len + 22} L ${w * 0.5} ${-len + 22} L ${w * 0.5} 6 Z`,
-  dauphine: (len, w) => `M 0 6 L ${-w} ${-len * 0.55} L 0 ${-len} L ${w} ${-len * 0.55} Z`,
-  leaf: (len, w) => `M 0 6 C ${-w * 1.4} ${-len * 0.4}, ${-w * 0.8} ${-len * 0.85}, 0 ${-len}
-                     C ${w * 0.8} ${-len * 0.85}, ${w * 1.4} ${-len * 0.4}, 0 6 Z`,
-};
-
-function hand(style, len, w, fill, angle, lume) {
-  const shape = (HAND_SHAPES[style] || HAND_SHAPES.sword)(len, w);
-  const lumeFill = lume
-    ? `<path d="${(HAND_SHAPES[style] || HAND_SHAPES.sword)(len - 12, w * 0.45)}"
-         fill="${lume}" opacity=".9"/>`
-    : '';
-  return (
-    `<g transform="translate(${CX} ${CY}) rotate(${angle})">` +
-      `<path d="${shape}" fill="${fill}" stroke="rgba(0,0,0,.28)" stroke-width="0.8"/>` +
-      lumeFill +
-    `</g>`
-  );
-}
-
-function renderHands(art) {
-  const ink = dialInk(art);
-  const style = art.hands || 'sword';
-  // 10:10:35 — the pose every catalogue uses, because it frames the dial.
-  const hourAngle = 305, minuteAngle = 60, secondAngle = 210;
-  const handFill = isLightDial(art) ? '#20242A' : '#E8E4DB';
-
-  let gmtHand = '';
-  if (art.bezel === 'gmt') {
-    gmtHand =
-      `<g transform="translate(${CX} ${CY}) rotate(140)">` +
-        `<rect x="-1.6" y="${-R_DIAL + 26}" width="3.2" height="${R_DIAL - 20}" fill="${art.accent}"/>` +
-        `<circle cx="0" cy="${-R_DIAL + 30}" r="6.5" fill="none" stroke="${art.accent}" stroke-width="3.2"/>` +
-      `</g>`;
-  }
-
-  return (
-    gmtHand +
-    hand(style, R_DIAL - 34, 5.5, handFill, hourAngle, art.lume) +
-    hand(style, R_DIAL - 12, 4.2, handFill, minuteAngle, art.lume) +
-    `<g transform="translate(${CX} ${CY})">` +
-      `<g class="watch-seconds" style="transform:rotate(${secondAngle}deg);transform-origin:0 0">` +
-        `<rect x="-0.9" y="${-R_DIAL + 10}" width="1.8" height="${R_DIAL + 12}" rx="0.9"
-           fill="${art.accent}"/>` +
-        `<circle cx="0" cy="18" r="4" fill="${art.accent}"/>` +
-      `</g>` +
-    `</g>` +
-    `<circle cx="${CX}" cy="${CY}" r="4.4" fill="${ink}" opacity=".9"/>` +
-    `<circle cx="${CX}" cy="${CY}" r="2" fill="${art.accent}"/>`
-  );
-}
-
-/* ---------- case furniture ---------- */
-
-function renderCrown(metal, art) {
-  const teeth = [];
-  for (let i = 0; i < 9; i++) {
-    teeth.push(`<rect x="${CX + R_CASE + 3}" y="${CY - 11 + i * 2.6}" width="9" height="1.5"
-      fill="rgba(0,0,0,.32)"/>`);
-  }
-  const guards =
-    art.bezel === 'dive' || art.bezel === 'compressor'
-      ? `<path d="M ${CX + R_CASE - 6} ${CY - 22} L ${CX + R_CASE + 6} ${CY - 15}
-           L ${CX + R_CASE + 6} ${CY + 15} L ${CX + R_CASE - 6} ${CY + 22} Z"
-           fill="url(#caseGrad)"/>`
-      : '';
-  const secondCrown =
-    art.bezel === 'compressor'
-      ? `<rect x="${CX + R_CASE - 3}" y="${CY - 54}" width="14" height="20" rx="2.5"
-           fill="url(#caseGrad)" stroke="rgba(0,0,0,.3)" stroke-width="0.8"/>`
-      : '';
-  return (
-    guards + secondCrown +
-    `<rect x="${CX + R_CASE - 4}" y="${CY - 13}" width="17" height="26" rx="3"
-       fill="url(#caseGrad)" stroke="rgba(0,0,0,.35)" stroke-width="0.8"/>` +
-    teeth.join('')
-  );
-}
-
-function renderLugs() {
-  const out = [];
-  for (const sy of [-1, 1]) {
-    for (const sx of [-1, 1]) {
-      const x = CX + sx * 30, y = CY + sy * 80;
-      out.push(
-        `<path d="M ${x - sx * 10} ${y} L ${x + sx * 12} ${y + sy * 30}
-           L ${x + sx * 4} ${y + sy * 38} L ${x - sx * 14} ${y + sy * 12} Z"
-           fill="url(#caseGrad)" stroke="rgba(0,0,0,.22)" stroke-width="0.8"/>`
-      );
-    }
-  }
-  return out.join('');
-}
-
-/* ---------- main ---------- */
-
-const BEAT_CLASS = { quartz: 'beat-quartz', solar: 'beat-quartz' };
-
-function renderWatch(product, opts = {}) {
-  const art = product.art;
-  const strap = opts.strap || product.straps[0];
-  const beat = BEAT_CLASS[product.movement] || 'beat-mech';
-  /* `live` runs the seconds hand. Cards start it on hover instead, so a grid
-     of twelve watches isn't all ticking at once. */
-  const liveClass = opts.live ? ' is-live' : '';
-  const metal = CASE_METALS[art.case] || CASE_METALS.steel;
-  const ink = dialInk(art);
-  const uid = `w-${product.id}-${strap.id}`.replace(/[^a-z0-9-]/gi, '');
-
-  const defs = `
-    <defs>
-      <linearGradient id="caseGrad" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="${metal.light}"/>
-        <stop offset="42%" stop-color="${metal.mid}"/>
-        <stop offset="68%" stop-color="${metal.edge}"/>
-        <stop offset="100%" stop-color="${metal.dark}"/>
-      </linearGradient>
-      <linearGradient id="braceletGrad" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="${metal.dark}"/>
-        <stop offset="28%" stop-color="${metal.light}"/>
-        <stop offset="60%" stop-color="${metal.mid}"/>
-        <stop offset="100%" stop-color="${metal.dark}"/>
-      </linearGradient>
-      <linearGradient id="hardwareGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="${metal.light}"/>
-        <stop offset="100%" stop-color="${metal.mid}"/>
-      </linearGradient>
-      <linearGradient id="strapShade" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="rgba(0,0,0,.45)"/>
-        <stop offset="30%" stop-color="rgba(255,255,255,.10)"/>
-        <stop offset="70%" stop-color="rgba(255,255,255,.04)"/>
-        <stop offset="100%" stop-color="rgba(0,0,0,.45)"/>
-      </linearGradient>
-      <linearGradient id="linkGrad" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="${metal.dark}"/>
-        <stop offset="45%" stop-color="${metal.light}"/>
-        <stop offset="100%" stop-color="${metal.mid}"/>
-      </linearGradient>
-      <linearGradient id="chamferGrad" x1="0.1" y1="0" x2="0.9" y2="1">
-        <stop offset="0%" stop-color="rgba(255,255,255,.75)"/>
-        <stop offset="35%" stop-color="rgba(255,255,255,.12)"/>
-        <stop offset="62%" stop-color="rgba(255,255,255,.34)"/>
-        <stop offset="100%" stop-color="rgba(0,0,0,.35)"/>
-      </linearGradient>
-      <linearGradient id="sweepGrad" x1="0" y1="0" x2="0.8" y2="1">
-        <stop offset="0%" stop-color="rgba(255,255,255,.20)"/>
-        <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-      </linearGradient>
-      <clipPath id="dialClip"><circle cx="${CX}" cy="${CY}" r="${R_DIAL}"/></clipPath>
-      <radialGradient id="dialGrad" cx="38%" cy="30%" r="80%">
-        <stop offset="0%" stop-color="rgba(255,255,255,.18)"/>
-        <stop offset="55%" stop-color="rgba(255,255,255,.02)"/>
-        <stop offset="100%" stop-color="rgba(0,0,0,.35)"/>
-      </radialGradient>
-      <linearGradient id="crystalGlare" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="rgba(255,255,255,.26)"/>
-        <stop offset="45%" stop-color="rgba(255,255,255,.03)"/>
-        <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-      </linearGradient>
-      <filter id="caseShadow" x="-40%" y="-40%" width="180%" height="180%">
-        <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity=".45"/>
-      </filter>
-    </defs>`;
-
-  const hasComplication = art.subdial || art.moon;
-  const dialText =
-    `<text x="${CX}" y="${CY - 40}" font-size="11.5" letter-spacing="2.4"
-       font-family="Inter, system-ui, sans-serif" font-weight="600" fill="${ink}"
-       text-anchor="middle">SWIZZ</text>` +
-    `<text x="${CX}" y="${hasComplication ? CY - 25 : CY + 52}" font-size="6.8"
-       letter-spacing="1.8" font-family="Inter, system-ui, sans-serif" fill="${ink}"
-       fill-opacity=".6" text-anchor="middle">${product.name.toUpperCase()}</text>`;
-
-  const svg = `
-<svg class="watch-svg ${beat}${liveClass}" viewBox="0 0 320 440" xmlns="http://www.w3.org/2000/svg"
-     role="img" aria-label="${product.name} on ${strap.name}" data-uid="${uid}">
-  ${defs}
-  ${renderStrap(strap, true)}
-  ${renderStrap(strap, false)}
-  ${renderLugs()}
-  ${renderCrown(metal, art)}
-  <g filter="url(#caseShadow)">
-    <circle cx="${CX}" cy="${CY}" r="${R_CASE}" fill="url(#caseGrad)"/>
-  </g>
-  <circle cx="${CX}" cy="${CY}" r="${R_CASE - 1}" fill="none"
-     stroke="url(#chamferGrad)" stroke-width="2.2"/>
-  ${renderBezel(art)}
-  <circle cx="${CX}" cy="${CY}" r="${R_DIAL}" fill="${art.dial}"/>
-  ${renderDialFinish(art, uid)}
-  <circle cx="${CX}" cy="${CY}" r="${R_DIAL}" fill="url(#dialGrad)"/>
-  ${renderIndices(art)}
-  ${art.subdial ? renderSubdial(art) : ''}
-  ${art.moon ? renderMoonphase(art) : ''}
-  ${dialText}
-  ${renderHands(art)}
-  <circle cx="${CX}" cy="${CY}" r="${R_DIAL}" fill="url(#crystalGlare)"/>
-  <g clip-path="url(#dialClip)">
-    <ellipse cx="${CX - 34}" cy="${CY - 46}" rx="72" ry="30" fill="url(#sweepGrad)"
-       transform="rotate(-34 ${CX - 34} ${CY - 46})"/>
-  </g>
-  <circle cx="${CX}" cy="${CY}" r="${R_CASE}" fill="none"
-     stroke="rgba(255,255,255,.18)" stroke-width="1"/>
-</svg>`;
-
-  // Several watches share a page, so every def id must be unique per instance —
-  // otherwise url(#caseGrad) resolves to whichever watch rendered first.
-  return namespaceIds(svg, uid);
-}
-
-const DEF_IDS = ['caseGrad', 'braceletGrad', 'linkGrad', 'hardwareGrad', 'strapShade',
-                 'chamferGrad', 'sweepGrad', 'dialClip', 'dialGrad', 'crystalGlare',
-                 'caseShadow', 'moonWin'];
-
-function namespaceIds(svg, uid) {
-  for (const id of DEF_IDS) {
-    svg = svg.split(`id="${id}"`).join(`id="${id}-${uid}"`)
-             .split(`url(#${id})`).join(`url(#${id}-${uid})`);
-  }
-  return svg;
-}
+/* Where "Order on Telegram" points. Set this to the real account or channel. */
+const TELEGRAM_HANDLE = 'swizzclones';
 
 
 /* Cart state. Persisted to localStorage; every read and write is guarded so a
    private window or blocked site data degrades to an in-memory cart rather
    than throwing. */
 
-const CART_KEY = 'swizz.cart.v1';
+const CART_KEY = 'swizz.cart.v2';
 
 const Cart = (() => {
   let memory = [];
@@ -2619,53 +2078,49 @@ const Cart = (() => {
     if (!line || typeof line !== 'object') return false;
     const product = PRODUCTS.find((p) => p.id === line.id);
     if (!product) return false;
-    if (!product.straps.some((s) => s.id === line.strap)) return false;
     return Number.isInteger(line.qty) && line.qty > 0;
   }
 
-  const keyOf = (line) => `${line.id}::${line.strap}`;
+  const keyOf = (line) => line.id;
 
   return {
     items: read,
 
-    /* Returns each line joined to its product and strap, ready to render. */
+    /* Returns each line joined to its listing, ready to render. */
     detailed() {
       return read().map((line) => {
         const product = PRODUCTS.find((p) => p.id === line.id);
-        const strap = product.straps.find((s) => s.id === line.strap);
-        return { ...line, product, strap, lineTotal: product.price * line.qty };
+        return { ...line, product, lineTotal: product.price * line.qty };
       });
     },
 
-    add(id, strapId, qty = 1) {
+    add(id, qty = 1) {
       const lines = read();
-      const key = `${id}::${strapId}`;
-      const existing = lines.find((l) => keyOf(l) === key);
+      const existing = lines.find((l) => l.id === id);
       const product = PRODUCTS.find((p) => p.id === id);
-      const cap = product ? product.stock : 99;
+      const cap = product ? product.stock : 1;
       if (existing) {
         existing.qty = Math.min(existing.qty + qty, cap);
       } else {
-        lines.push({ id, strap: strapId, qty: Math.min(qty, cap) });
+        lines.push({ id, qty: Math.min(qty, cap) });
       }
       write(lines);
     },
 
-    setQty(id, strapId, qty) {
-      const key = `${id}::${strapId}`;
+    setQty(id, qty) {
       let lines = read();
       if (qty <= 0) {
-        lines = lines.filter((l) => keyOf(l) !== key);
+        lines = lines.filter((l) => l.id !== id);
       } else {
-        const line = lines.find((l) => keyOf(l) === key);
+        const line = lines.find((l) => l.id === id);
         const product = PRODUCTS.find((p) => p.id === id);
-        if (line) line.qty = Math.min(qty, product ? product.stock : 99);
+        if (line) line.qty = Math.min(qty, product ? product.stock : 1);
       }
       write(lines);
     },
 
-    remove(id, strapId) {
-      write(read().filter((l) => keyOf(l) !== `${id}::${strapId}`));
+    remove(id) {
+      write(read().filter((l) => l.id !== id));
     },
 
     clear() { write([]); },
@@ -2702,6 +2157,7 @@ const ICONS = {
   menu: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><path d="M3 7h18M3 17h18"/></svg>',
   shield: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>',
   truck: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+  telegram: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3 18.7 19.4c-.2 1-.9 1.3-1.7.8l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8L18 6.3c.4-.3-.1-.5-.6-.2L7.5 12.4l-4.7-1.5c-1-.3-1-1 .2-1.5l18.4-7.1c.9-.3 1.6.2 1.3 1.5z"/></svg>',
   rotate: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>',
 };
 
@@ -2863,6 +2319,11 @@ function initChrome() {
 
   markCurrentNavLink();
 
+  document.querySelectorAll('[data-telegram-link]').forEach((a) => {
+    a.href = `https://t.me/${TELEGRAM_HANDLE}`;
+    if (!a.querySelector('svg')) a.insertAdjacentHTML('afterbegin', ICONS.telegram + ' ');
+  });
+
   const year = document.querySelector('[data-year]');
   if (year) year.textContent = new Date().getFullYear();
 
@@ -2906,9 +2367,23 @@ function collectionOf(product) {
   return COLLECTIONS.find((c) => c.id === product.collection);
 }
 
+/* A listing's photograph. With none uploaded we say so, rather than showing a
+   stand-in image: a generic picture of a different watch would misrepresent
+   the specific item being sold. */
+function productImage(product) {
+  const brand = collectionOf(product).name;
+  const alt = `${brand} ${product.name}, reference ${product.reference}`;
+  if (product.images && product.images.length) {
+    return `<img src="${esc(product.images[0])}" alt="${esc(alt)}" loading="lazy">`;
+  }
+  return `
+<div class="photo-pending" role="img" aria-label="Photography to follow for ${esc(alt)}">
+  <span>Photography<br>to follow</span>
+</div>`;
+}
+
 function badgeHTML(product) {
-  if (product.stock <= 3) return `<span class="badge badge-low">${product.stock} remaining</span>`;
-  return product.badge ? `<span class="badge">${esc(product.badge)}</span>` : '';
+  return product.condition === 'Unworn' ? '<span class="badge">Unworn</span>' : '';
 }
 
 /* `index` staggers the reveal so a grid settles row by row rather than at once. */
@@ -2919,12 +2394,14 @@ function productCardHTML(product, index = 0) {
 <article class="card" data-reveal style="--delay:${delay}s">
   ${badgeHTML(product)}
   <a class="card-art" href="${href}" tabindex="-1" aria-hidden="true">
-    ${renderWatch(product)}
+    ${productImage(product)}
   </a>
   <div class="card-body">
     <p class="card-collection">${esc(collectionOf(product).name)}</p>
     <h3 class="card-name"><a href="${href}">${esc(product.name)}</a></h3>
-    <p class="card-tagline">${esc(product.tagline)}</p>
+    <p class="card-meta">
+      Ref. ${esc(product.reference)} &middot; ${product.year} &middot; ${esc(product.condition)}
+    </p>
     <div class="card-foot">
       <span class="price">${money(product.price)}</span>
     </div>
@@ -3035,64 +2512,37 @@ function renderGrid(container, products) {
 })();
 
 
-/* Home page: hero art, cinematic chapters, the full reference rail. */
-
-/* One flagship per family, in the order the collections are listed. */
-const CHAPTER_IDS = ['tidewater-300', 'meridian-worldtimer', 'loft-moonphase', 'terrafirma-ti'];
-
-/* Four references, three layouts. The first and last are centred; the middle
-   two put the watch beside the words and swap sides, so the run does not read
-   as one template repeated. */
-const CHAPTER_LAYOUT = ['', 'chapter-aside', 'chapter-aside chapter-flip', ''];
-
-function chapterHTML(product, i, total) {
-  const collection = collectionOf(product);
-  const n = String(i + 1).padStart(2, '0');
-  const surface = i % 2 === 0 ? 'light' : 'dark';
-  return `
-<section class="chapter ${CHAPTER_LAYOUT[i] || ''}" data-surface="${surface}">
-  <span class="chapter-index">${n} / ${String(total).padStart(2, '0')}</span>
-  <div class="chapter-inner">
-    <p class="label" data-reveal>${esc(collection.name)}</p>
-    <h2 class="chapter-name" data-reveal style="--delay:.04s">${esc(product.name)}</h2>
-    <div class="chapter-art" data-reveal style="--delay:.08s">
-      ${renderWatch(product, { live: true })}
-    </div>
-    <p class="chapter-tagline" data-reveal style="--delay:.12s">${esc(product.tagline)}</p>
-    <div class="chapter-meta" data-reveal style="--delay:.16s">
-      <span class="price">${money(product.price)}</span>
-      <a class="btn btn-ghost"
-         href="#/product?id=${encodeURIComponent(product.id)}">${esc(product.name)} in full</a>
-      <a class="link-arrow"
-         href="#/shop?collection=${encodeURIComponent(collection.id)}">All ${esc(collection.name)}</a>
-    </div>
-  </div>
-</section>`;
-}
+/* Home: brands, then what is currently in stock. */
 
 onPageReady(() => {
-  const hero = document.querySelector('[data-hero-art]');
-  const heroProduct = PRODUCTS.find((p) => p.id === 'tidewater-300');
-  if (hero && heroProduct) hero.innerHTML = renderWatch(heroProduct, { live: true });
-
-  const chapters = document.querySelector('[data-chapters]');
-  if (chapters) {
-    const picks = CHAPTER_IDS.map((id) => PRODUCTS.find((p) => p.id === id)).filter(Boolean);
-    chapters.innerHTML = picks.map((p, i) => chapterHTML(p, i, picks.length)).join('');
-    observeReveals(chapters);
+  const brands = document.querySelector('[data-brands]');
+  if (brands) {
+    brands.innerHTML = COLLECTIONS.map((c, i) => {
+      const held = PRODUCTS.filter((p) => p.collection === c.id);
+      if (!held.length) return '';
+      const from = Math.min(...held.map((p) => p.price));
+      return `
+<a class="brand-tile" href="#/shop?collection=${encodeURIComponent(c.id)}"
+   data-reveal style="--delay:${Math.min(i, 6) * 0.06}s">
+  <span class="brand-tile-name">${esc(c.name)}</span>
+  <span class="brand-tile-meta">
+    ${held.length} ${held.length === 1 ? 'watch' : 'watches'} &middot; from ${money(from)}
+  </span>
+</a>`;
+    }).join('');
+    observeReveals(brands);
   }
 
-  const rail = document.querySelector('[data-rail]');
-  if (rail) {
-    // Ordered by family so the rail reads as a tour of the collection.
-    const ordered = COLLECTIONS.flatMap((c) => PRODUCTS.filter((p) => p.collection === c.id));
-    rail.innerHTML = ordered.map((p, i) => productCardHTML(p, i % 4)).join('');
-    observeReveals(rail);
+  const latest = document.querySelector('[data-latest]');
+  if (latest) {
+    // Newest first, which is how a dealer's stock list reads.
+    const byYear = [...PRODUCTS].sort((a, b) => b.year - a.year);
+    renderGrid(latest, byYear.slice(0, 8));
   }
 
-  // Reveals are ui.js's job; the motion engine only binds drag behaviour. Both
-  // have to be told about markup injected after their own setup ran.
-  observeReveals(document);
+  const all = document.querySelector('[data-stock-count]');
+  if (all) all.textContent = PRODUCTS.length;
+
   window.swizzMotion?.refresh();
 });
 
@@ -3109,13 +2559,19 @@ onPageReady(() => {
     { id: 'lg', label: 'Over 41 mm', test: (p) => p.size > 41 },
   ];
   const MOVEMENTS = [...new Set(PRODUCTS.map((p) => p.movement))].sort();
+  // Listed in condition order, not alphabetically.
+  const CONDITIONS_PRESENT = CONDITIONS.filter(
+    (c) => PRODUCTS.some((p) => p.condition === c));
 
+  const PRICE_CEILING = Math.ceil(Math.max(...PRODUCTS.map((p) => p.price)) / 1000) * 1000;
+  const PRICE_FLOOR = Math.floor(Math.min(...PRODUCTS.map((p) => p.price)) / 1000) * 1000;
   const params = pageParams();
   const state = {
     collections: new Set((params.get('collection') || '').split(',').filter(Boolean)),
     movements: new Set((params.get('movement') || '').split(',').filter(Boolean)),
     sizes: new Set((params.get('size') || '').split(',').filter(Boolean)),
-    maxPrice: Number(params.get('max')) || 3200,
+    conditions: new Set((params.get('condition') || '').split(',').filter(Boolean)),
+    maxPrice: Number(params.get('max')) || PRICE_CEILING,
     sort: params.get('sort') || 'featured',
   };
 
@@ -3131,6 +2587,8 @@ onPageReady(() => {
         (b) => state.sizes.has(b.id) && b.test(product));
       if (!inBucket) return false;
     }
+    if (skip !== 'conditions' && state.conditions.size &&
+        !state.conditions.has(product.condition)) return false;
     if (skip !== 'price' && product.price > state.maxPrice) return false;
     return true;
   }
@@ -3165,13 +2623,27 @@ onPageReady(() => {
         PRODUCTS.filter((p) => p.movement === m && matches(p, 'movements')).length)
     ).join('');
 
+    const condBox = document.querySelector('[data-filter-conditions]');
+    if (condBox) {
+      condBox.innerHTML = CONDITIONS_PRESENT.map((c) =>
+        checkbox('conditions', c, c,
+          PRODUCTS.filter((p) => p.condition === c && matches(p, 'conditions')).length)
+      ).join('');
+    }
+
     document.querySelector('[data-filter-sizes]').innerHTML = SIZE_BUCKETS.map((b) =>
       checkbox('sizes', b.id, b.label,
         PRODUCTS.filter((p) => b.test(p) && matches(p, 'sizes')).length)
     ).join('');
 
+    const slider = document.querySelector('#price-max');
+    slider.min = PRICE_FLOOR;
+    slider.max = PRICE_CEILING;
+    slider.step = 500;
+    slider.value = state.maxPrice;
     document.querySelector('[data-price-label]').textContent = money(state.maxPrice);
-    document.querySelector('#price-max').value = state.maxPrice;
+    const floorLabel = document.querySelector('[data-price-floor]');
+    if (floorLabel) floorLabel.textContent = money(PRICE_FLOOR);
     document.querySelector('[data-sort]').value = state.sort;
   }
 
@@ -3180,7 +2652,8 @@ onPageReady(() => {
     if (state.collections.size) q.set('collection', [...state.collections].join(','));
     if (state.movements.size) q.set('movement', [...state.movements].join(','));
     if (state.sizes.size) q.set('size', [...state.sizes].join(','));
-    if (state.maxPrice < 3200) q.set('max', state.maxPrice);
+    if (state.conditions.size) q.set('condition', [...state.conditions].join(','));
+    if (state.maxPrice < PRICE_CEILING) q.set('max', state.maxPrice);
     if (state.sort !== 'featured') q.set('sort', state.sort);
     setPageParams(q.toString());
   }
@@ -3198,8 +2671,8 @@ onPageReady(() => {
     }
     title.textContent = 'All watches';
     blurb.textContent =
-      'Twelve references across four families. Every one ships with a five-year ' +
-      'warranty and a strap change tool.';
+      'Each listing is one specific watch, with its reference, year, condition ' +
+      'and set stated. Photographs are of the actual piece.';
   }
 
   function render() {
@@ -3217,7 +2690,7 @@ onPageReady(() => {
 </div>`;
     }
     document.querySelector('[data-result-count]').textContent =
-      `${results.length} ${results.length === 1 ? 'watch' : 'watches'}`;
+      `${results.length} ${results.length === 1 ? 'watch' : 'watches'} in stock`;
     renderFilters();
     renderHeading();
     syncUrl();
@@ -3249,7 +2722,8 @@ onPageReady(() => {
       state.collections.clear();
       state.movements.clear();
       state.sizes.clear();
-      state.maxPrice = 3200;
+      state.conditions.clear();
+      state.maxPrice = PRICE_CEILING;
       render();
     }
     if (e.target.closest('[data-filter-toggle]')) {
@@ -3262,7 +2736,24 @@ onPageReady(() => {
 });
 
 
-/* Product detail: strap switching, quantity, add to bag, related references. */
+/* Listing detail.
+   One specific watch: reference, year, condition and set are the facts a
+   buyer of pre-owned actually decides on, so they sit above the fold. */
+
+/* Opens Telegram with the listing already quoted, so the first message
+   identifies the watch without the buyer having to describe it. */
+function telegramOrderHref(product) {
+  const brand = collectionOf(product).name;
+  const message =
+    `Hello, I would like to order this watch:\n\n` +
+    `${brand} ${product.name}\n` +
+    `Reference ${product.reference}\n` +
+    `${product.year} · ${product.condition} · ${product.set}\n` +
+    `${money(product.price)}\n\n` +
+    `Is it still available?`;
+  return `https://t.me/${TELEGRAM_HANDLE}?text=${encodeURIComponent(message)}`;
+}
+
 onPageReady(() => {
   const root = document.querySelector('[data-pdp]');
   if (!root) return;
@@ -3273,18 +2764,15 @@ onPageReady(() => {
   if (!product) {
     root.innerHTML = `
 <div class="empty-state">
-  <strong>We cannot find that reference.</strong>
-  <p>It may have been discontinued, or the link may be wrong.</p>
-  <p style="margin-top:1.8rem"><a class="btn btn-ghost" href="#/shop">See all twelve</a></p>
+  <strong>That listing is no longer available.</strong>
+  <p>It may have sold, or the link may be wrong.</p>
+  <p style="margin-top:1.8rem"><a class="btn btn-ghost" href="#/shop">See what is in stock</a></p>
 </div>`;
     return;
   }
 
-  document.title = `${product.name} | Swizz Clones`;
-  let strap = product.straps[0];
-  let qty = 1;
-
-  const lowStock = product.stock <= 3;
+  const brand = collectionOf(product);
+  document.title = `${brand.name} ${product.name} ${product.reference} | Swizz Clones`;
 
   function specRows() {
     return Object.entries(product.specs)
@@ -3292,125 +2780,79 @@ onPageReady(() => {
       .join('');
   }
 
-  function swatches() {
-    return product.straps.map((s) => `
-<button class="swatch" type="button" data-strap="${esc(s.id)}"
-        aria-pressed="${s.id === strap.id}">
-  <i style="background:${esc(s.color)}"></i>${esc(s.name)}
-</button>`).join('');
-  }
-
-  function render() {
-    root.innerHTML = `
+  root.innerHTML = `
 <div class="pdp">
   <div class="pdp-media">
-    <div class="pdp-stage" data-stage>${renderWatch(product, { strap, live: true })}</div>
-    <p class="label label-quiet" style="margin:1.8rem 0 0">Strap</p>
-    <div class="swatches" role="group" aria-label="Strap">${swatches()}</div>
+    <div class="pdp-stage" data-stage>${productImage(product)}</div>
   </div>
+
   <div>
     <nav class="breadcrumb" aria-label="Breadcrumb">
       <a href="#/shop">Shop</a><span>/</span>
-      <a href="#/shop?collection=${encodeURIComponent(product.collection)}">${esc(collectionOf(product).name)}</a>
-      <span>/</span>${esc(product.name)}
+      <a href="#/shop?collection=${encodeURIComponent(brand.id)}">${esc(brand.name)}</a>
+      <span>/</span>${esc(product.reference)}
     </nav>
+
+    <p class="label label-quiet" style="margin-bottom:0.6rem">${esc(brand.name)}</p>
     <h1>${esc(product.name)}</h1>
     <p class="pdp-tagline">${esc(product.tagline)}</p>
-    <p class="pdp-desc">${esc(product.description)}</p>
+
+    <dl class="facts">
+      <div><dt>Reference</dt><dd>${esc(product.reference)}</dd></div>
+      <div><dt>Year</dt><dd>${product.year}</dd></div>
+      <div><dt>Condition</dt><dd>${esc(product.condition)}</dd></div>
+      <div><dt>Set</dt><dd>${esc(product.set)}</dd></div>
+    </dl>
 
     <p class="pdp-price">${money(product.price)}</p>
-    <p class="pdp-stock${lowStock ? ' low' : ''}">
-      <strong>${lowStock ? `${product.stock} remaining` : 'In stock'}.</strong>
-      Dispatched within two working days.
-    </p>
+    <p class="pdp-stock"><strong>One available.</strong> Insured delivery quoted per order.</p>
 
     <div class="buy-row">
-      <div class="qty">
-        <button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button>
-        <output data-qty aria-live="polite">${qty}</output>
-        <button type="button" data-step="1" aria-label="Increase quantity">+</button>
-      </div>
-      <button class="btn btn-primary" type="button" data-add>Add to bag</button>
+      <a class="btn btn-telegram" href="${telegramOrderHref(product)}"
+         target="_blank" rel="noopener">${ICONS.telegram} Order on Telegram</a>
+      <button class="btn btn-ghost" type="button" data-add>Add to bag</button>
     </div>
 
-    <p class="label label-quiet" style="margin-bottom:1.2rem">Specification</p>
+    <p class="label label-quiet" style="margin-bottom:1.2rem">Description</p>
+    <p class="pdp-desc">${esc(product.description)}</p>
+
+    <p class="label label-quiet" style="margin:2.4rem 0 1.2rem">Specification</p>
     <table class="specs">
       <caption class="sr-only">Specification</caption>
       <tbody>
-        <tr><th scope="row">Strap</th><td data-strap-name>${esc(strap.name)}</td></tr>
+        <tr><th scope="row">Brand</th><td>${esc(brand.name)}</td></tr>
+        <tr><th scope="row">Model</th><td>${esc(product.name)}</td></tr>
+        <tr><th scope="row">Reference</th><td>${esc(product.reference)}</td></tr>
         ${specRows()}
       </tbody>
     </table>
 
     <div class="assurances">
-      <div class="assurance">${ICONS.shield}<span><strong>Five-year warranty</strong>
-        Transferable with the watch if you ever sell it.</span></div>
-      <div class="assurance">${ICONS.truck}<span><strong>Free insured shipping over ${money(FREE_SHIPPING_OVER)}</strong>
-        ${money(SHIPPING_FLAT)} flat below that.</span></div>
-      <div class="assurance">${ICONS.rotate}<span><strong>Thirty days to change your mind</strong>
-        Unworn, in its box. Return shipping is on us.</span></div>
+      <div class="assurance">${ICONS.shield}<span><strong>Authenticity checked</strong>
+        Every watch is inspected and, where supplied, its papers matched to the case.</span></div>
+      <div class="assurance">${ICONS.truck}<span><strong>Insured delivery</strong>
+        Tracked and insured to the full value, quoted per order.</span></div>
+      <div class="assurance">${ICONS.rotate}<span><strong>Fourteen-day returns</strong>
+        Unworn and as supplied, with all packaging.</span></div>
     </div>
   </div>
 </div>`;
-  }
-
-  /* Only the parts that change are re-rendered, so switching strap doesn't
-     scroll-jump the page or reset the quantity. The watch crossfades rather
-     than cutting straight to the new strap. */
-  function updateStrap(next) {
-    strap = next;
-    const stage = root.querySelector('[data-stage]');
-
-    root.querySelector('[data-strap-name]').textContent = strap.name;
-    root.querySelectorAll('[data-strap]').forEach((b) => {
-      b.setAttribute('aria-pressed', String(b.dataset.strap === strap.id));
-    });
-
-    const swap = () => {
-      stage.innerHTML = renderWatch(product, { strap, live: true });
-      stage.classList.remove('is-swapping');
-    };
-
-    if (prefersReducedMotion()) {
-      swap();
-      return;
-    }
-    stage.classList.add('is-swapping');
-    setTimeout(swap, 190);
-  }
 
   root.addEventListener('click', (e) => {
-    const swatch = e.target.closest('[data-strap]');
-    if (swatch) {
-      const next = product.straps.find((s) => s.id === swatch.dataset.strap);
-      if (next && next.id !== strap.id) updateStrap(next);
-      return;
-    }
-
-    const step = e.target.closest('[data-step]');
-    if (step) {
-      qty = Math.min(Math.max(1, qty + Number(step.dataset.step)), product.stock);
-      root.querySelector('[data-qty]').textContent = qty;
-      return;
-    }
-
     if (e.target.closest('[data-add]')) {
-      Cart.add(product.id, strap.id, qty);
-      toast(`${product.name} added to your bag`);
+      Cart.add(product.id, 1);
+      toast('Added to your bag');
     }
   });
 
-  render();
   observeReveals(root);
   window.swizzMotion?.refresh();
 
   const related = PRODUCTS.filter(
     (p) => p.collection === product.collection && p.id !== product.id);
-  const pool = related.length
-    ? related
-    : PRODUCTS.filter((p) => p.id !== product.id).slice(0, 3);
+  const pool = related.length ? related : PRODUCTS.filter((p) => p.id !== product.id);
   if (pool.length) {
-    renderGrid(document.querySelector('[data-related]'), pool.slice(0, 3));
+    renderGrid(document.querySelector('[data-related]'), pool.slice(0, 4));
     document.querySelector('[data-related-section]').hidden = false;
   }
 });
@@ -3423,21 +2865,20 @@ onPageReady(() => {
 
   function lineHTML(line) {
     const href = `#/product?id=${encodeURIComponent(line.product.id)}`;
+    const brand = collectionOf(line.product);
     return `
-<div class="cart-line" data-line data-id="${esc(line.id)}" data-strap="${esc(line.strap.id)}">
+<div class="cart-line" data-line data-id="${esc(line.id)}">
   <a class="cart-line-art" href="${href}" tabindex="-1" aria-hidden="true">
-    ${renderWatch(line.product, { strap: line.strap })}
+    ${productImage(line.product)}
   </a>
   <div>
-    <h3><a href="${href}">${esc(line.product.name)}</a></h3>
-    <p class="cart-line-meta">${esc(collectionOf(line.product).name)} &middot; ${esc(line.strap.name)}</p>
+    <h3><a href="${href}">${esc(brand.name)} ${esc(line.product.name)}</a></h3>
+    <p class="cart-line-meta">
+      Ref. ${esc(line.product.reference)} &middot; ${line.product.year} &middot;
+      ${esc(line.product.condition)} &middot; ${esc(line.product.set)}
+    </p>
     <div class="cart-line-controls">
-      <div class="qty">
-        <button type="button" data-step="-1" aria-label="Decrease quantity for ${esc(line.product.name)}">&minus;</button>
-        <output aria-live="polite">${line.qty}</output>
-        <button type="button" data-step="1" aria-label="Increase quantity for ${esc(line.product.name)}">+</button>
-      </div>
-      <button class="btn btn-quiet" type="button" data-remove>Remove</button>
+      <button class="btn-quiet" type="button" data-remove>Remove</button>
     </div>
   </div>
   <div class="cart-line-price">${money(line.lineTotal)}</div>
@@ -3460,7 +2901,6 @@ onPageReady(() => {
     }
 
     const shipping = Cart.shipping();
-    const remaining = FREE_SHIPPING_OVER - Cart.subtotal();
 
     root.innerHTML = `
 <div class="cart-layout">
@@ -3472,19 +2912,16 @@ onPageReady(() => {
     <h3>Order summary</h3>
     <div class="summary-row"><span>Subtotal</span><span>${money(Cart.subtotal())}</span></div>
     <div class="summary-row">
-      <span>Shipping</span>
-      <span>${shipping === 0 ? 'Free' : money(shipping)}</span>
+      <span>Delivery</span>
+      <span>Quoted per order</span>
     </div>
-    ${remaining > 0
-      ? `<p class="summary-note">Add ${money(remaining)} more for free insured shipping.</p>`
-      : ''}
     <div class="summary-row total"><span>Total</span><span>${money(Cart.total())}</span></div>
     <a class="btn btn-primary btn-block" href="#/checkout" style="margin-top:2rem">
       Proceed to checkout
     </a>
     <p class="summary-note">
-      Taxes calculated at checkout. We confirm your order by email and send a
-      secure payment link before anything is charged.
+      Delivery is insured and quoted per order. We confirm availability on
+      Telegram before anything is paid.
     </p>
   </aside>
 </div>`;
@@ -3493,20 +2930,12 @@ onPageReady(() => {
   root.addEventListener('click', (e) => {
     const lineEl = e.target.closest('[data-line]');
     if (!lineEl) return;
-    const { id, strap } = lineEl.dataset;
+    const { id } = lineEl.dataset;
 
     if (e.target.closest('[data-remove]')) {
-      Cart.remove(id, strap);
+      Cart.remove(id);
       render();
       toast('Removed from your bag');
-      return;
-    }
-
-    const step = e.target.closest('[data-step]');
-    if (step) {
-      const current = Cart.items().find((l) => l.id === id && l.strap === strap);
-      if (current) Cart.setQty(id, strap, current.qty + Number(step.dataset.step));
-      render();
     }
   });
 
@@ -3516,15 +2945,14 @@ onPageReady(() => {
 
 /* Checkout.
 
-   There is no payment processor wired up yet, so this collects the order and
-   hands it to the customer's mail client addressed to us. Nothing is invented:
-   the order is only placed once they send that message, and the page says so.
+   Orders run through Telegram. This collects the delivery details, composes
+   the order, and opens the chat with it ready to send. Nothing is invented:
+   the order is placed when the buyer sends that message, and the page says so.
 
-   When Stripe lands, replace submit() with a call to a serverless function
-   that creates a Checkout session and redirects. Price the line items there,
-   from the server's own catalog — never from the values in this page. */
+   If card payment is added later, price the line items server-side from your
+   own catalogue, never from the values in this page. */
 
-const ORDER_EMAIL = 'hello@swizzclones.example';   // <- set to a real inbox
+/* Orders are placed on Telegram. TELEGRAM_HANDLE lives in data.js. */
 onPageReady(() => {
   const root = document.querySelector('[data-checkout-root]');
   if (!root) return;
@@ -3555,15 +2983,16 @@ onPageReady(() => {
   <h3>Order summary</h3>
   ${lines.map((l) => `
     <div class="summary-row">
-      <span>${esc(l.product.name)} <span style="color:var(--faint)">&times;${l.qty}</span><br>
-        <span style="font-size:.78rem;color:var(--faint)">${esc(l.strap.name)}</span></span>
+      <span>${esc(collectionOf(l.product).name)} ${esc(l.product.name)}<br>
+        <span style="font-size:.78rem;color:var(--faint)">Ref. ${esc(l.product.reference)}
+        &middot; ${l.product.year} &middot; ${esc(l.product.condition)}</span></span>
       <span style="white-space:nowrap">${money(l.lineTotal)}</span>
     </div>`).join('')}
   <div class="summary-row" style="border-top:1px solid var(--line);margin-top:.6rem;padding-top:.8rem">
     <span>Subtotal</span><span>${money(Cart.subtotal())}</span>
   </div>
   <div class="summary-row">
-    <span>Shipping</span><span>${shipping === 0 ? 'Free' : money(shipping)}</span>
+    <span>Delivery</span><span>Quoted per order</span>
   </div>
   <div class="summary-row total"><span>Total</span><span>${money(Cart.total())}</span></div>
 </aside>`;
@@ -3599,11 +3028,11 @@ onPageReady(() => {
     </label>
 
     <p class="summary-note" style="margin-top:2.5rem">
-      We confirm every order by email and send a secure payment link before
-      anything is charged. Nothing is taken from you on this page.
+      Orders are placed on Telegram. We confirm the watch is still available
+      and quote insured delivery before any payment. Nothing is taken here.
     </p>
-    <button class="btn btn-primary btn-block" type="submit" style="margin-top:1.2rem">
-      Place order &middot; ${money(Cart.total())}
+    <button class="btn btn-telegram btn-block" type="submit" style="margin-top:1.2rem">
+      ${ICONS.telegram} Order on Telegram &middot; ${money(Cart.total())}
     </button>
     <p style="text-align:center;margin-top:1.8rem">
       <a class="btn-quiet" href="#/cart">Return to bag</a>
@@ -3627,24 +3056,25 @@ onPageReady(() => {
   /* Composes the order as plain text. This is what the customer sends us and
      what they keep — so it has to be complete on its own. */
   function orderText(reference, form) {
-    const lines = Cart.detailed().map(
-      (l) => `  ${l.qty} x ${l.product.name} (${l.strap.name})   ${money(l.lineTotal)}`);
+    const lines = Cart.detailed().map((l) => {
+      const brand = collectionOf(l.product);
+      return `${brand.name} ${l.product.name}, ref. ${l.product.reference} ` +
+             `(${l.product.year}, ${l.product.condition}) — ${money(l.lineTotal)}`;
+    });
     const f = (n) => form.elements[n].value.trim();
     return [
       `Order ${reference}`,
       '',
       ...lines,
       '',
-      `Subtotal: ${money(Cart.subtotal())}`,
-      `Shipping: ${Cart.shipping() === 0 ? 'Free' : money(Cart.shipping())}`,
-      `Total: ${money(Cart.total())}`,
+      `Total: ${money(Cart.total())} plus insured delivery`,
       '',
       'Deliver to:',
-      `  ${f('name')}`,
-      `  ${f('address')}`,
-      `  ${f('city')} ${f('postcode')}`,
-      `  ${f('country')}`,
-      `  ${f('email')}`,
+      `${f('name')}`,
+      `${f('address')}`,
+      `${f('city')} ${f('postcode')}`,
+      `${f('country')}`,
+      `${f('email')}`,
     ].join('\n');
   }
 
@@ -3654,20 +3084,21 @@ onPageReady(() => {
   <p class="label">Almost there</p>
   <h2 style="margin-bottom:1.6rem">Send order ${esc(reference)}</h2>
   <p class="lede">
-    Your email app should have opened with this order ready to send to
-    <strong>${esc(ORDER_EMAIL)}</strong>. <strong>The order is not placed until you
-    send it.</strong> If nothing opened, copy the details below and email them to us.
+    Telegram should have opened with this order ready to send.
+    <strong>The order is placed when you send it.</strong> If nothing opened,
+    copy the details below and message us on Telegram.
   </p>
   <pre data-order style="white-space:pre-wrap;font:inherit;font-size:.88rem;
        background:var(--panel);border:1px solid var(--line);padding:1.2rem;
        margin-top:1.8rem;overflow-x:auto">${esc(body)}</pre>
   <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1.6rem">
-    <a class="btn btn-primary" href="${esc(mailtoHref(reference, body))}">Open email again</a>
+    <a class="btn btn-telegram" href="${esc(telegramHref(body))}"
+       target="_blank" rel="noopener">${ICONS.telegram} Open Telegram</a>
     <button class="btn btn-ghost" type="button" data-copy>Copy the order</button>
   </div>
   <p class="summary-note" style="margin-top:1.6rem">
-    We reply to confirm stock and send a secure payment link. Nothing is charged
-    until you use it. Sent to ${esc(email)}.
+    We confirm availability and quote insured delivery before any payment.
+    A copy has been noted against ${esc(email)}.
   </p>
 </div>`;
 
@@ -3688,9 +3119,8 @@ onPageReady(() => {
     });
   }
 
-  function mailtoHref(reference, body) {
-    return `mailto:${ORDER_EMAIL}?subject=${encodeURIComponent(`Order ${reference}`)}`
-         + `&body=${encodeURIComponent(body)}`;
+  function telegramHref(body) {
+    return `https://t.me/${TELEGRAM_HANDLE}?text=${encodeURIComponent(body)}`;
   }
 
   function showError(form, name, message) {
@@ -3727,7 +3157,7 @@ onPageReady(() => {
 
     Cart.clear();
     renderConfirmation(reference, body, email);
-    window.location.href = mailtoHref(reference, body);
+    window.open(telegramHref(body), '_blank', 'noopener');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 

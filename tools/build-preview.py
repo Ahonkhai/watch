@@ -21,7 +21,7 @@ OUT = ROOT / "preview" / "swizz-clones-preview.html"
 PAGES = [("", "index.html"), ("shop", "shop.html"), ("product", "product.html"),
          ("cart", "cart.html"), ("checkout", "checkout.html"), ("about", "about.html")]
 
-SCRIPTS = ["assets/js/data.js", "assets/js/watch.js", "assets/js/store.js",
+SCRIPTS = ["assets/js/data.js", "assets/js/store.js",
            "assets/js/ui.js", "assets/js/motion.js",
            "assets/js/pages/home.js", "assets/js/pages/shop.js",
            "assets/js/pages/product.js", "assets/js/pages/cart.js",

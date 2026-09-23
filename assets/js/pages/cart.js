@@ -5,21 +5,20 @@ onPageReady(() => {
 
   function lineHTML(line) {
     const href = `product.html?id=${encodeURIComponent(line.product.id)}`;
+    const brand = collectionOf(line.product);
     return `
-<div class="cart-line" data-line data-id="${esc(line.id)}" data-strap="${esc(line.strap.id)}">
+<div class="cart-line" data-line data-id="${esc(line.id)}">
   <a class="cart-line-art" href="${href}" tabindex="-1" aria-hidden="true">
-    ${renderWatch(line.product, { strap: line.strap })}
+    ${productImage(line.product)}
   </a>
   <div>
-    <h3><a href="${href}">${esc(line.product.name)}</a></h3>
-    <p class="cart-line-meta">${esc(collectionOf(line.product).name)} &middot; ${esc(line.strap.name)}</p>
+    <h3><a href="${href}">${esc(brand.name)} ${esc(line.product.name)}</a></h3>
+    <p class="cart-line-meta">
+      Ref. ${esc(line.product.reference)} &middot; ${line.product.year} &middot;
+      ${esc(line.product.condition)} &middot; ${esc(line.product.set)}
+    </p>
     <div class="cart-line-controls">
-      <div class="qty">
-        <button type="button" data-step="-1" aria-label="Decrease quantity for ${esc(line.product.name)}">&minus;</button>
-        <output aria-live="polite">${line.qty}</output>
-        <button type="button" data-step="1" aria-label="Increase quantity for ${esc(line.product.name)}">+</button>
-      </div>
-      <button class="btn btn-quiet" type="button" data-remove>Remove</button>
+      <button class="btn-quiet" type="button" data-remove>Remove</button>
     </div>
   </div>
   <div class="cart-line-price">${money(line.lineTotal)}</div>
@@ -42,7 +41,6 @@ onPageReady(() => {
     }
 
     const shipping = Cart.shipping();
-    const remaining = FREE_SHIPPING_OVER - Cart.subtotal();
 
     root.innerHTML = `
 <div class="cart-layout">
@@ -54,19 +52,16 @@ onPageReady(() => {
     <h3>Order summary</h3>
     <div class="summary-row"><span>Subtotal</span><span>${money(Cart.subtotal())}</span></div>
     <div class="summary-row">
-      <span>Shipping</span>
-      <span>${shipping === 0 ? 'Free' : money(shipping)}</span>
+      <span>Delivery</span>
+      <span>Quoted per order</span>
     </div>
-    ${remaining > 0
-      ? `<p class="summary-note">Add ${money(remaining)} more for free insured shipping.</p>`
-      : ''}
     <div class="summary-row total"><span>Total</span><span>${money(Cart.total())}</span></div>
     <a class="btn btn-primary btn-block" href="checkout.html" style="margin-top:2rem">
       Proceed to checkout
     </a>
     <p class="summary-note">
-      Taxes calculated at checkout. We confirm your order by email and send a
-      secure payment link before anything is charged.
+      Delivery is insured and quoted per order. We confirm availability on
+      Telegram before anything is paid.
     </p>
   </aside>
 </div>`;
@@ -75,20 +70,12 @@ onPageReady(() => {
   root.addEventListener('click', (e) => {
     const lineEl = e.target.closest('[data-line]');
     if (!lineEl) return;
-    const { id, strap } = lineEl.dataset;
+    const { id } = lineEl.dataset;
 
     if (e.target.closest('[data-remove]')) {
-      Cart.remove(id, strap);
+      Cart.remove(id);
       render();
       toast('Removed from your bag');
-      return;
-    }
-
-    const step = e.target.closest('[data-step]');
-    if (step) {
-      const current = Cart.items().find((l) => l.id === id && l.strap === strap);
-      if (current) Cart.setQty(id, strap, current.qty + Number(step.dataset.step));
-      render();
     }
   });
 
