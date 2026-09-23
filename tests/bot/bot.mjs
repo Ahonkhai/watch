@@ -264,5 +264,53 @@ await step('the generated file stays valid JavaScript the site can load', async 
   ok(/GENERATED FILE/.test(src), 'keeps the do-not-edit header');
 });
 
+/* ---------- the health endpoint ---------- */
+
+const health = async (env) => {
+  for (const k of ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_WEBHOOK_SECRET', 'TELEGRAM_ALLOWED_IDS',
+                   'GITHUB_TOKEN', 'GITHUB_REPO', 'GITHUB_BRANCH']) delete process.env[k];
+  Object.assign(process.env, env);
+  const { default: h } = await import(new URL('../../api/health.js', import.meta.url).href + '?v=' + Math.random());
+  const res = { hdr: {}, code: 0, body: null,
+    setHeader(k, v) { this.hdr[k] = v; }, status(c) { this.code = c; return this; },
+    json(b) { this.body = b; return this; } };
+  h({}, res);
+  return res;
+};
+
+const FULL = {
+  TELEGRAM_BOT_TOKEN: 'SECRET-bot-token', TELEGRAM_WEBHOOK_SECRET: 'SECRET-webhook',
+  TELEGRAM_ALLOWED_IDS: '111222333,444555666', GITHUB_TOKEN: 'SECRET-github',
+  GITHUB_REPO: 'Ahonkhai/watch', GITHUB_BRANCH: 'main',
+};
+
+await step('health names what is missing, without values', async () => {
+  const r = await health({ GITHUB_REPO: 'Ahonkhai/watch' });
+  eq(r.code, 503, 'status');
+  eq(r.body.configured, false, 'configured');
+  ok(r.body.missing.includes('TELEGRAM_BOT_TOKEN'), 'names the missing token');
+  eq(r.body.functions, 'deployed', 'proves api/ built');
+});
+
+await step('health reports ready once everything is set', async () => {
+  const r = await health(FULL);
+  eq(r.code, 200, 'status');
+  eq(r.body.configured, true, 'configured');
+  eq(r.body.missing.length, 0, 'missing');
+  eq(r.body.operators, 2, 'operator count');
+  eq(r.hdr['Cache-Control'], 'no-store', 'not cacheable');
+});
+
+await step('health never discloses a secret, or who may drive the bot', async () => {
+  const r = await health(FULL);
+  const json = JSON.stringify(r.body);
+  for (const secret of ['SECRET-bot-token', 'SECRET-webhook', 'SECRET-github', '111222333', '444555666']) {
+    ok(!json.includes(secret), `leaked ${secret}`);
+  }
+  /* The repository and branch are deliberately echoed: they are public, and a
+     bot pointed at the wrong repo is otherwise invisible. */
+  ok(json.includes('Ahonkhai/watch'), 'target repo shown');
+});
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -81,6 +81,13 @@ tokens** → Generate new token.
 
 Project → Settings → Environment Variables. All of them, in Production:
 
+> If this Vercel project was reused from another repository, it still carries
+> that project's environment variables. They are ignored — the bot reads only
+> the six names below — but a stale `BOT_TOKEN` sitting there is a live secret
+> in a project with no use for it. Delete the ones that are not in this table,
+> after checking nothing else still deploys from this project.
+
+
 | Variable | Value |
 |---|---|
 | `TELEGRAM_BOT_TOKEN` | from BotFather |
@@ -121,7 +128,19 @@ curl -sS "https://api.telegram.org/bot<TOKEN>/getWebhookInfo"
 `pending_update_count` above zero with a `last_error_message` means the
 function is erroring — the message says how.
 
-Then send `/help` to your bot.
+### 6. Check it took
+
+```
+https://<your-domain>/api/health
+```
+
+- **404** — the functions did not deploy. Check Vercel → Settings → Build &
+  Deployment is on its defaults and that `api/` is in the repository.
+- **503** — deployed, but `missing` names the variables still to set.
+- **200** — ready. Send `/help` to your bot.
+
+This endpoint reports which variables are *present*. It never returns a secret
+and never says whether a value is correct.
 
 ## How it works, and why
 
