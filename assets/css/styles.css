@@ -468,7 +468,42 @@ p:last-child { margin-bottom: 0; }
   object-fit: cover;
   display: block;
 }
-.pdp-stage img { width: 100%; height: auto; display: block; }
+.pdp-stage img,
+.pdp-stage video { width: 100%; height: auto; display: block; background: var(--panel); }
+
+/* Thumbnails only appear when there is more than one thing to look at, so
+   they never take up space for a listing with a single photograph. */
+.pdp-thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+}
+.pdp-thumb {
+  position: relative;
+  width: 74px;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid var(--hair);
+  background: var(--panel);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.4s var(--ease);
+}
+.pdp-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pdp-thumb:hover { border-color: var(--line); }
+.pdp-thumb[aria-pressed='true'] { border-color: var(--gold); }
+.pdp-thumb:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.thumb-video {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+  font-size: 1.1rem;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.42);
+}
 .cart-line-art img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
 .card-foot { display: flex; align-items: baseline; gap: 1rem; margin-top: 1.1rem; }
 .price {

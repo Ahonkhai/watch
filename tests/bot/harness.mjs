@@ -15,6 +15,7 @@ export function makeWorld({ files = {}, allowed = '42' } = {}) {
     head: 'commit0',
     sent: [],          // Telegram sendMessage
     edited: [],        // Telegram editMessageText
+    log: [],           // both, in the order they happened
     commitLog: [],
     conflictOnce: false,
   };
@@ -43,10 +44,14 @@ export function makeWorld({ files = {}, allowed = '42' } = {}) {
       }
       const method = p.split('/').pop();
       if (method === 'sendMessage') {
-        world.sent.push(body);
+        world.sent.push(body); world.log.push(body);
         return json({ ok: true, result: { message_id: 900 + world.sent.length, chat: { id: body.chat_id } } });
       }
-      if (method === 'editMessageText') { world.edited.push(body); return json({ ok: true, result: {} }); }
+      if (method === 'editMessageText') {
+        world.edited.push(body); world.log.push(body);
+        return json({ ok: true, result: { message_id: body.message_id, chat: { id: body.chat_id }, text: body.text } });
+      }
+      if (method === 'setMyCommands') { world.commands = body.commands; return json({ ok: true, result: true }); }
       if (method === 'answerCallbackQuery') return json({ ok: true, result: true });
       if (method === 'getFile') return json({ ok: true, result: { file_path: `photos/${body.file_id}.jpg` } });
       return json({ ok: true, result: {} });
@@ -112,11 +117,29 @@ export async function deliver(handler, update, { secret = 'shh' } = {}) {
   return res;
 }
 
-export const photoMsg = ({ group, caption, uid, mid = 1, chat = 5, user = 42 }) => ({
+export const photoMsg = ({ group, caption, uid, mid = 1, chat = 5, user = 42, replyTo = null }) => ({
   message: {
     message_id: mid, chat: { id: chat }, from: { id: user },
     media_group_id: group, caption,
-    photo: [{ file_id: 'small' + uid, file_unique_id: uid + 's' }, { file_id: 'big' + uid, file_unique_id: uid }],
+    photo: [{ file_id: 'small' + uid, file_unique_id: uid + 's', file_size: 900 },
+            { file_id: 'big' + uid, file_unique_id: uid, file_size: 240000 }],
+    ...(replyTo ? { reply_to_message: { from: { is_bot: true }, text: replyTo } } : {}),
+  },
+});
+
+export const videoMsg = ({ group, caption, uid, mid = 1, chat = 5, user = 42, size = 4e6, replyTo = null }) => ({
+  message: {
+    message_id: mid, chat: { id: chat }, from: { id: user },
+    media_group_id: group, caption,
+    video: { file_id: 'vid' + uid, file_unique_id: uid, file_size: size, duration: 14 },
+    ...(replyTo ? { reply_to_message: { from: { is_bot: true }, text: replyTo } } : {}),
+  },
+});
+
+export const docMsg = ({ uid, mime, name, mid = 1, chat = 5, user = 42 }) => ({
+  message: {
+    message_id: mid, chat: { id: chat }, from: { id: user },
+    document: { file_id: 'doc' + uid, file_unique_id: uid, mime_type: mime, file_name: name, file_size: 1000 },
   },
 });
 
