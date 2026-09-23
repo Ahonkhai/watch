@@ -1,5 +1,14 @@
 import { chromium } from './_browser.mjs';
 const URL = 'http://127.0.0.1:8077/preview/swizz-clones-preview.html';
+/* Counts come from the catalogue, never from a literal. The shop's stock is
+   written by the bot and changes whenever a watch is listed or sold; a suite
+   that hard-codes "12" fails the first time someone does their job. */
+import fs from 'node:fs';
+const SRC = fs.readFileSync(`${import.meta.dirname}/../assets/js/listings.js`, 'utf8');
+const CATALOGUE = JSON.parse(SRC.slice(SRC.indexOf('{'), SRC.lastIndexOf('}') + 1));
+const STOCK = CATALOGUE.products.length;
+const inBrand = (id) => CATALOGUE.products.filter((p) => p.collection === id).length;
+
 const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 1360, height: 900 } });
 const page = await ctx.newPage();
@@ -32,13 +41,15 @@ await step('nav routes to the shop', async () => {
   await page.locator('.nav a[href="#/shop"]').click();
   await page.waitForTimeout(800);
   if (!page.url().endsWith('#/shop')) throw new Error(page.url());
-  if (await page.locator('[data-grid] .card').count() !== 12) throw new Error('grid empty');
+  const n = await page.locator('[data-grid] .card').count();
+  if (n !== STOCK) throw new Error(`grid shows ${n}, catalogue has ${STOCK}`);
 });
 
 await step('brand facet deep-links through the hash', async () => {
   await page.goto(URL + '#/shop?collection=rolex', { waitUntil: 'networkidle' });
   await page.waitForTimeout(900);
-  if (await page.locator('[data-grid] .card').count() !== 3) throw new Error('wrong count');
+  const n = await page.locator('[data-grid] .card').count();
+  if (n !== inBrand('rolex')) throw new Error(`rolex facet shows ${n}, catalogue has ${inBrand('rolex')}`);
   if (!await page.locator('input[value="rolex"]').isChecked()) throw new Error('facet not restored');
 });
 
