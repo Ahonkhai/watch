@@ -113,7 +113,8 @@ async function onMedia(msg) {
     return send(chat,
       ['<b>I could not read that caption.</b>', '',
        ...parsed.errors.map((e) => `• ${esc(e)}`), '',
-       'The media is saved. Reply to this message with a corrected caption — or send /new for a template.',
+       'The media is saved. Reply to this message with a corrected caption, /new for a template,',
+       'or just a reference like <code>126710BLNR</code> to add this to a watch already listed.',
        '', marker({ kind: 'draft', key: group })].join('\n'));
   }
 
@@ -124,8 +125,9 @@ async function onMedia(msg) {
 
   if (res.before === 0 && res.staged) {
     return send(chat,
-      ['Media saved, but there was no caption so I do not know what this watch is.', '',
-       'Reply to this message with the details, or send /new for a template.', '',
+      ['Media saved. Reply to this message with either:', '',
+       '• a <b>reference</b> like <code>126710BLNR</code> — adds it to that listing',
+       '• the <b>full details</b> — starts a new listing (/new for a template)', '',
        marker({ kind: 'draft', key: group })].join('\n'));
   }
   return null;
@@ -142,9 +144,13 @@ async function addMediaToListing(msg, t, chat) {
   }
 
   const existing = await listTree(`${IMAGES}/${t.key}/`);
-  const n = existing.length + 1;
-  const dest = `${IMAGES}/${t.key}/${String(n).padStart(2, '0')}.${att.ext}`;
-  if (existing.some((f) => f.path === dest)) return null;
+  const numberIn = (path) => Number(/(\d+)\.jpg$/i.exec(path)?.[1] || 0);
+  const n = Math.max(0, ...existing.map((f) => numberIn(f.path)),
+                        ...(found.listing.images || []).map(numberIn)) + 1;
+  const dest = att.kind === 'video'
+    ? `${IMAGES}/${t.key}/video.mp4`
+    : `${IMAGES}/${t.key}/${String(n).padStart(2, '0')}.jpg`;
+  if (att.kind !== 'video' && existing.some((f) => f.path === dest)) return null;
 
   const file = await download(att.file_id);
   const { listing, catalogue } = found;
@@ -158,6 +164,63 @@ async function addMediaToListing(msg, t, chat) {
   return send(chat,
     [`Added. ${listing.images?.length || 0} photograph(s)${listing.video ? ' and a video' : ''}.`,
      'Send more as a reply to this message, or /edit when you are done.', '', marker(t)].join('\n'));
+}
+
+/* Media staged as a draft, moved onto a listing that already exists.
+ *
+ * Photographing a watch and then saying which one it is, is the order people
+ * actually work in. Requiring /edit REF first — decide, then shoot — is
+ * backwards, so a reply that is just a reference means "add this to that". */
+async function attachStagedTo(group, chat, needle) {
+  const catalogue = await load();
+  const p = find(catalogue, needle);
+  if (!p) {
+    return send(chat,
+      [`No listing matches <code>${esc(needle)}</code>.`, '',
+       'Send /list to see the references, or /new for a template if this is a new watch.',
+       '', marker({ kind: 'draft', key: group })].join('\n'));
+  }
+
+  const staged = await listTree(`${mediaDir(group)}/`);
+  if (!staged.length) {
+    return send(chat, `Nothing is staged to add. Send the photographs, then reply with ${esc(p.reference)}.`);
+  }
+
+  /* Number on from the highest that exists, not from how many exist: a gap in
+     the sequence — 01 and 03, after one was removed — would otherwise make the
+     next upload overwrite 03. */
+  const onDisk = (await listTree(`${IMAGES}/${p.id}/`)).filter((f) => isPhoto(f.path));
+  const numberIn = (path) => Number(/(\d+)\.jpg$/i.exec(path)?.[1] || 0);
+  let n = Math.max(0, ...onDisk.map((f) => numberIn(f.path)),
+                      ...(p.images || []).map(numberIn));
+  const changes = [];
+  let photos = 0, video = false;
+
+  for (const f of staged) {
+    if (isVideo(f.path)) {
+      const dest = `${IMAGES}/${p.id}/video.mp4`;
+      changes.push({ path: dest, sha: f.sha });
+      p.video = dest;
+      video = true;
+    } else {
+      n += 1;
+      const dest = `${IMAGES}/${p.id}/${String(n).padStart(2, '0')}.jpg`;
+      changes.push({ path: dest, sha: f.sha });
+      p.images = [...(p.images || []), dest];
+      photos += 1;
+    }
+    changes.push({ path: f.path, delete: true });
+  }
+
+  changes.push({ path: LISTINGS_PATH, content: serialise(catalogue) });
+  if (await readFile(draftPath(group))) changes.push({ path: draftPath(group), delete: true });
+
+  await commitChanges({ message: `Add media to ${p.name}, ref ${p.reference}`, changes });
+
+  const what = [photos ? `${photos} photograph(s)` : null, video ? 'a video' : null]
+    .filter(Boolean).join(' and ');
+  return showEditor(chat, { kind: 'listing', key: p.id }, null,
+    `<b>Added ${what}</b> to ${esc(p.name)}, ref ${esc(p.reference)}.`);
 }
 
 /* ---------- the draft preview ---------- */
@@ -339,6 +402,14 @@ async function onReply(msg) {
   /* No field named: this is a caption for a draft that had none. */
   if (!fieldMatch) {
     if (t.kind !== 'draft') return showEditor(chat, t);
+
+    /* A one-word reply is a reference, not a caption — they are adding this
+       media to a watch that is already listed. */
+    const bare = String(msg.text).trim();
+    if (bare && !/[\n|:]/.test(bare) && bare.length <= 40) {
+      return attachStagedTo(t.key, chat, bare);
+    }
+
     const parsed = parseCaption(msg.text);
     if (!parsed.ok) {
       return send(chat, ['<b>Still not quite right.</b>', '',
