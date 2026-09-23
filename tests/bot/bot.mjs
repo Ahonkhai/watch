@@ -347,6 +347,38 @@ await step('added photographs are numbered after the ones already there', async 
   ok(w.files.has('assets/img/rolex-129720blnr/01.jpg'), 'the original is untouched');
 });
 
+await step('a reference TYPED, not replied, still attaches the media', async () => {
+  const { w, handler } = await fresh();
+  const before = listing(w, 'rolex-126610ln').images.length;
+  await deliver(handler, photoMsg({ group: 'g6', uid: 't1' }));
+  await deliver(handler, textMsg('126610LN'));          // no reply_to_message
+  eq(listing(w, 'rolex-126610ln').images.length, before + 1, 'photograph added');
+  eq(load(w).products.length, STOCK, 'no new listing');
+});
+
+await step('a reference typed with nothing staged opens that listing for editing', async () => {
+  const { w, handler } = await fresh();
+  await deliver(handler, textMsg('126610LN'));
+  const labels = lastKb(w).flat().map((b) => b.text);
+  ok(labels.some((x) => x.includes('Price')), 'editor opened');
+  ok(/#t-listing-rolex-126610ln/.test(lastText(w)), 'on the right listing');
+  eq(w.commitLog.length, 0, 'nothing committed');
+});
+
+await step('a stale pointer to already-published media does not block editing', async () => {
+  const { w, handler, tap } = await fresh();
+  await deliver(handler, photoMsg({ group: 'g7', uid: 'u1', caption: CAPTION }));
+  await tap('pub:');                                     // consumes the staged media
+  await deliver(handler, textMsg('126610LN'));           // pointer still names g7
+  ok(/#t-listing-rolex-126610ln/.test(lastText(w)), 'falls through to the editor');
+});
+
+await step('text that is not a reference is still read as listing details', async () => {
+  const { w, handler } = await fresh();
+  await deliver(handler, textMsg(CAPTION));
+  ok(/Explorer II/.test(lastText(w)), 'preview shown');
+});
+
 await step('an unknown reference is a one-line answer, not a wall of errors', async () => {
   const { w, handler } = await fresh();
   await deliver(handler, photoMsg({ group: 'g5', uid: 'n1' }));

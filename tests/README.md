@@ -1,7 +1,15 @@
 # Tests
 
-No framework and no dependencies beyond Playwright. Each file is a script that
-prints PASS/FAIL lines and exits non-zero if anything failed.
+No framework and no dependencies beyond Playwright.
+
+```bash
+node tests/run.mjs              # everything
+node tests/run.mjs bot dealer   # just those
+```
+
+`run.mjs` starts the two servers the browser suites need and stops them
+afterwards, so there is nothing to set up and nothing left listening. Each
+suite is also a plain script you can run on its own, given the servers.
 
 ## The bot
 
@@ -18,21 +26,17 @@ the conflict-retry path is genuinely tested rather than stubbed out.
 
 ## The site
 
-These need the site being served. In one shell:
+| | |
+|---|---|
+| `dealer.mjs` | listings, facets, the bag, checkout, the Telegram hand-off |
+| `csp.mjs` | every page under the production CSP, served with `vercel.json`'s real headers |
+| `preview.mjs` | the single-file hash-routed build |
+| `reduced.mjs` | `prefers-reduced-motion` |
 
-```bash
-python3 -m http.server 8077        # for dealer, preview, reduced
-node tests/hdrserver.mjs           # for csp: serves with vercel.json's headers on :8099
-```
-
-Then:
-
-```bash
-node tests/dealer.mjs     # listings, facets, bag, checkout, Telegram hand-off
-node tests/csp.mjs        # every page under the production CSP
-node tests/preview.mjs    # the single-file hash-routed build
-node tests/reduced.mjs    # prefers-reduced-motion
-```
+Counts come from `assets/js/listings.js` at run time, never from a literal:
+the shop's stock is written by the bot and changes whenever a watch is listed
+or sold, and a suite that fails when someone does their job is worse than no
+suite.
 
 `dealer.mjs` asserts some things that are easy to regress and embarrassing to
 ship: that no listing shows a photograph of a different watch, that checkout
