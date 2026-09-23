@@ -194,6 +194,49 @@ await step('no invented provenance left in the copy', async () => {
   }
 });
 
+await step('a listing with a video serves it playably', async () => {
+  /* This container's Chromium is built without H.264, so it cannot decode any
+     mp4 and asking it to play one proves nothing. What IS worth asserting is
+     everything around the codec: that the element renders, that the file is
+     actually served, that it arrives as video/mp4, and that the server answers
+     byte ranges — a phone video keeps its moov index at the end of the file,
+     so without ranges a browser cannot start it. */
+  const withVideo = CATALOGUE.products.find((p) => p.video);
+  if (!withVideo) return;                       // nothing to check yet
+
+  await go(`product.html?id=${withVideo.id}`);
+  const el = await page.evaluate(() => {
+    const v = document.querySelector('[data-stage] video');
+    return v ? { src: v.getAttribute('src'), controls: v.hasAttribute('controls'),
+                 playsinline: v.hasAttribute('playsinline') } : null;
+  });
+  if (!el) throw new Error('no <video> rendered on a listing that has one');
+  if (!el.controls) throw new Error('video has no controls');
+  if (!el.playsinline) throw new Error('video is not playsinline — iOS would go fullscreen');
+
+  const url = new URL(el.src.split('#')[0], `${BASE}/`).href;
+  const head = await page.request.get(url, { headers: { Range: 'bytes=0-99' } });
+  if (head.status() !== 206) throw new Error(`range request returned ${head.status()}, not 206`);
+  const type = head.headers()['content-type'];
+  if (!/video\/mp4/.test(type || '')) throw new Error(`served as ${type}, not video/mp4`);
+
+  const whole = await page.request.get(url);
+  if (whole.status() !== 200) throw new Error(`video returned ${whole.status()}`);
+  const bytes = (await whole.body()).length;
+  if (bytes < 1000) throw new Error(`video is only ${bytes} bytes`);
+});
+
+await step('a video with no photograph still shows a frame, not a black box', async () => {
+  const noStill = CATALOGUE.products.find((p) => p.video && !(p.images || []).length);
+  if (!noStill) return;
+  await go(`product.html?id=${noStill.id}`);
+  const src = await page.evaluate(() =>
+    document.querySelector('[data-stage] video')?.getAttribute('src'));
+  if (!/#t=/.test(src || '')) {
+    throw new Error('no media fragment, so the player would render black until pressed');
+  }
+});
+
 await step('no horizontal overflow at 390px', async () => {
   const m = await ctx.newPage();
   await m.setViewportSize({ width: 390, height: 800 });
