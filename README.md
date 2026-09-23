@@ -36,10 +36,23 @@ over the network.
 
 ## Listings
 
-`assets/js/data.js` is the only file you edit to change what is for sale.
-Everything derives from it — the nav, the facets, the counts, the price range
-on the shop page and the brand tiles on the home page — so adding a watch or a
-whole brand needs no other change.
+Watches are added, repriced and marked sold through a **Telegram bot**: you
+send the photographs with a caption, tap Publish, and the listing is live
+under a minute later. Nothing else is needed — no admin panel, no database.
+See [docs/telegram-bot.md](docs/telegram-bot.md) for the caption format and
+the one-time setup.
+
+The bot writes `assets/js/listings.js`, which is loaded as a script, so the
+site stays completely static. **Do not edit that file by hand** — the next bot
+action rewrites it wholesale.
+
+`assets/js/data.js` holds everything the bot does not own: the condition and
+set vocabularies the shop filters on, the delivery rules, and the Telegram
+handle orders are sent to.
+
+Everything else derives from those two — the nav, the facets, the counts, the
+price range on the shop page and the brand tiles on the home page — so adding a
+watch or a whole brand needs no code change.
 
 A listing looks like this:
 
@@ -71,8 +84,12 @@ second add is a no-op rather than a quantity of two.
 `images` is empty on every listing, and a listing with no photograph renders a
 "photography to follow" panel rather than a stand-in picture. That is
 deliberate: a generic image of a different watch is a lie about what is being
-sold. Drop real files into `assets/img/` and list them in `images` — the card,
-the listing page and the bag all read the first one.
+sold.
+
+The bot fills them: photographs are downloaded from Telegram, re-hosted under
+`assets/img/<listing-id>/`, and written into `images`. In the grid they are
+cropped to a square so a row of cards lines up; on the listing page nothing is
+cropped, because that is where you are looking at the watch.
 
 There used to be an `assets/js/watch.js` that drew a watch as inline SVG. It
 was right for an invented brand and wrong here, for the same reason. It is in
@@ -106,10 +123,13 @@ values in this page, which anyone can edit with dev tools.
 ├── assets/css/fonts.css    @font-face for the two self-hosted families
 ├── assets/css/styles.css   design tokens, then layout, then components
 ├── assets/fonts/*.woff2    Cormorant Garamond + Jost, latin subsets
-├── assets/js/data.js       the catalogue, and the Telegram handle
+├── assets/js/listings.js   the stock — GENERATED, written by the bot
+├── assets/js/data.js       vocabularies, delivery, the Telegram handle
 ├── assets/js/store.js      the bag, persisted to localStorage
 ├── assets/js/ui.js         shared chrome: nav, bag count, toasts, cards
 ├── assets/js/pages/*.js    one script per page
+├── api/telegram.js         the listing bot's webhook
+├── api/_lib/*.js           GitHub, Telegram and catalogue helpers
 ├── tools/build-pages.py    regenerates the pages from one shared chrome
 ├── tools/build-preview.py  packs the site into one hash-routed file
 ├── tools/check-csp-hash.py guards the CSP hash against drift
@@ -266,7 +286,7 @@ paths, which is what you want for sharing and search engines.
 
 ## Before you sell
 
-1. **Replace the catalogue.** The twelve entries in `data.js` are real
+1. **Replace the catalogue.** The twelve entries in `listings.js` are real
    references with published manufacturer specifications, used as a working
    placeholder so the page has something to lay out. They are not anyone's
    stock. Replace them with the watches actually held, and verify every figure
@@ -274,10 +294,14 @@ paths, which is what you want for sharing and search engines.
    reference can still be wrong for the individual watch.
 
 2. **Photograph each watch.** Until `images` is filled, every listing shows
-   "photography to follow".
+   "photography to follow". Send them through the bot.
+
+   Setting the bot up takes five environment variables and one curl — see
+   [docs/telegram-bot.md](docs/telegram-bot.md).
 
 3. **Set the Telegram handle.** `TELEGRAM_HANDLE` in `data.js` is
-   `'swizzclones'` and every order link is built from it.
+   `'swizzclones'` and every order link on the site is built from it. This is
+   the account *customers* message — it is separate from the listing bot.
 
 4. **Decide on the name.** "Swizz Clones" reads as replicas, which is the
    opposite of what this dealer sells. It is worth changing before anyone

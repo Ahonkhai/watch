@@ -86,6 +86,7 @@ FOOT = '''</main>
     </div>
   </div>
 </footer>
+<script src="assets/js/listings.js"></script>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/store.js"></script>
 <script src="assets/js/ui.js"></script>

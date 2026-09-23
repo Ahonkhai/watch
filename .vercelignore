@@ -1,2 +1,7 @@
-# Authoring scripts, not site content.
+# Authoring scripts and tests, not site content.
 tools
+tests
+
+# Drafts in progress. These live in the repo so the bot can be stateless, but
+# they are not part of the site and must never be served.
+.bot
