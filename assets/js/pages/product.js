@@ -36,6 +36,36 @@ onPageReady(() => {
   const brand = collectionOf(product);
   document.title = `${brand.name} ${product.name} ${product.reference} | Swizz Clones`;
 
+  /* The photographs and video of this specific watch. With none uploaded the
+     stage shows the "photography to follow" panel instead of a stand-in. */
+  const media = productMedia(product);
+  const alt = productAlt(product);
+
+  function stageHTML(i) {
+    if (!media.length) return productImage(product);
+    const item = media[i];
+    if (item.type === 'video') {
+      const poster = product.images && product.images.length ? ` poster="${esc(product.images[0])}"` : '';
+      return `<video src="${esc(item.src)}"${poster} controls playsinline preload="metadata"
+                     aria-label="Video of ${esc(alt)}"></video>`;
+    }
+    return `<img src="${esc(item.src)}" alt="${esc(alt)}">`;
+  }
+
+  function thumbsHTML() {
+    if (media.length < 2) return '';
+    const items = media.map((m, i) => {
+      const label = m.type === 'video' ? `Play the video of ${alt}` : `View photograph ${i + 1} of ${alt}`;
+      const inner = m.type === 'video'
+        ? `<span class="thumb-video" aria-hidden="true">▶</span>` +
+          (product.images && product.images.length ? `<img src="${esc(product.images[0])}" alt="" loading="lazy">` : '')
+        : `<img src="${esc(m.src)}" alt="" loading="lazy">`;
+      return `<button type="button" class="pdp-thumb" data-thumb="${i}"
+                      aria-label="${esc(label)}" aria-pressed="${i === 0}">${inner}</button>`;
+    }).join('');
+    return `<div class="pdp-thumbs" data-thumbs role="group" aria-label="Media for ${esc(alt)}">${items}</div>`;
+  }
+
   function specRows() {
     return Object.entries(product.specs)
       .map(([k, v]) => `<tr><th scope="row">${esc(k)}</th><td>${esc(v)}</td></tr>`)
@@ -45,7 +75,8 @@ onPageReady(() => {
   root.innerHTML = `
 <div class="pdp">
   <div class="pdp-media">
-    <div class="pdp-stage" data-stage>${productImage(product)}</div>
+    <div class="pdp-stage" data-stage>${stageHTML(0)}</div>
+    ${thumbsHTML()}
   </div>
 
   <div>
@@ -104,6 +135,23 @@ onPageReady(() => {
     if (e.target.closest('[data-add]')) {
       Cart.add(product.id, 1);
       toast('Added to your bag');
+      return;
+    }
+
+    const thumb = e.target.closest('[data-thumb]');
+    if (thumb) {
+      const i = Number(thumb.dataset.thumb);
+      const stage = root.querySelector('[data-stage]');
+      stage.innerHTML = stageHTML(i);
+      root.querySelectorAll('[data-thumb]').forEach((b) => {
+        b.setAttribute('aria-pressed', String(Number(b.dataset.thumb) === i));
+      });
+      /* Opening the video means wanting to watch it, so do not make them
+         press play a second time. Autoplay can still be refused; the controls
+         are there either way. */
+      if (media[i] && media[i].type === 'video') {
+        stage.querySelector('video')?.play?.().catch(() => {});
+      }
     }
   });
 

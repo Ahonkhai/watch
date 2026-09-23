@@ -10,51 +10,114 @@ you ──▶ Telegram ──▶ /api/telegram ──▶ commit to this repo ─
 
 ## Listing a watch
 
-Select the photographs, and put this in the caption:
+Select the photographs — and a video if you have one — and put the details in
+the caption. Send **/new** and the bot hands you this to copy and fill in:
 
 ```
-Rolex | Submariner Date | 126610LN | 2023 | Unworn | Full set | 14200 | 41 | automatic
-Oystersteel on Oyster bracelet, black Cerachrom bezel.
-
-Unworn 2023 example with stickers intact, supplied with the original box,
-card and hang tags. Purchased from an authorised dealer.
-
+Brand: Rolex
+Model: GMT-Master II
+Ref: 126710BLNR
+Year: 2022
+Condition: Excellent
+Set: Full set
+Price: 14500
+Size: 40
+Movement: automatic
+Tagline: Oystersteel on Jubilee bracelet, blue and black bezel.
+Description: Worn lightly, no notable marks. Box and card present.
+Specs:
 Case material: Oystersteel
-Movement: Rolex calibre 3235, automatic
-Water resistance: 300 m
+Movement: Rolex calibre 3285, automatic
+Water resistance: 100 m
 ```
 
-- **First line**, separated by `|`: brand, model, reference, year, condition,
-  set, price, case size, movement. Size and movement can be left off if the
-  spec rows below cover them — the bot reads `Case diameter` and works the
-  movement out of the calibre line.
-- **Then** the tagline, a blank line, the description, a blank line, and any
-  number of `Key: value` rows that become the specification table.
-- Condition must be one of: Unworn, Excellent, Very good, Good.
-- Set must be one of: Full set, Watch and box, Watch and papers, Watch only.
-- Case does not matter (`full set` and `FULL SET` both work), and the price can
-  be written `14200`, `14,200` or `$14,200`.
+Order does not matter. You can leave out **Size, Movement, Tagline and
+Description** and fill them in later. Everything under `Specs:` becomes a row
+in the specification table. Case does not matter (`full set` works), and the
+price can be `14500`, `14,500` or `$14,500`.
 
-The bot replies with a card showing exactly what it understood, and two
-buttons. Nothing reaches the site until you tap **Publish**.
+Condition must be one of: Unworn, Excellent, Very good, Good.
+Set must be one of: Full set, Watch and box, Watch and papers, Watch only.
 
-If the caption is wrong, the bot says which field it could not read and keeps
-the photographs. Reply to that message with a corrected caption; you do not
-need to send the photos again.
+Forgot the caption? Send the photos anyway — the bot asks, and you reply with
+the details. Pasted the details with no photos? That works too; add them after.
 
-A brand the bot has not seen before is added to the shop automatically, so
-listing a Grand Seiko needs no code change.
+**The faster shorthand.** Once the order is in your head, one pipe-separated
+line does the same job:
+
+```
+Rolex | GMT-Master II | 126710BLNR | 2022 | Excellent | Full set | 14500 | 40 | automatic
+Oystersteel on Jubilee bracelet, blue and black bezel.
+
+Worn lightly, no notable marks.
+```
+
+### The preview
+
+The bot replies with a card showing what it understood, a button for every
+field, and **Publish** / **Discard**. Nothing reaches the site until you tap
+Publish. Tap any field to correct it first — that costs no deploy, because
+drafts are staged with `[skip ci]`.
+
+If a field is wrong the bot names it and keeps your media; reply with a
+correction rather than starting over.
+
+## Videos
+
+Send a video in the same album as the photographs and it is published with the
+listing. On the site the photographs come first and the video sits last in the
+thumbnail strip, marked with a play symbol.
+
+Two limits, both real:
+
+- **20 MB.** Telegram will not hand a bot a bigger file, whatever your plan.
+  The bot says so with the actual size rather than failing silently.
+- **Videos live in git**, like the photographs. Short clips are fine; a
+  habit of 15 MB videos will make the repository heavy. The bot warns above
+  8 MB. If it ever becomes a problem, the fix is to point the publish step at
+  blob storage — one function.
+
+One video per listing. Send a second and it replaces nothing; only the first
+in an album is used, and the bot says so.
+
+## Editing
+
+`/edit 126710BLNR` (or `/edit` with the listing id) opens a menu with a button
+for every field:
+
+Brand · Model · Reference · Year · Condition · Set · Price · Size · Movement ·
+Tagline · Description · Media · Specs
+
+- **Condition, Set and Movement** are buttons — no typing, no way to enter a
+  value the shop cannot filter on. The current value is marked with a dot.
+- **Everything else** prompts you to reply with the new value, and validates
+  it the same way an upload is validated. `free` is not a price.
+- **Media** lets you reply with more photographs or a video, added to the
+  listing.
+- **Specs** replaces the whole specification table with the rows you send.
+
+Changing **Brand** or **Reference** renames the listing, because the id and
+the image paths are built from them. The bot moves the media in the same
+commit, so nothing points at a file that has moved, and it refuses a rename
+that would collide with an existing listing.
+
+`/list` shows everything in stock with an `/edit` shortcut per row.
 
 ## The other commands
 
 | | |
 |---|---|
-| `/list` | Everything in stock, with prices, photo counts and ids |
-| `/price 126610LN 13900` | Reprice by reference or id |
-| `/sold 126610LN` | Remove a watch from the site — asks first |
-| `/help` | The caption format |
+| `/new` | The template above, to copy |
+| `/list` | Everything in stock, with photo counts and edit shortcuts |
+| `/edit 126710BLNR` | Change any field, or add media |
+| `/price 126710BLNR 13900` | Quick reprice without opening the menu |
+| `/sold 126710BLNR` | Remove from the site — asks first |
+| `/help` | The caption format, and registers the `/` menu |
 
-`/sold` deletes the listing and its photographs from the site. They stay in git
+Send `/help` once after setup: it registers the command menu so typing `/` in
+Telegram lists everything instead of you having to remember.
+
+`/sold` deletes the listing and its media from the site. Both stay in git
 history, so nothing is truly lost.
 
 ## Setting it up
@@ -143,6 +206,15 @@ This endpoint reports which variables are *present*. It never returns a secret
 and never says whether a value is correct.
 
 ## How it works, and why
+
+### Editing without a database
+
+The bot stamps a marker into its own message — `#t-listing-<id>` or
+`#t-draft-<group>` — and Telegram hands that message back on every button tap
+and every reply. So the bot always knows what is being edited without
+remembering anything between calls, and `callback_data` carries the field name
+only, which keeps it well inside Telegram's 64-byte limit however long an id
+gets.
 
 ### Drafts live in the repo
 

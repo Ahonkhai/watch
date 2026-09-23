@@ -218,9 +218,21 @@ function collectionOf(product) {
 /* A listing's photograph. With none uploaded we say so, rather than showing a
    stand-in image: a generic picture of a different watch would misrepresent
    the specific item being sold. */
-function productImage(product) {
+function productAlt(product) {
   const brand = collectionOf(product).name;
-  const alt = `${brand} ${product.name}, reference ${product.reference}`;
+  return `${brand} ${product.name}, reference ${product.reference}`;
+}
+
+/* Everything shot of this watch, in the order it will be shown. A video is
+   last: the photographs are what a buyer scans, the video is what they open. */
+function productMedia(product) {
+  const media = (product.images || []).map((src) => ({ type: 'image', src }));
+  if (product.video) media.push({ type: 'video', src: product.video });
+  return media;
+}
+
+function productImage(product) {
+  const alt = productAlt(product);
   if (product.images && product.images.length) {
     return `<img src="${esc(product.images[0])}" alt="${esc(alt)}" loading="lazy">`;
   }

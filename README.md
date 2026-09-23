@@ -36,9 +36,10 @@ over the network.
 
 ## Listings
 
-Watches are added, repriced and marked sold through a **Telegram bot**: you
-send the photographs with a caption, tap Publish, and the listing is live
-under a minute later. Nothing else is needed — no admin panel, no database.
+Watches are added, edited, repriced and marked sold through a **Telegram
+bot**: you send the photographs — and a video if you have one — with a
+caption, tap Publish, and the listing is live under a minute later. Every
+field of every listing is editable from the same bot afterwards. Nothing else is needed — no admin panel, no database.
 See [docs/telegram-bot.md](docs/telegram-bot.md) for the caption format and
 the one-time setup.
 
@@ -90,6 +91,11 @@ The bot fills them: photographs are downloaded from Telegram, re-hosted under
 `assets/img/<listing-id>/`, and written into `images`. In the grid they are
 cropped to a square so a row of cards lines up; on the listing page nothing is
 cropped, because that is where you are looking at the watch.
+
+A listing with more than one photograph gets a thumbnail strip under the
+stage. A video, if there is one, sits last in that strip behind a play symbol
+and plays inline — `video` on the listing, `assets/img/<id>/video.mp4` on
+disk.
 
 There used to be an `assets/js/watch.js` that drew a watch as inline SVG. It
 was right for an invented brand and wrong here, for the same reason. It is in

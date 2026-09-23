@@ -1,15 +1,22 @@
 /* The listing bot's webhook.
  *
  * There is no database. A draft accumulates in the repository under .bot/,
- * committed with [skip ci] so that building a listing over several photos
- * costs no deploys, and publishing writes the listing and its photographs in
- * a single commit that does deploy. The repository is the state, which is why
- * this function can be stateless and still survive a cold start mid-album. */
+ * committed with [skip ci] so building a listing over several photographs
+ * costs no deploys, and publishing writes everything in a single commit that
+ * does deploy.
+ *
+ * Editing is stateless by the same trick. The bot stamps a marker into its
+ * own message — #t-listing-<id> or #t-draft-<group> — and Telegram hands that
+ * message back on every button tap and every reply, so the bot always knows
+ * what is being edited without remembering anything between calls. That also
+ * keeps callback_data well inside its 64-byte limit: it carries the field
+ * name only, never the id. */
 
 import { commitChanges, listTree, readFile } from './_lib/github.js';
-import { send, edit, answer, download, buttons, esc } from './_lib/tg.js';
+import { send, edit, answer, download, buttons, esc, publishCommands } from './_lib/tg.js';
 import { load, serialise, listingId, ensureCollection, money, LISTINGS_PATH } from './_lib/catalogue.js';
-import { parseCaption, USAGE } from './_lib/parse.js';
+import { parseCaption, parseField, FIELDS, FIELD_ORDER, USAGE, TEMPLATE } from './_lib/parse.js';
+import { attachment, isPhoto, isVideo, humanSize, MAX_BYTES, SOFT_VIDEO_BYTES } from './_lib/media.js';
 
 export const config = { maxDuration: 60 };
 
@@ -20,6 +27,24 @@ const IMAGES = 'assets/img';
 const draftPath = (g) => `${DRAFTS}/${g}.json`;
 const mediaDir  = (g) => `${MEDIA}/${g}`;
 
+/* ---------- targets ---------- */
+
+const marker = (t) => `#t-${t.kind}-${t.key}`;
+const targetOf = (text) => {
+  const m = /#t-(draft|listing)-([A-Za-z0-9_-]+)/.exec(String(text || ''));
+  return m ? { kind: m[1], key: m[2] } : null;
+};
+
+async function loadTarget(t) {
+  if (t.kind === 'draft') {
+    const raw = await readFile(draftPath(t.key));
+    return raw ? { listing: JSON.parse(raw).listing } : null;
+  }
+  const catalogue = await load();
+  const listing = catalogue.products.find((p) => p.id === t.key);
+  return listing ? { listing, catalogue } : null;
+}
+
 /* ---------- authorisation ---------- */
 
 function allowed(userId) {
@@ -28,185 +53,409 @@ function allowed(userId) {
   return list.length > 0 && list.includes(String(userId));
 }
 
-/* ---------- photographs ---------- */
+/* ---------- media ---------- */
 
-async function onPhoto(msg) {
-  const group = msg.media_group_id || `m${msg.message_id}`;
-  const photo = msg.photo[msg.photo.length - 1];        // largest rendition
-  const chat = msg.chat.id;
+async function stageMedia(msg, group, chat) {
+  const att = attachment(msg);
+  if (!att) return { staged: 0 };
 
-  const existing = await listTree(`${mediaDir(group)}/`);
-  const already = existing.some((f) => f.path.endsWith(`/${photo.file_unique_id}.jpg`));
-
-  const changes = [];
-  if (!already) {
-    const file = await download(photo.file_id);
-    changes.push({ path: `${mediaDir(group)}/${photo.file_unique_id}.jpg`, base64: file.base64 });
+  if (att.kind === 'unsupported') {
+    await send(chat, `I can take photographs and videos. ${esc(att.name)} is neither.`);
+    return { staged: 0 };
+  }
+  if (att.size > MAX_BYTES) {
+    await send(chat,
+      `That ${att.kind} is ${humanSize(att.size)}. Telegram will not hand a bot anything over 20 MB, ` +
+      `so it has to be trimmed or compressed first.`);
+    return { staged: 0 };
   }
 
+  const path = `${mediaDir(group)}/${att.uid}.${att.ext}`;
+  const existing = await listTree(`${mediaDir(group)}/`);
+  if (existing.some((f) => f.path === path)) return { staged: 0, already: true, before: existing.length };
+
+  const file = await download(att.file_id);
+  await commitChanges({
+    message: `Draft ${group}: ${att.kind}`,
+    changes: [{ path, base64: file.base64 }],
+    skipDeploy: true,
+  });
+
+  if (att.kind === 'video' && att.size > SOFT_VIDEO_BYTES) {
+    await send(chat,
+      `Saved that video (${humanSize(att.size)}). Videos live in the repository like photographs, ` +
+      `so short clips keep it healthy — a few of that size is fine, a hundred is not.`);
+  }
+  return { staged: 1, before: existing.length, kind: att.kind };
+}
+
+async function onMedia(msg) {
+  const chat = msg.chat.id;
+
+  /* Media sent as a reply to "send more" is added to that listing or draft. */
+  const t = msg.reply_to_message?.from?.is_bot ? targetOf(msg.reply_to_message.text) : null;
+  if (t && t.kind === 'listing') return addMediaToListing(msg, t, chat);
+
+  const group = msg.media_group_id || (t?.kind === 'draft' ? t.key : `m${msg.message_id}`);
+  const res = await stageMedia(msg, group, chat);
   const parsed = msg.caption ? parseCaption(msg.caption) : null;
 
   if (parsed?.ok) {
-    changes.push({
-      path: draftPath(group),
-      content: JSON.stringify({ group, chat, listing: parsed.listing }, null, 2),
-    });
-  }
-
-  if (changes.length) {
     await commitChanges({
-      message: `Draft ${group}: photograph`,
-      changes,
+      message: `Draft ${group}: details`,
+      changes: [{ path: draftPath(group), content: JSON.stringify({ group, chat, listing: parsed.listing }, null, 2) }],
       skipDeploy: true,
     });
+    return preview(chat, group);
   }
-
-  if (parsed?.ok) return preview(chat, group, parsed.listing, existing.length + 1);
 
   if (parsed && !parsed.ok) {
     return send(chat,
       ['<b>I could not read that caption.</b>', '',
        ...parsed.errors.map((e) => `• ${esc(e)}`), '',
-       'The photographs are saved. Reply to this message with a corrected caption and I will try again.',
-       '', `#draft-${group}`].join('\n'));
+       'The media is saved. Reply to this message with a corrected caption — or send /new for a template.',
+       '', marker({ kind: 'draft', key: group })].join('\n'));
   }
 
-  /* An album member with no caption. Only the first one speaks, so a
-   * five-photo album does not produce five identical nudges. */
-  const draft = await readFile(draftPath(group));
-  if (!draft && existing.length === 0) {
+  /* No caption on this update. If a draft already exists, the member that
+     carried the caption has shown the preview — five photographs must not
+     produce five identical cards. */
+  if (await readFile(draftPath(group))) return null;
+
+  if (res.before === 0 && res.staged) {
     return send(chat,
-      ['Photographs saved, but there was no caption so I do not know what this watch is.', '',
-       'Reply to this message with the caption and I will build the listing.', '',
-       `#draft-${group}`].join('\n'));
+      ['Media saved, but there was no caption so I do not know what this watch is.', '',
+       'Reply to this message with the details, or send /new for a template.', '',
+       marker({ kind: 'draft', key: group })].join('\n'));
   }
   return null;
 }
 
-/* A caption sent afterwards, as a reply to one of the bot's own prompts. */
-async function onCaptionReply(msg) {
-  const marker = /#draft-([A-Za-z0-9_-]+)/.exec(msg.reply_to_message.text || '');
-  if (!marker) return null;
-  const group = marker[1];
-  const chat = msg.chat.id;
+async function addMediaToListing(msg, t, chat) {
+  const found = await loadTarget(t);
+  if (!found) return send(chat, 'That listing is gone.');
 
-  const parsed = parseCaption(msg.text);
-  if (!parsed.ok) {
-    return send(chat,
-      ['<b>Still not quite right.</b>', '',
-       ...parsed.errors.map((e) => `• ${esc(e)}`), '', `#draft-${group}`].join('\n'));
+  const att = attachment(msg);
+  if (!att || att.kind === 'unsupported') return send(chat, 'I can take photographs and videos.');
+  if (att.size > MAX_BYTES) {
+    return send(chat, `That ${att.kind} is ${humanSize(att.size)} — over Telegram's 20 MB bot limit.`);
   }
 
-  const photos = await listTree(`${mediaDir(group)}/`);
+  const existing = await listTree(`${IMAGES}/${t.key}/`);
+  const n = existing.length + 1;
+  const dest = `${IMAGES}/${t.key}/${String(n).padStart(2, '0')}.${att.ext}`;
+  if (existing.some((f) => f.path === dest)) return null;
+
+  const file = await download(att.file_id);
+  const { listing, catalogue } = found;
+  if (att.kind === 'video') listing.video = dest;
+  else listing.images = [...(listing.images || []), dest];
+
   await commitChanges({
-    message: `Draft ${group}: caption`,
-    changes: [{ path: draftPath(group), content: JSON.stringify({ group, chat, listing: parsed.listing }, null, 2) }],
-    skipDeploy: true,
+    message: `Add ${att.kind} to ${listing.name}, ref ${listing.reference}`,
+    changes: [{ path: dest, base64: file.base64 }, { path: LISTINGS_PATH, content: serialise(catalogue) }],
   });
-  return preview(chat, group, parsed.listing, photos.length);
+  return send(chat,
+    [`Added. ${listing.images?.length || 0} photograph(s)${listing.video ? ' and a video' : ''}.`,
+     'Send more as a reply to this message, or /edit when you are done.', '', marker(t)].join('\n'));
 }
 
-function preview(chat, group, l, photoCount) {
-  const lines = [
+/* ---------- the draft preview ---------- */
+
+function summary(l) {
+  return [
     `<b>${esc(l.brand)} ${esc(l.name)}</b>`,
-    `Ref. ${esc(l.reference)} · ${l.year} · ${esc(l.condition)}`,
+    `Ref ${esc(l.reference)} · ${l.year} · ${esc(l.condition)}`,
     `${esc(l.set)} · <b>${money(l.price)}</b>`,
-    '',
-    l.tagline ? `<i>${esc(l.tagline)}</i>` : '<i>(no tagline)</i>',
-    '',
-    l.description ? esc(l.description) : '(no description)',
-    '',
-    `Photographs: ${photoCount}`,
-    `Size: ${l.size ? l.size + ' mm' : '—'} · Movement: ${esc(l.movement || '—')}`,
-    `Specification rows: ${Object.keys(l.specs).length}`,
-    '',
-    'Send more photographs to this album before publishing if you want them included.',
-  ];
-  return send(chat, lines.join('\n'), buttons([[
-    { text: '✅ Publish', callback_data: `pub:${group}` },
-    { text: '🗑 Discard', callback_data: `dis:${group}` },
-  ]]));
+    l.tagline ? `<i>${esc(l.tagline)}</i>` : '<i>no tagline</i>',
+    l.description ? esc(l.description) : '<i>no description</i>',
+    `Size ${l.size ? l.size + ' mm' : '—'} · Movement ${esc(l.movement || '—')} · ` +
+      `${Object.keys(l.specs || {}).length} spec row(s)`,
+  ].join('\n');
+}
+
+function fieldKeyboard(extra = []) {
+  const rows = [];
+  for (let i = 0; i < FIELD_ORDER.length; i += 3) {
+    rows.push(FIELD_ORDER.slice(i, i + 3)
+      .map((k) => ({ text: FIELDS[k].label, callback_data: `f:${k}` })));
+  }
+  rows.push([{ text: '🖼 Media', callback_data: 'f:__media' },
+             { text: '📋 Specs', callback_data: 'f:__specs' }]);
+  if (extra.length) rows.push(extra);
+  return buttons(rows);
+}
+
+async function preview(chat, group, messageId = null) {
+  const raw = await readFile(draftPath(group));
+  if (!raw) return send(chat, 'That draft is gone.');
+  const { listing } = JSON.parse(raw);
+  const media = await listTree(`${mediaDir(group)}/`);
+  const t = { kind: 'draft', key: group };
+
+  const text = [
+    summary(listing), '',
+    `${media.filter((f) => isPhoto(f.path)).length} photograph(s), ` +
+      `${media.filter((f) => isVideo(f.path)).length} video(s)`,
+    '', 'Tap a field to change it before publishing.', '', marker(t),
+  ].join('\n');
+
+  const kb = fieldKeyboard([
+    { text: '✅ Publish', callback_data: 'pub:' },
+    { text: '🗑 Discard', callback_data: 'dis:' },
+  ]);
+  return messageId ? edit(chat, messageId, text, kb) : send(chat, text, kb);
+}
+
+/* ---------- editing ---------- */
+
+async function showEditor(chat, t, messageId = null, note = '') {
+  const found = await loadTarget(t);
+  if (!found) return send(chat, 'That listing is gone.');
+  if (t.kind === 'draft') return preview(chat, t.key, messageId);
+
+  const media = await listTree(`${IMAGES}/${t.key}/`);
+  const text = [
+    note, note ? '' : null,
+    summary(found.listing), '',
+    `${media.filter((f) => isPhoto(f.path)).length} photograph(s), ` +
+      `${media.filter((f) => isVideo(f.path)).length} video(s)`,
+    '', 'Tap a field to change it.', '', marker(t),
+  ].filter((x) => x !== null).join('\n');
+
+  const kb = fieldKeyboard([{ text: '💷 Sold — remove from site', callback_data: 'sold:' }]);
+  return messageId ? edit(chat, messageId, text, kb) : send(chat, text, kb);
+}
+
+async function askForField(chat, messageId, t, key) {
+  const found = await loadTarget(t);
+  if (!found) return edit(chat, messageId, 'That listing is gone.');
+  const current = found.listing[key];
+
+  if (key === '__media') {
+    return edit(chat, messageId,
+      ['<b>Media</b>', '',
+       'Send photographs or a video as a reply to this message and they are added.',
+       'Telegram will not pass a bot anything over 20 MB.', '',
+       marker(t)].join('\n'),
+      buttons([[{ text: '↩ Back', callback_data: 'back:' }]]));
+  }
+
+  if (key === '__specs') {
+    const rows = Object.entries(found.listing.specs || {});
+    return edit(chat, messageId,
+      ['<b>Specification</b>', '',
+       rows.length ? rows.map(([k, v]) => `${esc(k)}: ${esc(v)}`).join('\n') : '<i>none</i>', '',
+       'Reply to this message with the full set of rows to replace them:', '',
+       '<pre>Case material: Oystersteel\nMovement: calibre 3285\nWater resistance: 100 m</pre>', '',
+       marker(t), '#field-__specs'].join('\n'),
+      buttons([[{ text: '↩ Back', callback_data: 'back:' }]]));
+  }
+
+  const f = FIELDS[key];
+  if (f.choices) {
+    const rows = [];
+    for (let i = 0; i < f.choices.length; i += 2) {
+      rows.push(f.choices.slice(i, i + 2).map((c, j) => ({
+        text: (c === current ? '• ' : '') + c, callback_data: `v:${key}:${i + j}`,
+      })));
+    }
+    rows.push([{ text: '↩ Back', callback_data: 'back:' }]);
+    return edit(chat, messageId,
+      [`<b>${f.label}</b>`, `Currently: ${esc(current ?? '—')}`, '', marker(t)].join('\n'),
+      buttons(rows));
+  }
+
+  return edit(chat, messageId,
+    [`<b>${f.label}</b>`,
+     `Currently: ${current ? esc(current) : '<i>empty</i>'}`, '',
+     `Reply to this message with the new ${f.label.toLowerCase()}.`, '',
+     marker(t), `#field-${key}`].join('\n'),
+    buttons([[{ text: '↩ Back', callback_data: 'back:' }]]));
+}
+
+/* Applying a change. Brand and reference decide the id and the image paths,
+ * so changing either renames the listing and moves its media in the same
+ * commit — otherwise the catalogue would point at files that had moved. */
+async function applyField(t, key, value) {
+  if (t.kind === 'draft') {
+    const raw = await readFile(draftPath(t.key));
+    if (!raw) return { error: 'That draft is gone.' };
+    const draft = JSON.parse(raw);
+    if (key === '__specs') draft.listing.specs = value; else draft.listing[key] = value;
+    await commitChanges({
+      message: `Draft ${t.key}: set ${key}`,
+      changes: [{ path: draftPath(t.key), content: JSON.stringify(draft, null, 2) }],
+      skipDeploy: true,
+    });
+    return { listing: draft.listing, target: t };
+  }
+
+  const catalogue = await load();
+  const listing = catalogue.products.find((p) => p.id === t.key);
+  if (!listing) return { error: 'That listing is gone.' };
+
+  if (key === '__specs') listing.specs = value; else listing[key] = value;
+
+  const changes = [];
+  let target = t;
+
+  if (key === 'brand' || key === 'reference') {
+    const collection = key === 'brand' ? ensureCollection(catalogue, value) : listing.collection;
+    listing.collection = collection;
+    const newId = listingId(collection, listing.reference);
+    if (newId !== listing.id) {
+      if (catalogue.products.some((p) => p.id === newId)) {
+        return { error: `That would collide with the existing listing <code>${esc(newId)}</code>.` };
+      }
+      const media = await listTree(`${IMAGES}/${listing.id}/`);
+      const remap = {};
+      media.forEach((f) => {
+        const dest = f.path.replace(`${IMAGES}/${listing.id}/`, `${IMAGES}/${newId}/`);
+        changes.push({ path: dest, sha: f.sha }, { path: f.path, delete: true });
+        remap[f.path] = dest;
+      });
+      listing.images = (listing.images || []).map((p) => remap[p] || p);
+      if (listing.video) listing.video = remap[listing.video] || listing.video;
+      listing.id = newId;
+      target = { kind: 'listing', key: newId };
+    }
+  }
+
+  changes.push({ path: LISTINGS_PATH, content: serialise(catalogue) });
+  await commitChanges({ message: `Edit ${listing.name} ref ${listing.reference}: ${key}`, changes });
+  return { listing, target };
+}
+
+/* A reply to one of the bot's prompts. */
+async function onReply(msg) {
+  const chat = msg.chat.id;
+  const prompt = msg.reply_to_message.text || '';
+  const t = targetOf(prompt);
+  if (!t) return null;
+
+  const fieldMatch = /#field-([A-Za-z_]+)/.exec(prompt);
+
+  /* No field named: this is a caption for a draft that had none. */
+  if (!fieldMatch) {
+    if (t.kind !== 'draft') return showEditor(chat, t);
+    const parsed = parseCaption(msg.text);
+    if (!parsed.ok) {
+      return send(chat, ['<b>Still not quite right.</b>', '',
+        ...parsed.errors.map((e) => `• ${esc(e)}`), '', marker(t)].join('\n'));
+    }
+    await commitChanges({
+      message: `Draft ${t.key}: details`,
+      changes: [{ path: draftPath(t.key), content: JSON.stringify({ group: t.key, chat, listing: parsed.listing }, null, 2) }],
+      skipDeploy: true,
+    });
+    return preview(chat, t.key);
+  }
+
+  const key = fieldMatch[1];
+  let value;
+  if (key === '__specs') {
+    value = {};
+    for (const row of String(msg.text).split(/\r?\n/)) {
+      const at = row.indexOf(':');
+      if (at > 0) value[row.slice(0, at).trim()] = row.slice(at + 1).trim();
+    }
+  } else {
+    const r = parseField(key, msg.text);
+    if (r.error) return send(chat, `${esc(r.error)}.\n\n${marker(t)}\n#field-${key}`);
+    value = r.value;
+  }
+
+  const res = await applyField(t, key, value);
+  if (res.error) return send(chat, res.error);
+  return showEditor(chat, res.target, null, '<b>Saved.</b>');
 }
 
 /* ---------- publishing ---------- */
 
 async function publish(group, chat, messageId) {
   const raw = await readFile(draftPath(group));
-  if (!raw) {
-    return edit(chat, messageId, 'That draft is gone — it was already published or discarded.');
-  }
+  if (!raw) return edit(chat, messageId, 'That draft is gone — already published or discarded.');
   const { listing } = JSON.parse(raw);
   const catalogue = await load();
 
   const collection = ensureCollection(catalogue, listing.brand);
   const id = listingId(collection, listing.reference);
-
   if (catalogue.products.some((p) => p.id === id)) {
     return edit(chat, messageId,
-      `A listing with the id <code>${esc(id)}</code> already exists. Mark the old one sold first, or use a distinguishing reference.`);
+      `A listing with the id <code>${esc(id)}</code> already exists. Mark the old one sold first.`);
   }
 
-  /* Move the draft's photographs into the site's image directory by reusing
-   * their blob hashes — nothing is downloaded or uploaded a second time. */
-  const photos = await listTree(`${mediaDir(group)}/`);
-  const images = [];
+  /* Move the draft's media by reusing its blob hashes — nothing is downloaded
+     or uploaded a second time. */
+  const staged = await listTree(`${mediaDir(group)}/`);
+  const photos = staged.filter((f) => isPhoto(f.path));
+  const videos = staged.filter((f) => isVideo(f.path));
   const changes = [];
+  const images = [];
+  let video = null;
+
   photos.forEach((f, i) => {
     const dest = `${IMAGES}/${id}/${String(i + 1).padStart(2, '0')}.jpg`;
-    changes.push({ path: dest, sha: f.sha });
-    changes.push({ path: f.path, delete: true });
+    changes.push({ path: dest, sha: f.sha }, { path: f.path, delete: true });
     images.push(dest);
+  });
+  videos.forEach((f, i) => {
+    if (i === 0) {
+      video = `${IMAGES}/${id}/video.mp4`;
+      changes.push({ path: video, sha: f.sha });
+    }
+    changes.push({ path: f.path, delete: true });
   });
 
   catalogue.products.unshift({
-    id,
-    collection,
-    name: listing.name,
-    reference: listing.reference,
-    year: listing.year,
-    condition: listing.condition,
-    set: listing.set,
-    price: listing.price,
-    tagline: listing.tagline,
-    description: listing.description,
-    images,
-    specs: listing.specs,
-    size: listing.size,
-    movement: listing.movement,
+    id, collection,
+    name: listing.name, reference: listing.reference, year: listing.year,
+    condition: listing.condition, set: listing.set, price: listing.price,
+    tagline: listing.tagline, description: listing.description,
+    images, video, specs: listing.specs, size: listing.size, movement: listing.movement,
     listed: new Date().toISOString().slice(0, 10),
   });
 
   changes.push({ path: LISTINGS_PATH, content: serialise(catalogue) });
   changes.push({ path: draftPath(group), delete: true });
 
-  await commitChanges({
-    message: `List ${listing.brand} ${listing.name}, ref ${listing.reference}`,
-    changes,
-  });
+  await commitChanges({ message: `List ${listing.brand} ${listing.name}, ref ${listing.reference}`, changes });
 
   return edit(chat, messageId,
     [`<b>Published.</b> ${esc(listing.brand)} ${esc(listing.name)}, ref ${esc(listing.reference)}.`,
-     `${images.length} photograph${images.length === 1 ? '' : 's'}. Live in under a minute.`,
-     `<code>${esc(id)}</code>`].join('\n'));
+     `${images.length} photograph(s)${video ? ' and a video' : ''}. Live in under a minute.`,
+     videos.length > 1 ? `<i>Only the first video was used.</i>` : null,
+     '', 'Change anything with /edit ' + esc(listing.reference)].filter(Boolean).join('\n'));
 }
 
 async function discard(group, chat, messageId) {
-  const photos = await listTree(`${mediaDir(group)}/`);
-  const changes = photos.map((f) => ({ path: f.path, delete: true }));
+  const media = await listTree(`${mediaDir(group)}/`);
+  const changes = media.map((f) => ({ path: f.path, delete: true }));
   if (await readFile(draftPath(group))) changes.push({ path: draftPath(group), delete: true });
-  if (changes.length) {
-    await commitChanges({ message: `Discard draft ${group}`, changes, skipDeploy: true });
-  }
+  if (changes.length) await commitChanges({ message: `Discard draft ${group}`, changes, skipDeploy: true });
   return edit(chat, messageId, 'Discarded. Nothing was published.');
+}
+
+async function markSold(id, chat, messageId) {
+  const catalogue = await load();
+  const i = catalogue.products.findIndex((p) => p.id === id);
+  if (i < 0) return edit(chat, messageId, 'That listing is already gone.');
+  const [p] = catalogue.products.splice(i, 1);
+
+  const media = await listTree(`${IMAGES}/${id}/`);
+  const changes = media.map((f) => ({ path: f.path, delete: true }));
+  changes.push({ path: LISTINGS_PATH, content: serialise(catalogue) });
+  await commitChanges({ message: `Sold: ${p.name}, ref ${p.reference}`, changes });
+  return edit(chat, messageId, `<b>Sold.</b> ${esc(p.name)}, ref ${esc(p.reference)} is off the site.`);
 }
 
 /* ---------- commands ---------- */
 
-function find(catalogue, needle) {
+const find = (catalogue, needle) => {
   const n = String(needle).trim().toLowerCase();
-  return catalogue.products.find((p) =>
-    p.id.toLowerCase() === n || String(p.reference).toLowerCase() === n);
-}
+  return catalogue.products.find((p) => p.id.toLowerCase() === n || String(p.reference).toLowerCase() === n);
+};
 
 async function onCommand(msg) {
   const chat = msg.chat.id;
@@ -216,45 +465,55 @@ async function onCommand(msg) {
   switch (cmd.split('@')[0].toLowerCase()) {
     case '/start':
     case '/help':
-    case '/add':
+      await publishCommands().catch(() => {});
       return send(chat, USAGE);
+
+    case '/new':
+      return send(chat,
+        ['Copy this, fill it in, and send it as the caption on your photographs.', '',
+         `<pre>${esc(TEMPLATE)}</pre>`].join('\n'));
 
     case '/list': {
       const c = await load();
       if (!c.products.length) return send(chat, 'Nothing listed yet.');
       const rows = c.products.map((p) =>
         `<b>${money(p.price)}</b> — ${esc(p.name)}, ref ${esc(p.reference)}\n` +
-        `   ${p.year} · ${esc(p.condition)} · ${p.images.length} photo${p.images.length === 1 ? '' : 's'} · <code>${esc(p.id)}</code>`);
+        `   ${p.year} · ${esc(p.condition)} · ${(p.images || []).length} photo(s)` +
+        `${p.video ? ' + video' : ''} · /edit ${esc(p.reference)}`);
       return send(chat, [`<b>${c.products.length} in stock</b>`, '', ...rows].join('\n'));
+    }
+
+    case '/edit': {
+      const c = await load();
+      if (!arg) return send(chat, 'Which one? <code>/edit 126710BLNR</code> — or /list to see them.');
+      const p = find(c, arg);
+      if (!p) return send(chat, `No listing matches <code>${esc(arg)}</code>. Try /list.`);
+      return showEditor(chat, { kind: 'listing', key: p.id });
     }
 
     case '/price': {
       const [ref, ...amt] = rest;
-      const price = Number(String(amt.join('')).replace(/[^0-9.]/g, ''));
-      if (!ref || !price) return send(chat, 'Usage: <code>/price 126610LN 13900</code>');
+      const r = parseField('price', amt.join(''));
+      if (!ref || r.error) return send(chat, 'Usage: <code>/price 126710BLNR 13900</code>');
       const c = await load();
       const p = find(c, ref);
       if (!p) return send(chat, `No listing matches <code>${esc(ref)}</code>. Try /list.`);
       const was = p.price;
-      p.price = price;
-      await commitChanges({
-        message: `Reprice ${p.name} ref ${p.reference}: ${was} -> ${price}`,
-        changes: [{ path: LISTINGS_PATH, content: serialise(c) }],
-      });
-      return send(chat, `${esc(p.name)} ref ${esc(p.reference)}: ${money(was)} → <b>${money(price)}</b>.`);
+      const res = await applyField({ kind: 'listing', key: p.id }, 'price', r.value);
+      if (res.error) return send(chat, res.error);
+      return send(chat, `${esc(p.name)} ref ${esc(p.reference)}: ${money(was)} → <b>${money(r.value)}</b>.`);
     }
 
     case '/sold': {
-      if (!arg) return send(chat, 'Usage: <code>/sold 126610LN</code>');
+      if (!arg) return send(chat, 'Usage: <code>/sold 126710BLNR</code>');
       const c = await load();
       const p = find(c, arg);
       if (!p) return send(chat, `No listing matches <code>${esc(arg)}</code>. Try /list.`);
       return send(chat,
-        `Mark <b>${esc(p.name)}</b>, ref ${esc(p.reference)}, ${money(p.price)} as sold and remove it from the site?`,
-        buttons([[
-          { text: '✅ Sold', callback_data: `sold:${p.id}` },
-          { text: 'Cancel', callback_data: 'cancel:' },
-        ]]));
+        [`Mark <b>${esc(p.name)}</b>, ref ${esc(p.reference)}, ${money(p.price)} as sold?`, '',
+         marker({ kind: 'listing', key: p.id })].join('\n'),
+        buttons([[{ text: '✅ Sold', callback_data: 'sold:' },
+                  { text: 'Cancel', callback_data: 'cancel:' }]]));
     }
 
     default:
@@ -262,27 +521,10 @@ async function onCommand(msg) {
   }
 }
 
-async function markSold(id, chat, messageId) {
-  const c = await load();
-  const i = c.products.findIndex((p) => p.id === id);
-  if (i < 0) return edit(chat, messageId, 'That listing is already gone.');
-  const [p] = c.products.splice(i, 1);
-
-  /* The photographs go with it. They stay in git history if you ever need
-   * them back, but a sold watch should not keep serving images from the site. */
-  const photos = await listTree(`${IMAGES}/${id}/`);
-  const changes = photos.map((f) => ({ path: f.path, delete: true }));
-  changes.push({ path: LISTINGS_PATH, content: serialise(c) });
-
-  await commitChanges({ message: `Sold: ${p.name}, ref ${p.reference}`, changes });
-  return edit(chat, messageId, `<b>Sold.</b> ${esc(p.name)}, ref ${esc(p.reference)} is off the site.`);
-}
-
 /* ---------- entry point ---------- */
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).send('POST only');
-
   if (req.headers['x-telegram-bot-api-secret-token'] !== process.env.TELEGRAM_WEBHOOK_SECRET) {
     return res.status(401).send('no');
   }
@@ -290,29 +532,51 @@ export default async function handler(req, res) {
   const update = req.body || {};
   const from = update.message?.from || update.callback_query?.from;
 
-  /* Answer 200 to anything else. Telegram retries a non-200, and a stranger
-   * poking at the endpoint should learn nothing from the response. */
+  /* Answer 200 to everything else. Telegram retries a non-200, and a stranger
+     poking at the endpoint should learn nothing from the response. */
   if (!from || !allowed(from.id)) return res.status(200).send('ok');
 
   try {
     if (update.callback_query) {
       const q = update.callback_query;
-      const [action, value] = String(q.data || '').split(':');
+      const [action, a, b] = String(q.data || '').split(':');
       const chat = q.message.chat.id;
       const mid = q.message.message_id;
+      const t = targetOf(q.message.text);
       await answer(q.id);
-      if (action === 'pub') await publish(value, chat, mid);
-      else if (action === 'dis') await discard(value, chat, mid);
-      else if (action === 'sold') await markSold(value, chat, mid);
+
+      if (action === 'f' && t) await askForField(chat, mid, t, a);
+      else if (action === 'back' && t) await showEditor(chat, t, mid);
+      else if (action === 'v' && t) {
+        const value = FIELDS[a].choices[Number(b)];
+        const r = await applyField(t, a, value);
+        if (r.error) await edit(chat, mid, r.error);
+        else await showEditor(chat, r.target, mid, `<b>${FIELDS[a].label} set to ${esc(value)}.</b>`);
+      } else if (action === 'pub' && t) await publish(t.key, chat, mid);
+      else if (action === 'dis' && t) await discard(t.key, chat, mid);
+      else if (action === 'sold' && t) await markSold(t.key, chat, mid);
       else if (action === 'cancel') await edit(chat, mid, 'Cancelled.');
-    } else if (update.message?.photo) {
-      await onPhoto(update.message);
+    } else if (update.message?.photo || update.message?.video || update.message?.document) {
+      await onMedia(update.message);
     } else if (update.message?.reply_to_message?.from?.is_bot && update.message?.text) {
-      await onCaptionReply(update.message);
+      await onReply(update.message);
     } else if (update.message?.text?.startsWith('/')) {
       await onCommand(update.message);
     } else if (update.message?.text) {
-      await send(update.message.chat.id, USAGE);
+      /* Loose text that parses as a listing is treated as one — people paste
+         the template back without re-attaching it to a photograph. */
+      const parsed = parseCaption(update.message.text);
+      if (parsed.ok) {
+        const group = `m${update.message.message_id}`;
+        await commitChanges({
+          message: `Draft ${group}: details`,
+          changes: [{ path: draftPath(group), content: JSON.stringify({ group, chat: update.message.chat.id, listing: parsed.listing }, null, 2) }],
+          skipDeploy: true,
+        });
+        await preview(update.message.chat.id, group);
+      } else {
+        await send(update.message.chat.id, USAGE);
+      }
     }
   } catch (e) {
     console.error(e);
