@@ -194,6 +194,29 @@ await step('no invented provenance left in the copy', async () => {
   }
 });
 
+await step('/api/health?media=1 confirms every file the catalogue names is served', async () => {
+  const { default: health } = await import('../api/health.js');
+  const res = { hdr: {}, code: 0, body: null,
+    setHeader(k, v) { this.hdr[k] = v; }, status(c) { this.code = c; return this; },
+    json(b) { this.body = b; return this; } };
+  const host = BASE.replace(/^https?:\/\//, '');
+  await health({ url: '/api/health?media=1', query: { media: '1' },
+                 headers: { host, 'x-forwarded-proto': 'http' } }, res);
+
+  if (res.body.error) throw new Error(res.body.error);
+  const expected = CATALOGUE.products
+    .reduce((n, p) => n + (p.images || []).length + (p.video ? 1 : 0), 0);
+  if (res.body.media.length !== expected) {
+    throw new Error(`checked ${res.body.media.length} files, catalogue names ${expected}`);
+  }
+  if (!res.body.ok) throw new Error('not served: ' + JSON.stringify(res.body.broken));
+  if (res.code !== 200) throw new Error(`status ${res.code}`);
+  for (const m of res.body.media) {
+    const want = m.kind === 'video' ? /video\/mp4/ : /image\//;
+    if (!want.test(m.type || '')) throw new Error(`${m.path} served as ${m.type}`);
+  }
+});
+
 await step('a listing with a video serves it playably', async () => {
   /* This container's Chromium is built without H.264, so it cannot decode any
      mp4 and asking it to play one proves nothing. What IS worth asserting is

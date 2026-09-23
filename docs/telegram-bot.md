@@ -227,6 +227,28 @@ https://<your-domain>/api/health
 - **503** — deployed, but `missing` names the variables still to set.
 - **200** — ready. Send `/help` to your bot.
 
+### Is the media actually deployed?
+
+```
+https://<your-domain>/api/health?media=1
+```
+
+Fetches every photograph and video the catalogue names, from the live site,
+and reports what came back. A serverless function cannot read the static files
+beside it, but it can fetch its own site — which is what the browser does, so
+this answers the question directly.
+
+```json
+{ "ok": true, "stock": 13,
+  "media": [{ "path": "assets/img/rolex-126710blnr/video.mp4",
+              "status": 206, "type": "video/mp4", "bytes": 12065115 }] }
+```
+
+A `503` lists what is missing under `broken`. `404` there means the file is in
+the repository but not in the deployment; a wrong `type` means the host is
+serving it as the wrong thing. Either way it is a hosting problem, not the
+upload.
+
 This endpoint reports which variables are *present*. It never returns a secret
 and never says whether a value is correct.
 
