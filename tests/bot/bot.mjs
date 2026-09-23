@@ -5,6 +5,11 @@ import vm from 'node:vm';
 const SEED = fs.readFileSync(new URL('../../assets/js/listings.js', import.meta.url), 'utf8');
 const LP = 'assets/js/listings.js';
 
+/* The catalogue is live data — the bot adds to it whenever a watch is listed.
+   Expectations are relative to whatever it holds, never to a literal, or the
+   suite breaks the first time someone does their job. */
+const STOCK = JSON.parse(SEED.slice(SEED.indexOf('{'), SEED.lastIndexOf('}') + 1)).products.length;
+
 let pass = 0, fail = 0;
 const step = async (label, fn) => {
   try { await fn(); console.log('PASS', label); pass++; }
@@ -78,7 +83,7 @@ await step('an album drafts without deploying, and replies exactly once', async 
   eq([...w.files.keys()].filter((p) => p.startsWith('.bot/media/g1/')).length, 3, 'staged');
   eq(w.sent.length, 1, 'messages');
   ok(w.commitLog.every((c) => c.message.endsWith('[skip ci]')), 'nothing deployed');
-  eq(load(w).products.length, 12, 'catalogue untouched');
+  eq(load(w).products.length, STOCK, 'catalogue untouched');
 });
 
 await step('the piped shorthand still works', async () => {
@@ -127,7 +132,7 @@ await step('publishing twice does not duplicate the listing', async () => {
   const card = lastText(w);
   await tap('pub:', card);
   await tap('pub:', card);
-  eq(load(w).products.length, 13, 'catalogue size');
+  eq(load(w).products.length, STOCK + 1, 'catalogue size');
   ok(/already published or discarded/.test(lastText(w)), 'explains');
 });
 
@@ -137,7 +142,7 @@ await step('discard removes everything and publishes nothing', async () => {
   await deliver(handler, photoMsg({ group: 'g1', uid: 'p2', mid: 2 }));
   await tap('dis:');
   eq([...w.files.keys()].filter((p) => p.startsWith('.bot/')).length, 0, 'leftovers');
-  eq(load(w).products.length, 12, 'catalogue size');
+  eq(load(w).products.length, STOCK, 'catalogue size');
 });
 
 /* ---------- video ---------- */
@@ -333,7 +338,7 @@ await step('a duplicate reference is refused rather than shadowing the old one',
   await deliver(handler, photoMsg({ group: 'g4', uid: 's1',
     caption: CAPTION.replace('226570', '126610LN') }));
   await tap('pub:');
-  eq(load(w).products.length, 12, 'catalogue size');
+  eq(load(w).products.length, STOCK, 'catalogue size');
   ok(/already exists/.test(lastText(w)), 'explains');
 });
 
@@ -343,7 +348,7 @@ await step('/list shows stock with media counts and an edit shortcut', async () 
   const { w, handler } = await fresh();
   await deliver(handler, textMsg('/list'));
   const t = w.sent[0].text;
-  ok(/12 in stock/.test(t), 'count');
+  ok(new RegExp(`${STOCK} in stock`).test(t), 'count');
   ok(/126610LN/.test(t), 'reference');
   ok(/\/edit 126610LN/.test(t), 'edit shortcut');
 });
@@ -375,9 +380,9 @@ await step('/sold asks first, then removes the listing and its media', async () 
   const { w, handler, tap } = await publishOne();
   await deliver(handler, textMsg('/sold 226570'));
   ok(/as sold/.test(w.sent.at(-1).text), 'asked');
-  eq(load(w).products.length, 13, 'not yet removed');
+  eq(load(w).products.length, STOCK + 1, 'not yet removed');
   await tap('sold:', w.sent.at(-1).text);
-  eq(load(w).products.length, 12, 'removed');
+  eq(load(w).products.length, STOCK, 'removed');
   eq([...w.files.keys()].filter((p) => p.startsWith('assets/img/rolex-226570/')).length, 0, 'media removed');
 });
 
@@ -385,7 +390,7 @@ await step('cancelling /sold keeps the listing', async () => {
   const { w, handler, tap } = await fresh();
   await deliver(handler, textMsg('/sold 126610LN'));
   await tap('cancel:', w.sent.at(-1).text);
-  eq(load(w).products.length, 12, 'catalogue size');
+  eq(load(w).products.length, STOCK, 'catalogue size');
   eq(w.commitLog.length, 0, 'commits');
 });
 
@@ -396,7 +401,7 @@ await step('a racing commit is retried rather than lost', async () => {
   await deliver(handler, photoMsg({ group: 'g1', uid: 'p1', caption: CAPTION }));
   w.conflictOnce = true;
   await tap('pub:');
-  eq(load(w).products.length, 13, 'published despite the conflict');
+  eq(load(w).products.length, STOCK + 1, 'published despite the conflict');
 });
 
 await step('the generated file stays valid JavaScript the site can load', async () => {
@@ -407,7 +412,7 @@ await step('the generated file stays valid JavaScript the site can load', async 
   const ctx = {};
   vm.createContext(ctx);
   vm.runInContext(w.files.get(LP).toString() + '\nthis.OUT = CATALOGUE;', ctx);
-  eq(ctx.OUT.products.length, 13, 'evaluates');
+  eq(ctx.OUT.products.length, STOCK + 1, 'evaluates');
   eq(ctx.OUT.products[0].video, 'assets/img/rolex-226570/video.mp4', 'video survives the round trip');
 });
 

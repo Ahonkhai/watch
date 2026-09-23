@@ -1,5 +1,14 @@
 import { chromium } from './_browser.mjs';
 const BASE = process.env.BASE || 'http://127.0.0.1:8077';
+/* Counts come from the catalogue, never from a literal. The shop's stock is
+   written by the bot and changes whenever a watch is listed or sold; a suite
+   that hard-codes "12" fails the first time someone does their job. */
+import fs from 'node:fs';
+const SRC = fs.readFileSync(new URL('../assets/js/listings.js', import.meta.url), 'utf8');
+const CATALOGUE = JSON.parse(SRC.slice(SRC.indexOf('{'), SRC.lastIndexOf('}') + 1));
+const STOCK = CATALOGUE.products.length;
+const inBrand = (id) => CATALOGUE.products.filter((p) => p.collection === id).length;
+
 const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 1440, height: 950 } });
 const page = await ctx.newPage();
@@ -29,7 +38,7 @@ await step('home: brand tiles and latest listings', async () => {
   }));
   if (r.tiles !== 9) throw new Error(`${r.tiles} brand tiles`);
   if (r.cards !== 8) throw new Error(`${r.cards} latest cards`);
-  if (r.count !== '12') throw new Error('stock count says ' + r.count);
+  if (r.count !== String(STOCK)) throw new Error(`stock count says ${r.count}, catalogue has ${STOCK}`);
 });
 
 await step('every listing is one specific watch, never a variant', async () => {
@@ -48,12 +57,13 @@ await step('no listing invents a photograph', async () => {
   // Until real photographs exist, every card must show the pending panel and
   // never a stand-in image of some other watch.
   if (r.imgs !== r.withPhotos) throw new Error(`${r.imgs} images for ${r.withPhotos} photographed listings`);
-  if (r.placeholders !== 12 - r.withPhotos) throw new Error('placeholder count wrong');
+  if (r.placeholders !== STOCK - r.withPhotos)
+    throw new Error(`${r.placeholders} placeholders + ${r.withPhotos} photographed != ${STOCK} listed`);
 });
 
-await step('shop: all twelve listed, with reference, year and condition', async () => {
+await step('shop: every listing shown, with reference, year and condition', async () => {
   const n = await page.locator('[data-grid] .card').count();
-  if (n !== 12) throw new Error('got ' + n);
+  if (n !== STOCK) throw new Error(`shop shows ${n}, catalogue has ${STOCK}`);
   const meta = await page.locator('.card-meta').first().textContent();
   if (!/Ref\. .+ · \d{4} · \w+/.test(meta.replace(/\s+/g, ' ').trim()))
     throw new Error('card meta malformed: ' + meta.trim());
@@ -62,7 +72,8 @@ await step('shop: all twelve listed, with reference, year and condition', async 
 await step('shop: brand facet filters and deep-links', async () => {
   await page.locator('input[value="rolex"]').check();
   await page.waitForTimeout(250);
-  if (await page.locator('[data-grid] .card').count() !== 3) throw new Error('rolex count wrong');
+  const rolex = await page.locator('[data-grid] .card').count();
+  if (rolex !== inBrand('rolex')) throw new Error(`rolex facet shows ${rolex}, catalogue has ${inBrand('rolex')}`);
   if (!page.url().includes('collection=rolex')) throw new Error('url not synced');
   await go('shop.html?collection=omega');
   if (await page.locator('[data-grid] .card').count() !== 2) throw new Error('omega deep link');
