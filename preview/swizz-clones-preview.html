@@ -1494,7 +1494,7 @@ select option { background: var(--panel); color: var(--text); }
  * your edit would be lost. To change a listing, use the bot (/list, /price,
  * /sold). To change how a listing is SHOWN, edit assets/js/data.js instead. */
 const CATALOGUE = {
-  "updated": "2026-09-23T07:53:21.858Z",
+  "updated": "2026-09-23T09:29:45.988Z",
   "collections": [
     {
       "id": "rolex",
@@ -1612,7 +1612,8 @@ const CATALOGUE = {
         "Bracelet": "Jubilee, folding Oysterlock clasp"
       },
       "size": 40,
-      "movement": "automatic"
+      "movement": "automatic",
+      "video": "assets/img/rolex-126710blnr/video.mp4"
     },
     {
       "id": "rolex-116500ln",
@@ -2559,8 +2560,14 @@ onPageReady(() => {
     if (!media.length) return productImage(product);
     const item = media[i];
     if (item.type === 'video') {
-      const poster = product.images && product.images.length ? ` poster="${esc(product.images[0])}"` : '';
-      return `<video src="${esc(item.src)}"${poster} controls playsinline preload="metadata"
+      /* Without a poster a video renders as a black rectangle, which looks
+         broken rather than unplayed. A listing with photographs uses the
+         first one; with none, #t=0.1 makes the browser seek to a tenth of a
+         second and paint that frame, so the still you see is the watch. */
+      const hasStill = product.images && product.images.length;
+      const poster = hasStill ? ` poster="${esc(product.images[0])}"` : '';
+      const src = hasStill ? item.src : `${item.src}#t=0.1`;
+      return `<video src="${esc(src)}"${poster} controls playsinline preload="metadata"
                      aria-label="Video of ${esc(alt)}"></video>`;
     }
     return `<img src="${esc(item.src)}" alt="${esc(alt)}">`;

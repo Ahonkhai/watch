@@ -45,8 +45,14 @@ onPageReady(() => {
     if (!media.length) return productImage(product);
     const item = media[i];
     if (item.type === 'video') {
-      const poster = product.images && product.images.length ? ` poster="${esc(product.images[0])}"` : '';
-      return `<video src="${esc(item.src)}"${poster} controls playsinline preload="metadata"
+      /* Without a poster a video renders as a black rectangle, which looks
+         broken rather than unplayed. A listing with photographs uses the
+         first one; with none, #t=0.1 makes the browser seek to a tenth of a
+         second and paint that frame, so the still you see is the watch. */
+      const hasStill = product.images && product.images.length;
+      const poster = hasStill ? ` poster="${esc(product.images[0])}"` : '';
+      const src = hasStill ? item.src : `${item.src}#t=0.1`;
+      return `<video src="${esc(src)}"${poster} controls playsinline preload="metadata"
                      aria-label="Video of ${esc(alt)}"></video>`;
     }
     return `<img src="${esc(item.src)}" alt="${esc(alt)}">`;
