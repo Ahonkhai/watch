@@ -458,7 +458,18 @@ p:last-child { margin-bottom: 0; }
   text-align: center;
   line-height: 1.8;
 }
-.card-art img, .pdp-stage img { width: 100%; height: auto; display: block; }
+/* Photographs arrive from a phone in whatever shape they were taken. In the
+   grid they are cropped to one square so a row of cards lines up; on the
+   listing page nothing is cropped, because that is where you are actually
+   looking at the watch. */
+.card-art img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+}
+.pdp-stage img { width: 100%; height: auto; display: block; }
+.cart-line-art img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
 .card-foot { display: flex; align-items: baseline; gap: 1rem; margin-top: 1.1rem; }
 .price {
   font-family: var(--sans);
